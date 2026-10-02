@@ -4,50 +4,96 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9aa04bb0-a51b-42e3-bb80-523c848c1994" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/Projekt-8.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backtester/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backtester/admin.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backtester/apps.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backtester/chains.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backtester/data.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backtester/engine.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backtester/forms.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backtester/indicators.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backtester/jobs.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backtester/migrations/0001_initial.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backtester/migrations/0002_backtestrun_chain_backtestrun_execution.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backtester/migrations/0003_backtestrun_batch_backtestrun_data_note_and_more.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backtester/migrations/0004_backtestrun_slippage.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backtester/migrations/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backtester/models.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backtester/strategies.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backtester/templates/backtester/base.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backtester/templates/backtester/dashboard.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backtester/tests.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backtester/urls.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backtester/validation.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backtester/views.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config/settings.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config/urls.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config/wsgi.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/manage.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tradebot.zip" afterDir="false" />
+    <list default="true" id="9aa04bb0-a51b-42e3-bb80-523c848c1994" name="Changes" comment="First">
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="DjangoConsoleOptions" custom-start-script="import sys; print('Python %s on %s' % (sys.version, sys.platform))&#10;import django; print('Django %s' % django.get_version())&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;if 'setup' in dir(django): django.setup()&#10;import django_manage_shell; django_manage_shell.run(PROJECT_ROOT)">
+    <option name="myCustomStartScript" value="import sys; print('Python %s on %s' % (sys.version, sys.platform))&#10;import django; print('Django %s' % django.get_version())&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;if 'setup' in dir(django): django.setup()&#10;import django_manage_shell; django_manage_shell.run(PROJECT_ROOT)" />
+  </component>
   <component name="Git.Settings">
+    <option name="PUSH_TAGS">
+      <GitPushTagMode>
+        <option name="argument" value="--follow-tags" />
+        <option name="title" value="Current Branch" />
+      </GitPushTagMode>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "Busaschie"
+  }
+}]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/Busaschie/Python_Django_Blockchain.git",
+    "accountId": "5667b3cb-b0dc-4e03-825b-1f14ee9d9f2c"
+  }
+}]]></component>
+  <component name="NextEditCompletionFeaturesState">
+    <decayedCancelled>
+      <entry key="MS100" value="1.4572079668939761" />
+      <entry key="MS500" value="3.8394572110455254" />
+      <entry key="S2" value="7.255690969840196" />
+      <entry key="S5" value="8.723452146856033" />
+      <entry key="S10" value="9.326608484362898" />
+      <entry key="S30" value="9.767156690376314" />
+      <entry key="S60" value="9.882492590464368" />
+      <entry key="M2" value="9.940972528332122" />
+      <entry key="M5" value="9.981366548105182" />
+      <entry key="M10" value="10.08858955049151" />
+      <entry key="M15" value="10.264333919530861" />
+      <entry key="M30" value="10.733931405624116" />
+      <entry key="H1" value="11.212835250693725" />
+      <entry key="H2" value="11.557736633942904" />
+      <entry key="H4" value="11.765135994402115" />
+      <entry key="D1" value="11.958799684595185" />
+      <entry key="W1" value="11.994061816383276" />
+    </decayedCancelled>
+    <decayedSelected>
+      <entry key="MS100" value="0.0" />
+      <entry key="MS500" value="0.0" />
+      <entry key="S2" value="0.0" />
+      <entry key="S5" value="0.0" />
+      <entry key="S10" value="0.0" />
+      <entry key="S30" value="0.0" />
+      <entry key="S60" value="0.0" />
+      <entry key="M2" value="0.0" />
+      <entry key="M5" value="0.0" />
+      <entry key="M10" value="0.0" />
+      <entry key="M15" value="0.0" />
+      <entry key="M30" value="0.0" />
+      <entry key="H1" value="0.0" />
+      <entry key="H2" value="0.0" />
+      <entry key="H4" value="0.0" />
+      <entry key="D1" value="0.0" />
+      <entry key="W1" value="0.0" />
+    </decayedSelected>
+    <decayedShown>
+      <entry key="MS100" value="1.370878575396542" />
+      <entry key="MS500" value="3.7609949855513634" />
+      <entry key="S2" value="7.20593513878113" />
+      <entry key="S5" value="8.698249216756247" />
+      <entry key="S10" value="9.312918982416955" />
+      <entry key="S30" value="9.762328894033237" />
+      <entry key="S60" value="9.880044073758887" />
+      <entry key="M2" value="9.939739495140579" />
+      <entry key="M5" value="9.980870508674014" />
+      <entry key="M10" value="10.08833450981195" />
+      <entry key="M15" value="10.26415580938323" />
+      <entry key="M30" value="10.73383146296133" />
+      <entry key="H1" value="11.21277971377409" />
+      <entry key="H2" value="11.557706859849123" />
+      <entry key="H4" value="11.765120504157784" />
+      <entry key="D1" value="11.95879700899851" />
+      <entry key="W1" value="11.994061431712813" />
+    </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 4,
@@ -80,6 +126,11 @@
     "to.speed.mode.migration.done": "true"
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\Nobody-42\Documents\Work\Python Blockchain\Projekt-8" />
+    </key>
+  </component>
   <component name="RunManager">
     <configuration name="Projekt-8" type="Python.DjangoServer" factoryName="Django server">
       <module name="Projekt-8" />
@@ -123,11 +174,24 @@
       <option name="presentableId" value="Default" />
       <updated>1790934247554</updated>
       <workItem from="1790934248575" duration="1252000" />
-      <workItem from="1790943794541" duration="419000" />
+      <workItem from="1790943794541" duration="1969000" />
     </task>
+    <task id="LOCAL-00001" summary="First">
+      <option name="closed" value="true" />
+      <created>1790944233210</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1790944233210</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="First" />
+    <option name="LAST_COMMIT_MESSAGE" value="First" />
   </component>
 </project>
