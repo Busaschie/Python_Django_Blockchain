@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trading Backtester</title>
+<style>
+ :root{--bg:#f4f6f9;--card:#fff;--line:#e1e5ea;--ink:#1c2330;--muted:#667085;--accent:#2f5bea;--bad:#b00020;--good:#1a7f37}
+ *{box-sizing:border-box}
+ body{font:14px/1.45 system-ui,-apple-system,Segoe UI,sans-serif;background:var(--bg);color:var(--ink);margin:0}
+ .wrap{max-width:1750px;margin:0 auto;padding:1rem 1.25rem 2rem}
+ h1{font-size:1.3rem;margin:0 0 .7rem} h1 a{color:inherit;text-decoration:none}
+ h2{font-size:1.1rem;margin:0 0 .6rem} h3{font-size:.98rem;margin:.2rem 0 .5rem} h4{font-size:.92rem;margin:0 0 .35rem}
+ a{color:var(--accent)} small,.small{color:var(--muted);font-size:.82rem} .muted{color:var(--muted)}
+ .err{color:var(--bad)} .good{color:var(--good)}
+
+ /* Auswahl der Chain (ganz oben) */
+ .chains{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1rem}
+ .chains input{position:absolute;opacity:0;pointer-events:none}
+ .chains label{padding:.55rem 1.3rem;border:1px solid var(--line);border-radius:999px;background:var(--card);
+   cursor:pointer;font-weight:600}
+ .chains label small{margin-left:.4rem;font-weight:400}
+ .chains input:checked + label{background:var(--accent);border-color:var(--accent);color:#fff}
+ .chains input:checked + label small{color:#dbe4ff}
+ .chains input:focus-visible + label{outline:2px solid var(--accent);outline-offset:2px}
+
+ /* Drei Spalten */
+ .cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr) 300px;gap:1rem;align-items:start}
+ @media (max-width:1150px){.cols{grid-template-columns:minmax(0,1fr)}}
+ .box{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:.9rem 1rem;margin-bottom:1rem}
+ .scroll{overflow-x:auto}
+ table{border-collapse:collapse;width:100%} td,th{padding:.28rem .5rem;border-bottom:1px solid var(--line);text-align:left;font-size:.9rem}
+ th{font-weight:600;color:#394150}
+ .field{margin:.4rem 0} .field label{display:block;font-size:.82rem;color:var(--muted);margin-bottom:.15rem}
+ .field input:not([type=radio]),.field select{width:100%;padding:.4rem .5rem;border:1px solid var(--line);border-radius:6px;font:inherit;background:#fff}
+ button{background:var(--accent);color:#fff;border:0;border-radius:6px;padding:.55rem 1rem;font:inherit;font-weight:600;cursor:pointer;margin-top:.5rem}
+ button.secondary{background:#fff;color:var(--accent);border:1px solid var(--accent);margin-left:.4rem}
+ .sect{margin:.9rem 0 .2rem;padding-top:.6rem;border-top:1px solid var(--line);font-size:.9rem}
+ .errorlist{margin:.2rem 0;padding:0;list-style:none;color:var(--bad);font-size:.82rem}
+
+ /* Historie */
+ .hist .grp{margin-bottom:.9rem} .hist ul{list-style:none;margin:0;padding:0}
+ .hist li{padding:.35rem .5rem;border-radius:6px;border-left:3px solid transparent}
+ .hist li a{display:block;font-weight:500;text-decoration:none}
+ .hist li.cur{background:#eef2ff;border-left-color:var(--accent)}
+ .hist li + li{border-top:1px solid var(--line)}
+
+ /* Legende */
+ #legende{margin-top:1.5rem}
+ .legend{column-count:2;column-gap:2.5rem}
+ @media (max-width:900px){.legend{column-count:1}}
+ .legend h3{margin-top:1rem;break-after:avoid} .legend h3:first-child{margin-top:0}
+ .term{break-inside:avoid;margin-bottom:.55rem} .term dt{font-weight:600} .term dd{margin:0 0 0 .1rem;color:#394150}
+ dl{margin:0}
+</style></head><body>
+<div class="wrap">
+<h1><a href="{% url 'index' %}">Trading Backtester</a></h1>
+{% block content %}{% endblock %}
+</div></body></html>

@@ -1,0 +1,397 @@
+{% extends "backtester/base.html" %}
+{% block content %}
+
+<nav class="chains" aria-label="Blockchain wählen">
+ {% for c in chains %}
+  <input type="radio" id="chain-{{ c.key }}" name="chain" value="{{ c.key }}" form="bt-form"
+         {% if form.chain.value == c.key %}checked{% endif %}>
+  <label for="chain-{{ c.key }}">{{ c.name }} <small>{{ c.symbol }}</small></label>
+ {% endfor %}
+</nav>
+{{ form.chain.errors }}
+
+<div class="cols">
+
+ <!-- Spalte 1: Einstellungen + Kennzahlen -->
+ <section>
+  <div class="box">
+   <h2>Einstellungen</h2>
+   {% if error %}<p class="err">{{ error }}</p>{% endif %}
+   <form method="post" id="bt-form" action="{% url 'index' %}">{% csrf_token %}
+    {{ form.non_field_errors }}
+    {% for field in form %}{% if field.name != "chain" %}
+     {% if field.name == "stop_loss" %}<h3 class="sect" data-field="risk_heading">Risikomanagement</h3>{% endif %}
+     <div class="field" data-field="{{ field.name }}">
+      <label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{{ field.errors }}
+     </div>
+    {% endif %}{% endfor %}
+    <button type="submit">Backtest starten</button>
+    <button type="submit" name="compare" value="1" class="secondary" title="Gleiche Einstellungen auf Bitcoin, Solana und Ethereum">Auf allen 3 Chains vergleichen</button>
+   </form>
+  </div>
+
+  {% if run_done %}
+  <div class="box">
+   <h2>{{ run.get_chain_display }} · {{ run.strategy_label }} · {{ run.timeframe }}</h2>
+   <p class="small">{{ run.mode_label }} · {{ run.days }} Tage · {% if run.source == "ccxt" %}Börse {{ run.exchange_label }} ({{ run.symbol }}) · {% endif %}Gebühr {{ run.fee }} · Slippage {{ run.slippage }} · Ausführung: {{ run.execution_label }} · Quelle: {{ run.source }}<br>
+    Parameter{% if run.validation.kind %} (zuletzt gewählt){% endif %}: {{ run.params }}
+    {% if run.risk_label %}<br>Risiko: {{ run.risk_label }}{% endif %}</p>
+   {% if run.data_note %}<p class="err small">Hinweis zu den Daten: {{ run.data_note }}</p>{% endif %}
+   <table>
+    <tr><th colspan="2">{% if run.validation.kind == "walkforward" %}Out-of-Sample gesamt{% elif run.validation.kind == "split" %}Testphase{% else %}Gesamtzeitraum{% endif %}</th></tr>
+    <tr><td>Rendite Strategie</td><td>{{ run.metrics.total_return_pct }} %</td></tr>
+    <tr><td>Rendite Buy &amp; Hold</td><td>{{ run.metrics.buyhold_return_pct }} %</td></tr>
+    <tr><td>Max Drawdown</td><td>{{ run.metrics.max_drawdown_pct }} %</td></tr>
+    <tr><td>Sharpe Ratio</td><td>{{ run.metrics.sharpe }}</td></tr>
+    <tr><td>Trades</td><td>{{ run.metrics.trades }}</td></tr>
+    <tr><td>Win-Rate</td><td>{{ run.metrics.win_rate_pct }} %</td></tr>
+    {% if "cagr_pct" in run.metrics %}
+    <tr><td>CAGR (p. a.)</td><td>{{ run.metrics.cagr_pct }} % (B&amp;H {{ run.metrics.buyhold_cagr_pct }} %)</td></tr>
+    <tr><td>Sortino Ratio</td><td>{{ run.metrics.sortino }}</td></tr>
+    <tr><td>Calmar Ratio</td><td>{{ run.metrics.calmar|default_if_none:"–" }}</td></tr>
+    <tr><td>Profit Factor</td><td>{{ run.metrics.profit_factor|default_if_none:"–" }}</td></tr>
+    <tr><td>Zeit im Markt</td><td>{{ run.metrics.time_in_market_pct }} % (B&amp;H 100 %)</td></tr>
+    {% if run.metrics.avg_invested_pct is not None %}<tr><td>Ø Investitionsgrad</td><td>{{ run.metrics.avg_invested_pct }} % des Kapitals</td></tr>{% endif %}
+    <tr><td>Max Drawdown Buy &amp; Hold</td><td>{{ run.metrics.buyhold_max_drawdown_pct }} %</td></tr>
+    {% endif %}
+   </table>
+   {% if run.validation.overfit_warning %}
+   <p class="err"><strong>Overfitting-Warnung:</strong> Die Performance bricht auf ungesehenen Daten deutlich ein.</p>
+   {% endif %}
+   {% if run.validation.kind and run.metrics.trades == 0 %}
+   <p class="err small"><strong>Hinweis „keine Trades“:</strong> Im ausgewerteten Zeitraum gab es keinen Trade. Das passiert, wenn alle Parameter im Training Verluste brachten und die Optimierung deshalb eine Kombination ohne Handel wählt (Sharpe 0 schlägt Verlust). Die Strategie hat dann auf diesen Daten keinen Vorteil gezeigt.</p>
+   {% endif %}
+  </div>
+
+  {% if run.validation.kind == "split" %}
+  <div class="box">
+   <h3>Train/Test (Split am {{ run.validation.split_at|slice:":10" }})</h3>
+   <table>
+    <tr><th></th><th>Train</th><th>Test</th></tr>
+    <tr><td>Rendite %</td><td>{{ run.validation.train.total_return_pct }}</td><td>{{ run.validation.test.total_return_pct }}</td></tr>
+    <tr><td>Buy &amp; Hold %</td><td>{{ run.validation.train.buyhold_return_pct }}</td><td>{{ run.validation.test.buyhold_return_pct }}</td></tr>
+    <tr><td>Sharpe</td><td>{{ run.validation.train.sharpe }}</td><td>{{ run.validation.test.sharpe }}</td></tr>
+    <tr><td>Max Drawdown %</td><td>{{ run.validation.train.max_drawdown_pct }}</td><td>{{ run.validation.test.max_drawdown_pct }}</td></tr>
+    <tr><td>Trades</td><td>{{ run.validation.train.trades }}</td><td>{{ run.validation.test.trades }}</td></tr>
+    {% if "cagr_pct" in run.validation.test %}
+    <tr><td>CAGR %</td><td>{{ run.validation.train.cagr_pct }}</td><td>{{ run.validation.test.cagr_pct }}</td></tr>
+    <tr><td>Sortino</td><td>{{ run.validation.train.sortino }}</td><td>{{ run.validation.test.sortino }}</td></tr>
+    <tr><td>Calmar</td><td>{{ run.validation.train.calmar|default_if_none:"–" }}</td><td>{{ run.validation.test.calmar|default_if_none:"–" }}</td></tr>
+    <tr><td>Profit Factor</td><td>{{ run.validation.train.profit_factor|default_if_none:"–" }}</td><td>{{ run.validation.test.profit_factor|default_if_none:"–" }}</td></tr>
+    <tr><td>Zeit im Markt %</td><td>{{ run.validation.train.time_in_market_pct }}</td><td>{{ run.validation.test.time_in_market_pct }}</td></tr>
+    {% endif %}
+   </table>
+  </div>
+  {% endif %}
+
+  {% if run.validation.kind == "walkforward" %}
+  <div class="box">
+   <h3>Walk-Forward: {{ run.validation.n_folds }} Folds, Train = {{ run.validation.train_mult }} × Testfenster</h3>
+   <p class="small">Profitable Folds: <strong>{{ run.validation.profitable_folds }}</strong> · Ø Train-Sharpe {{ run.validation.train_sharpe_mean }} vs. OOS-Sharpe {{ run.metrics.sharpe }}</p>
+   <div class="scroll"><table>
+    <tr><th>#</th><th>Test-Zeitraum</th><th>Parameter</th><th>Train-Sharpe</th><th>Test %</th><th>B&amp;H %</th><th>Test-Sharpe</th><th>Trades</th></tr>
+    {% for f in run.validation.folds %}
+    <tr><td>{{ forloop.counter }}</td><td>{{ f.test_start|slice:":10" }} – {{ f.test_end }}</td><td>{{ f.params_txt }}</td>
+     <td>{{ f.train_sharpe }}</td><td>{{ f.test.total_return_pct }}</td><td>{{ f.test.buyhold_return_pct }}</td>
+     <td>{{ f.test.sharpe }}</td><td>{{ f.test.trades }}</td></tr>
+    {% endfor %}
+   </table></div>
+   <p class="small">Stark schwankende Parameter über die Folds deuten auf eine instabile Strategie hin.</p>
+  </div>
+  {% endif %}
+  {% endif %}
+
+  {% if run and not run_done %}
+  <div class="box">
+   {% if run.status == "error" %}
+   <h3 class="err">Berechnung fehlgeschlagen</h3>
+   <p class="err">{{ run.error }}</p>
+   <p class="small">Einstellungen oben anpassen und erneut starten, z. B. andere Börse, anderes Zeitfenster oder kürzerer Zeitraum.</p>
+   {% else %}
+   <h3>Berechnung {{ run.status_label }} …</h3>
+   <p class="small">Der Backtest läuft im Hintergrund ({{ run.get_chain_display }} · {{ run.strategy_label }} · {{ run.timeframe }}). Diese Seite aktualisiert sich automatisch.</p>
+   {% endif %}
+  </div>
+  {% endif %}
+
+  {% if batch_runs %}
+  <div class="box">
+   <h2>Chain-Vergleich</h2>
+   <p class="small">{{ batch_runs.0.strategy_label }} · {{ batch_runs.0.timeframe }} · {{ batch_runs.0.mode_label }} · {{ batch_runs.0.days }} Tage · Ausführung: {{ batch_runs.0.execution_label }}
+    {% if batch_runs.0.source == "ccxt" %} · Börse {{ batch_runs.0.exchange_label }}{% endif %}<br>
+    Kennzahlen: Gesamtzeitraum bzw. Testphase / Out-of-Sample, je nach Modus.</p>
+   <div class="scroll"><table>
+    <tr><th>Chain</th><th>Rendite %</th><th>B&amp;H %</th><th>Max DD %</th><th>Sharpe</th><th>Trades</th><th>CAGR %</th><th>Zeit im Markt %</th></tr>
+    {% for r in batch_runs %}
+    <tr><td><a href="{% url 'detail' r.pk %}">{{ r.get_chain_display }}</a> <small>{{ r.symbol }}</small></td>
+    {% if r.status == "done" %}
+     <td>{{ r.metrics.total_return_pct }}</td><td>{{ r.metrics.buyhold_return_pct }}</td>
+     <td>{{ r.metrics.max_drawdown_pct }}</td><td>{{ r.metrics.sharpe }}</td><td>{{ r.metrics.trades }}</td>
+     <td>{{ r.metrics.cagr_pct }}</td><td>{{ r.metrics.time_in_market_pct }}</td>
+    {% else %}
+     <td colspan="7" class="{% if r.status == 'error' %}err{% else %}muted{% endif %}">{{ r.status_label }}{% if r.error %}: {{ r.error }}{% endif %}</td>
+    {% endif %}</tr>
+    {% endfor %}
+   </table></div>
+  </div>
+  {% endif %}
+ </section>
+
+ <!-- Spalte 2: Charts + Trades -->
+ <section>
+  {% if run_done %}
+  <div class="box"><div id="price" style="height:380px"></div></div>
+  <div class="box"><div id="chart" style="height:330px"></div></div>
+  {% if run.validation.kind == "split" %}<div class="box"><div id="heatmap" style="height:340px"></div></div>{% endif %}
+  {% if run.curves.trades %}
+  <div class="box">
+   <h3>Trades ({{ run.curves.trades|length }})</h3>
+   {% if run.risk_label and exit_reasons %}<p class="small">Ausstiege: {% for r, n in exit_reasons %}{{ r }} {{ n }}{% if not forloop.last %} · {% endif %}{% endfor %}</p>{% endif %}
+   <div class="scroll" style="max-height:320px;overflow-y:auto"><table>
+    <tr><th>Kauf</th><th>Preis</th><th>Verkauf</th><th>Preis</th><th>Netto %</th><th>Grund</th>{% if run.risk_label %}<th>Größe %</th>{% endif %}</tr>
+    {% for t in run.curves.trades %}
+    <tr><td>{{ t.entry_ts|slice:":10" }}</td><td>{{ t.entry_px }}</td>
+     <td>{% if t.exit_ts %}{{ t.exit_ts|slice:":10" }}{% else %}offen{% endif %}</td>
+     <td>{{ t.exit_px|default_if_none:"–" }}</td>
+     <td class="{% if t.ret_pct >= 0 %}good{% else %}err{% endif %}">{{ t.ret_pct }}</td>
+     <td>{{ t.reason|default:"–" }}</td>{% if run.risk_label %}<td>{{ t.size_pct|default:"–" }}</td>{% endif %}</tr>
+    {% endfor %}
+   </table></div>
+  </div>
+  {% endif %}
+  {% elif batch_runs %}
+  <div class="box"><div id="cmp" style="height:420px"></div>
+   <p class="small">Equity normiert auf Start = 100. Durchgezogen: Strategie, gestrichelt: Buy &amp; Hold.</p></div>
+  {% elif run %}
+  <div class="box muted">Charts und Trades erscheinen hier, sobald die Berechnung abgeschlossen ist.</div>
+  {% else %}
+  <div class="box muted">Wähle oben eine Blockchain, stelle links die Parameter ein und starte einen Backtest.
+   Die Charts und Trades erscheinen hier, abgeschlossene Läufe rechts.</div>
+  {% endif %}
+ </section>
+
+ <!-- Spalte 3: gelaufene Auswertungen je Chain -->
+ <aside class="box hist">
+  <h2>Gelaufene Auswertungen</h2>
+  {% for g in groups %}
+  <div class="grp">
+   <h4>{{ g.name }} <small>{{ g.symbol }} · {{ g.total }} Läufe</small></h4>
+   <ul>
+    {% for r in g.runs %}
+    <li {% if r.pk == run.pk or r.batch and r.batch == batch_runs.0.batch %}class="cur"{% endif %}>
+     <a href="{% url 'detail' r.pk %}">{{ r.strategy_label }} · {{ r.timeframe }} · {{ r.mode_label }}</a>
+     {% if r.status == "done" %}<span class="small">{{ r.created_at|date:"d.m. H:i" }} · {{ r.source_label }} · {{ r.metrics.total_return_pct }} % (B&amp;H {{ r.metrics.buyhold_return_pct }} %)</span>
+     {% elif r.status == "error" %}<span class="small err">{{ r.created_at|date:"d.m. H:i" }} · {{ r.source_label }} · ⚠ Fehler</span>
+     {% else %}<span class="small">{{ r.created_at|date:"d.m. H:i" }} · {{ r.source_label }} · ⏳ {{ r.status_label }} …</span>{% endif %}
+     {% if r.batch %}<a class="small" href="{% url 'compare' r.batch %}">Chain-Vergleich ansehen</a>{% endif %}
+    </li>
+    {% empty %}<li class="muted small">Noch keine Läufe.</li>{% endfor %}
+   </ul>
+  </div>
+  {% endfor %}
+ </aside>
+</div>
+
+<!-- Legende -->
+<section id="legende" class="box">
+ <h2>Legende: Abkürzungen und Fachbegriffe</h2>
+ <div class="legend">
+
+  <h3>Märkte und Daten</h3>
+  <dl>
+   <div class="term"><dt>Bitcoin (BTC), Ethereum (ETH), Solana (SOL)</dt><dd>Ausgewertet werden die Kurse der zugehörigen Kryptowährungen, nicht die Blockchain-Technik selbst.</dd></div>
+   <div class="term"><dt>USDT / Handelspaar (z. B. BTC/USDT)</dt><dd>USDT (Tether) ist ein Stablecoin, der an den US-Dollar gekoppelt ist. Ein Handelspaar nennt den Preis der ersten Währung in der zweiten: BTC/USDT = Preis von 1 BTC in USDT.</dd></div>
+   <div class="term"><dt>Kerze und Zeitfenster (1h, 4h, 1d)</dt><dd>Eine Kerze fasst die Kurse eines Zeitintervalls zusammen. 1h = 1 Stunde, 4h = 4 Stunden, 1d = 1 Tag je Kerze.</dd></div>
+   <div class="term"><dt>OHLCV</dt><dd>Daten je Kerze: Open (Eröffnungskurs), High (Höchstkurs), Low (Tiefstkurs), Close (Schlusskurs), Volume (gehandelte Menge).</dd></div>
+   <div class="term"><dt>Tage Historie</dt><dd>Länge des Zeitraums, der rückwirkend geladen und ausgewertet wird.</dd></div>
+   <div class="term"><dt>ccxt</dt><dd>Python-Bibliothek mit einheitlicher Schnittstelle zu Krypto-Börsen. Hier werden damit öffentliche Kursdaten von Binance geladen (kein API-Key nötig).</dd></div>
+   <div class="term"><dt>Börse</dt><dd>Handelsplattform, von der die Kursdaten stammen (Binance, Kraken, Coinbase, Bybit, OKX, Bitstamp). Kurse unterscheiden sich je Börse leicht, Umfang und Tiefe der Historie ebenfalls. Manche Börsen sind regional eingeschränkt erreichbar.</dd></div>
+   <div class="term"><dt>Quote-Währung (USDT / USD / USDC)</dt><dd>Nicht jede Börse listet USDT-Paare. Fehlt BTC/USDT, wird automatisch BTC/USD oder BTC/USDC genutzt. Das tatsächlich verwendete Paar steht in der Kopfzeile des Laufs.</dd></div>
+   <div class="term"><dt>Datenhinweis</dt><dd>Erscheint, wenn eine Börse weniger Historie liefert als angefordert (z. B. begrenzen manche Börsen die Zahl abrufbarer Kerzen). Die Auswertung bezieht sich dann auf den kürzeren Zeitraum. Nicht jede Börse bietet jedes Zeitfenster an (Coinbase z. B. kein 4h).</dd></div>
+   <div class="term"><dt>Synthetisch (offline)</dt><dd>Künstlich erzeugte Zufallskurse zum Testen ohne Internet. Sie enthalten kein echtes Marktmuster, gute Ergebnisse sind dort reiner Zufall.</dd></div>
+  </dl>
+
+  <h3>Strategien und Indikatoren</h3>
+  <dl>
+   <div class="term"><dt>Indikator / Technische Analyse (TA), TA-Lib</dt><dd>Indikatoren sind aus Kursen berechnete Kennlinien, die Kauf- und Verkaufssignale liefern sollen. TA-Lib ist eine verbreitete Bibliothek dafür; ohne sie nutzt das Projekt eine pandas-Berechnung mit gleicher Logik.</dd></div>
+   <div class="term"><dt>Signal, Long, Flat, Long-only</dt><dd>Ein Signal sagt je Kerze „investiert“ (long, 1) oder „nicht investiert“ (flat, 0). Long-only heißt: keine Leerverkäufe (Short) und kein Hebel.</dd></div>
+   <div class="term"><dt>SMA (Simple Moving Average)</dt><dd>Einfacher gleitender Durchschnitt: Mittelwert der letzten n Schlusskurse.</dd></div>
+   <div class="term"><dt>SMA-Crossover, fast, slow</dt><dd>Long, solange der kurze SMA (fast, z. B. 20 Kerzen) über dem langen SMA (slow, z. B. 50 Kerzen) liegt, sonst flat. Ein kurzes Fenster reagiert schnell, ein langes träge.</dd></div>
+   <div class="term"><dt>RSI (Relative Strength Index), period, low, high</dt><dd>Momentum-Indikator zwischen 0 und 100: Verhältnis der durchschnittlichen Kursgewinne zu den durchschnittlichen Kursverlusten der letzten n Kerzen (period, üblich 14), nach Wilder geglättet. Unter low (z. B. 30, „überverkauft“) wird gekauft, über high (z. B. 70, „überkauft“) verkauft; dazwischen bleibt die Position bestehen. In der Grid-Search gilt high = 100 − low.</dd></div>
+   <div class="term"><dt>Parameter</dt><dd>Einstellbare Werte einer Strategie, z. B. fast und slow beim SMA-Crossover.</dd></div>
+  </dl>
+
+  <h3>Ausführung und Kosten</h3>
+  <dl>
+   <div class="term"><dt>Ausführung</dt><dd>Das Signal entsteht am Ende einer Kerze. „Eröffnungskurs der Folgekerze“ setzt es zum Open der nächsten Kerze um (realistischer, Standard). „Schlusskurs der Signalkerze“ setzt es sofort zum Close derselben Kerze um (optimistischer).</dd></div>
+   <div class="term"><dt>Look-ahead-Bias</dt><dd>Fehler, bei dem eine Strategie Informationen nutzt, die zum Handelszeitpunkt noch nicht bekannt waren. Er macht Backtests unrealistisch gut und wird hier durch die verzögerte Umsetzung verhindert.</dd></div>
+   <div class="term"><dt>Gebühr</dt><dd>Anteil des Handelsvolumens, der bei jedem Kauf und Verkauf abgezogen wird (0.001 = 0,1 %).</dd></div>
+   <div class="term"><dt>Slippage</dt><dd>Abweichung zwischen erwartetem und tatsächlichem Ausführungspreis, u. a. durch den Spread (Abstand zwischen Kauf- und Verkaufskurs) und Kursbewegungen während der Ausführung. Hier als zusätzlicher Prozentsatz je Kauf und Verkauf modelliert (0.0005 = 0,05 %) und wirkt wie eine zweite Gebühr. Es ist eine Pauschale, keine Simulation des Orderbuchs; bei großen Orders oder dünnen Märkten fällt sie höher aus.</dd></div>
+   <div class="term"><dt>Trade, Netto-Rendite, ▲ / ▼</dt><dd>Ein Trade ist ein Kauf mit zugehörigem Verkauf. Die Netto-Rendite ist das Ergebnis nach Gebühren. ▲ markiert Käufe, ▼ Verkäufe im Kurs-Chart; „offen“ heißt, die Position läuft noch.</dd></div>
+  </dl>
+
+  <h3>Risikomanagement</h3>
+  <dl>
+   <div class="term"><dt>Stop-Loss</dt><dd>Automatischer Verkauf, sobald der Kurs einen festen Prozentsatz unter den Einstiegskurs fällt (z. B. 5 %). Er begrenzt den Verlust je Trade, führt aber auch dazu, dass kurze Rücksetzer Trades vorzeitig beenden.</dd></div>
+   <div class="term"><dt>Take-Profit</dt><dd>Automatischer Verkauf, sobald der Kurs einen festen Prozentsatz über den Einstiegskurs steigt. Er sichert Gewinne, schneidet aber starke Trends ab.</dd></div>
+   <div class="term"><dt>Trailing-Stop</dt><dd>Ein Stop, der mit dem Kurs nach oben nachgezogen wird: Er liegt einen festen Prozentsatz unter dem höchsten Kurs seit dem Einstieg (bis zur Vorkerze) und sinkt nie. Er schützt aufgelaufene Gewinne. Sind Stop-Loss und Trailing-Stop gesetzt, gilt der jeweils höhere.</dd></div>
+   <div class="term"><dt>Kurslücke (Gap)</dt><dd>Eröffnet eine Kerze jenseits eines Stops oder Ziels, wird zum Eröffnungskurs ausgeführt. Ein Stop-Ausstieg kann dadurch schlechter ausfallen als der Stop-Kurs.</dd></div>
+   <div class="term"><dt>Reihenfolge innerhalb einer Kerze</dt><dd>Aus Kerzendaten ist nicht erkennbar, ob zuerst der Tiefst- oder der Höchstkurs erreicht wurde. Wären Stop und Take-Profit in derselben Kerze möglich, gilt konservativ der Stop.</dd></div>
+   <div class="term"><dt>Wiedereinstieg nach Stop</dt><dd>Nach einem Ausstieg per Stop wird nicht sofort neu gekauft, auch wenn das Signal noch „long“ zeigt. Erst nach einem zwischenzeitlichen Signal „flat“ und einem neuen Kaufsignal gibt es wieder einen Einstieg.</dd></div>
+   <div class="term"><dt>Positionsgröße</dt><dd>Anteil des Kapitals, der pro Trade investiert wird. „Voll“ = 100 %. „Fest“ = ein fester Prozentsatz, der Rest bleibt in Cash. „Volatilitätsziel“ = die Größe wird kleiner, wenn der Markt stärker schwankt: Größe = Ziel-Volatilität geteilt durch die realisierte Volatilität der letzten 20 Kerzen (hochgerechnet auf ein Jahr), maximal 100 %. Die Größe wird beim Einstieg festgelegt und bis zum Ausstieg gehalten; Gebühren fallen anteilig an.</dd></div>
+   <div class="term"><dt>Volatilität</dt><dd>Maß für die Schwankungsbreite der Kurse: Standardabweichung der Kerzenrenditen, hier auf ein Jahr hochgerechnet (× √Kerzen pro Jahr). Hohe Volatilität bedeutet große Kursausschläge.</dd></div>
+   <div class="term"><dt>Ø Investitionsgrad</dt><dd>Durchschnittlicher Anteil des Kapitals, der über den gesamten Zeitraum im Markt war (Zeit im Markt × Positionsgröße). Eine Strategie mit kleiner Position erzielt meist weniger Rendite bei geringerem Risiko, deshalb sind Rendite und Drawdown dann nur eingeschränkt mit Buy &amp; Hold vergleichbar.</dd></div>
+   <div class="term"><dt>Grund (Ausstiegsgrund)</dt><dd>In der Trade-Tabelle: „Signal“ (Strategie meldet flat), „Stop-Loss“, „Trailing-Stop“, „Take-Profit“ oder „offen“ (Position läuft am Datenende noch). Über der Tabelle steht die Verteilung der Gründe.</dd></div>
+   <div class="term"><dt>Risiko-Einstellungen und Optimierung</dt><dd>Stops und Positionsgröße werden fest vorgegeben und nicht von der Grid-Search optimiert. So bleibt das Raster klein und das Overfitting-Risiko geringer. Wer verschiedene Werte ausprobiert und den besten nimmt, optimiert aber trotzdem auf den Daten, deshalb auch hier die Testphase beachten.</dd></div>
+  </dl>
+
+  <h3>Kennzahlen</h3>
+  <dl>
+   <div class="term"><dt>Rendite Strategie</dt><dd>Gesamtveränderung des Kapitals im Zeitraum nach Gebühren, ausgehend von 10.000 Startkapital.</dd></div>
+   <div class="term"><dt>Buy &amp; Hold (B&amp;H)</dt><dd>Vergleichsstrategie: am Anfang kaufen, am Ende verkaufen. Eine Strategie lohnt sich nur, wenn sie B&amp;H schlägt, am besten bei geringerem Risiko.</dd></div>
+   <div class="term"><dt>Equity-Kurve</dt><dd>Verlauf des Kapitals über die Zeit.</dd></div>
+   <div class="term"><dt>Max Drawdown (MDD)</dt><dd>Größter prozentualer Rückgang der Equity vom bisherigen Höchststand bis zum folgenden Tiefpunkt, ein Maß für den schlimmsten Verlustabschnitt.</dd></div>
+   <div class="term"><dt>Sharpe Ratio</dt><dd>Mittlere Rendite je Kerze geteilt durch deren Standardabweichung, hochgerechnet auf ein Jahr (× √Kerzen pro Jahr; 1d = 365, 4h = 2190, 1h = 8760), ohne risikofreien Zins. Sie misst Rendite im Verhältnis zum Schwankungsrisiko. Grobe Orientierung: unter 0 verlustbringend, 0 bis 1 schwach, über 1 gut.</dd></div>
+   <div class="term"><dt>CAGR (Compound Annual Growth Rate)</dt><dd>Durchschnittliche jährliche Wachstumsrate: (Endkapital / Startkapital)^(1 / Jahre) − 1. Bei Zeiträumen unter einem Jahr, z. B. kurzen Testphasen, verzerrt die Hochrechnung stark; dort besser die Gesamtrendite lesen.</dd></div>
+   <div class="term"><dt>Sortino Ratio</dt><dd>Wie die Sharpe Ratio, aber geteilt durch die Abwärtsabweichung: Nur negative Kerzenrenditen zählen als Risiko (Zielrendite 0), ebenfalls aufs Jahr hochgerechnet. Bestraft Verluste, nicht Kursanstiege.</dd></div>
+   <div class="term"><dt>Calmar Ratio</dt><dd>CAGR geteilt durch den Betrag des Max Drawdown: Jahresrendite je Einheit des schlimmsten Rückgangs (höher = besser). „–“, wenn es keinen Drawdown gab.</dd></div>
+   <div class="term"><dt>Profit Factor</dt><dd>Summe der Renditen aller Gewinn-Trades geteilt durch den Betrag der Summe aller Verlust-Trades. Über 1 überwiegen die Gewinne. „–“, wenn es keine Verlust-Trades oder gar keine Trades gab.</dd></div>
+   <div class="term"><dt>Zeit im Markt</dt><dd>Anteil der Kerzen, in denen eine Position gehalten wurde (Buy &amp; Hold: 100 %). Eine Strategie, die nur 30 % der Zeit investiert ist, trägt weniger Marktrisiko; Rendite und Drawdown sind deshalb nicht 1:1 mit Buy &amp; Hold vergleichbar. Für den fairen Vergleich helfen Sortino, Calmar und der Max Drawdown von Buy &amp; Hold.</dd></div>
+   <div class="term"><dt>Win-Rate</dt><dd>Anteil der Trades mit positiver Netto-Rendite. Allein aussagearm, da wenige große Verluste viele kleine Gewinne auffressen können.</dd></div>
+  </dl>
+
+  <h3>Validierung</h3>
+  <dl>
+   <div class="term"><dt>Overfitting (Überanpassung)</dt><dd>Parameter passen nur zufällig auf die Vergangenheit und versagen auf neuen Daten. Das ist das Hauptrisiko beim Optimieren.</dd></div>
+   <div class="term"><dt>Train/Test-Split</dt><dd>Die Daten werden chronologisch geteilt. Auf dem Train-Anteil werden Parameter gesucht, der Test-Anteil wird danach einmalig mit den gewählten Parametern bewertet.</dd></div>
+   <div class="term"><dt>Grid-Search</dt><dd>Systematisches Ausprobieren aller Parameterkombinationen eines festen Rasters. Die beste Kombination (höchster Train-Sharpe) wird übernommen.</dd></div>
+   <div class="term"><dt>Heatmap</dt><dd>Farbfläche der Grid-Search: Jede Zelle ist eine Parameterkombination, die Farbe der Train-Sharpe (grün gut, rot schlecht). Grüne Flächen sind stabiler als einzelne grüne Zellen.</dd></div>
+   <div class="term"><dt>Walk-Forward-Analyse, Fold</dt><dd>Wiederholtes Trainieren und Testen mit wandernden Fenstern. Jeder Fold optimiert auf einem Train-Fenster und testet auf dem direkt folgenden Testfenster. „Train-Fenster (× Testfenster)“ legt fest, wie viel länger das Training als der Test dauert.</dd></div>
+   <div class="term"><dt>In-Sample / Out-of-Sample (OOS)</dt><dd>In-Sample sind Daten, auf denen optimiert wurde. Out-of-Sample sind ungesehene Daten. Nur OOS-Ergebnisse sind belastbar; die OOS-Kurve fügt alle Testfenster zusammen.</dd></div>
+   <div class="term"><dt>Profitable Folds</dt><dd>Zahl der Folds mit positiver Test-Rendite, z. B. 3/5.</dd></div>
+   <div class="term"><dt>Hinweis „keine Trades“</dt><dd>Erscheint, wenn im Test- bzw. Out-of-Sample-Zeitraum nichts gehandelt wurde. Meist hat die Optimierung eine Parameterkombination gewählt, die im Training nie handelt, weil alle anderen Verluste brachten. Die Rendite von 0 % ist dann kein Erfolg, sondern zeigt, dass die Strategie auf diesen Daten nichts leistet.</dd></div>
+   <div class="term"><dt>Overfitting-Warnung</dt><dd>Erscheint, wenn der Test- bzw. OOS-Sharpe unter der Hälfte des Train-Sharpe liegt oder die Test-Rendite negativ ist. Das ist eine Faustregel, kein statistischer Beweis.</dd></div>
+  </dl>
+
+  <h3>Läufe und Vergleich</h3>
+  <dl>
+   <div class="term"><dt>Hintergrund-Berechnung, Status</dt><dd>Jeder Backtest läuft im Hintergrund, die Seite bleibt bedienbar und aktualisiert sich selbst. Status: wartet (in der Warteschlange), läuft, fertig oder Fehler (mit Begründung, z. B. Börse nicht erreichbar).</dd></div>
+   <div class="term"><dt>Chain-Vergleich</dt><dd>Startet dieselben Einstellungen auf Bitcoin, Solana und Ethereum. Die Tabelle zeigt die Kennzahlen nebeneinander, der Chart die Equity-Kurven.</dd></div>
+   <div class="term"><dt>Normiert (Start = 100)</dt><dd>Alle Kurven werden auf den Startwert 100 umgerechnet, damit Chains mit sehr unterschiedlichen Kursniveaus vergleichbar sind. Eine Linie bei 120 heißt +20 % seit Beginn.</dd></div>
+  </dl>
+
+  <h3>Hinweis</h3>
+  <dl><div class="term"><dd>Ein Backtest bildet nur die Vergangenheit ab und garantiert keine künftigen Ergebnisse. Das Projekt dient Lern- und Analysezwecken und ist keine Anlageberatung.</dd></div></dl>
+ </div>
+</section>
+
+<script>
+ // Felder je Modus/Strategie ein- und ausblenden, Parameter-Beschriftungen anpassen
+ (function () {
+   const f = document.getElementById("bt-form");
+   const field = n => f.querySelector('[data-field="' + n + '"]');
+   const labels = {
+     sma_cross: ["SMA fast (kurzes Fenster, Kerzen)", "SMA slow (langes Fenster, Kerzen)", ""],
+     rsi: ["RSI period (Kerzen)", "RSI low (Kaufschwelle)", "RSI high (Verkaufsschwelle)"],
+   };
+   function sync() {
+     const mode = f.elements["mode"].value, strat = f.elements["strategy"].value;
+     const show = (n, on) => { field(n).style.display = on ? "" : "none"; };
+     show("exchange", f.elements["source"].value === "ccxt");
+     show("train_frac", mode === "split");
+     show("wf_folds", mode === "walkforward");
+     show("wf_train_mult", mode === "walkforward");
+     show("param_a", mode === "single");
+     show("param_b", mode === "single");
+     show("param_c", mode === "single" && strat === "rsi");
+     const sm = f.elements["size_mode"].value;
+     show("size_value", sm !== "full");
+     field("size_value").querySelector("label").textContent =
+       sm === "vol" ? "Ziel-Volatilität (% p. a.)" : "Positionsgröße (% des Kapitals)";
+     ["param_a", "param_b", "param_c"].forEach((n, i) => {
+       const l = field(n).querySelector("label"); if (labels[strat][i]) l.textContent = labels[strat][i];
+     });
+   }
+   f.elements["mode"].addEventListener("change", sync);
+   f.elements["strategy"].addEventListener("change", sync);
+   f.elements["source"].addEventListener("change", sync);
+   f.elements["size_mode"].addEventListener("change", sync);
+   sync();
+ })();
+</script>
+
+{% if run_done %}
+{{ run.curves|json_script:"curves" }}
+{{ run.validation.lines|json_script:"lines" }}
+{{ run.validation.heatmap|json_script:"heat" }}
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<script>
+ const c = JSON.parse(document.getElementById("curves").textContent);
+ const linesRaw = JSON.parse(document.getElementById("lines").textContent);
+ const shapes = (Array.isArray(linesRaw) ? linesRaw : []).map(x => ({
+   type:"line", x0:x, x1:x, yref:"paper", y0:0, y1:1, line:{dash:"dot", color:"gray"}}));
+ const base = {margin:{t:40, l:55, r:10, b:40}, legend:{orientation:"h", y:-0.18}, shapes};
+ const cfg = {responsive:true};
+
+ if (c.close) {
+   const T = c.trades || [], closed = T.filter(t => t.exit_ts);
+   Plotly.newPlot("price", [
+     {x:c.index, y:c.close, name:"Kurs", mode:"lines", line:{width:1.5}},
+     {x:T.map(t => t.entry_ts), y:T.map(t => t.entry_px), name:"Kauf", mode:"markers",
+      marker:{symbol:"triangle-up", size:11, color:"green"},
+      text:T.map(t => "Trade: " + t.ret_pct + " %" + (t.size_pct && t.size_pct < 100 ? " · Größe " + t.size_pct + " %" : "")), hovertemplate:"Kauf %{y}<br>%{text}<extra></extra>"},
+     {x:closed.map(t => t.exit_ts), y:closed.map(t => t.exit_px), name:"Verkauf", mode:"markers",
+      marker:{symbol:"triangle-down", size:11, color:"red"},
+      text:closed.map(t => "Trade: " + t.ret_pct + " % · " + (t.reason || "Signal")), hovertemplate:"Verkauf %{y}<br>%{text}<extra></extra>"},
+   ], {...base, title:"Kurs mit Trades"}, cfg);
+ }
+ Plotly.newPlot("chart", [
+   {x:c.index, y:c.strategy, name:"Strategie"},
+   {x:c.index, y:c.buyhold, name:"Buy & Hold"}],
+   {...base, title:"Equity-Kurve"}, cfg);
+
+ const H = JSON.parse(document.getElementById("heat").textContent);
+ if (H && H.z && document.getElementById("heatmap")) {
+   Plotly.newPlot("heatmap", [{type:"heatmap", x:H.x, y:H.y, z:H.z, colorscale:"RdYlGn",
+                               colorbar:{title:"Sharpe"}}],
+     {title:"Grid-Search auf Train-Daten", xaxis:{title:H.x_name, type:"category"},
+      yaxis:{title:H.y_name, type:"category"}, margin:{t:40, l:60, r:10, b:50}}, cfg);
+ }
+</script>
+{% endif %}
+
+{% if batch_runs %}
+{{ compare_data|json_script:"cmpdata" }}
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<script>
+ (function () {
+   const data = JSON.parse(document.getElementById("cmpdata").textContent);
+   const colors = {btc:"#f7931a", sol:"#9945ff", eth:"#4f6bed"};
+   const norm = a => a.map(v => v / a[0] * 100);
+   const traces = [];
+   data.forEach(d => {
+     traces.push({x:d.index, y:norm(d.strategy), name:d.name + " Strategie", legendgroup:d.key,
+                  line:{color:colors[d.key], width:2}});
+     traces.push({x:d.index, y:norm(d.buyhold), name:d.name + " Buy & Hold", legendgroup:d.key,
+                  line:{color:colors[d.key], width:1.5, dash:"dot"}});
+   });
+   if (traces.length && document.getElementById("cmp")) {
+     Plotly.newPlot("cmp", traces, {title:"Equity im Vergleich (Start = 100)",
+       margin:{t:40, l:55, r:10, b:40}, legend:{orientation:"h", y:-0.2}}, {responsive:true});
+   }
+ })();
+</script>
+{% endif %}
+
+{% if pending_ids %}
+<script>
+ // Läuft noch etwas im Hintergrund? Dann Status abfragen und bei Abschluss neu laden.
+ (function poll() {
+   fetch("{% url 'status' %}?ids={{ pending_ids }}")
+     .then(r => r.json())
+     .then(d => { if (d.pending === 0) location.reload(); else setTimeout(poll, 1500); })
+     .catch(() => setTimeout(poll, 3000));
+ })();
+</script>
+{% endif %}
+{% endblock %}
