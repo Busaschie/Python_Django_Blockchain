@@ -2,5 +2,6 @@ django>=5.0
 pandas
 numpy
 ccxt
+gunicorn==21.2.0
 # optional: TA-Lib (braucht die C-Bibliothek, siehe README). Ohne TA-Lib greift ein pandas-Fallback.
 # TA-Lib
