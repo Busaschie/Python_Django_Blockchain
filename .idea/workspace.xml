@@ -4,20 +4,7 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9aa04bb0-a51b-42e3-bb80-523c848c1994" name="Changes" comment="requirement">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtester/data.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtester/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/forms.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtester/indicators.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/indicators.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtester/jobs.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/jobs.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtester/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtester/templates/backtester/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/templates/backtester/dashboard.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtester/tests.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/tests.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtester/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/config/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
-    </list>
+    <list default="true" id="9aa04bb0-a51b-42e3-bb80-523c848c1994" name="Changes" comment="nemo db" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -54,61 +41,61 @@
 }</component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0683933563287962" />
-      <entry key="MS500" value="1.5847938320259738" />
-      <entry key="S2" value="1.8745039878673975" />
-      <entry key="S5" value="2.0097100533774874" />
-      <entry key="S10" value="2.9276187005036047" />
-      <entry key="S30" value="8.422410273722228" />
-      <entry key="S60" value="13.582398949250887" />
-      <entry key="M2" value="18.866307668150345" />
-      <entry key="M5" value="24.090870112527895" />
-      <entry key="M10" value="27.006789095492778" />
-      <entry key="M15" value="29.68877903227067" />
-      <entry key="M30" value="38.17168445686196" />
-      <entry key="H1" value="49.225205610958874" />
-      <entry key="H2" value="58.538042455267366" />
-      <entry key="H4" value="64.64477433644495" />
-      <entry key="D1" value="70.67659172247424" />
-      <entry key="W1" value="71.80839681624657" />
+      <entry key="MS100" value="1.0" />
+      <entry key="MS500" value="1.0003690234199991" />
+      <entry key="S2" value="1.1386000804518484" />
+      <entry key="S5" value="1.4536626453598338" />
+      <entry key="S10" value="1.684617444281348" />
+      <entry key="S30" value="3.18965583747567" />
+      <entry key="S60" value="7.299223931528004" />
+      <entry key="M2" value="13.82259855780851" />
+      <entry key="M5" value="21.991900980103328" />
+      <entry key="M10" value="26.60367553141504" />
+      <entry key="M15" value="29.900977169316942" />
+      <entry key="M30" value="39.005239844269305" />
+      <entry key="H1" value="50.46760123705882" />
+      <entry key="H2" value="60.08593731171249" />
+      <entry key="H4" value="66.39468568741329" />
+      <entry key="D1" value="72.630951898769" />
+      <entry key="W1" value="73.80177070560906" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
       <entry key="MS500" value="0.0" />
       <entry key="S2" value="0.0" />
-      <entry key="S5" value="1.124151957203132E-222" />
-      <entry key="S10" value="1.0602603252046786E-111" />
-      <entry key="S30" value="1.0196962844318453E-37" />
-      <entry key="S60" value="3.193268363967937E-19" />
-      <entry key="M2" value="5.650901135188911E-10" />
-      <entry key="M5" value="1.9991578365553068E-4" />
-      <entry key="M10" value="0.014139157812809465" />
-      <entry key="M15" value="0.058472145275691834" />
-      <entry key="M30" value="0.24181014303724285" />
-      <entry key="H1" value="0.4917419476079324" />
-      <entry key="H2" value="0.7012431444284726" />
-      <entry key="H4" value="0.8374026178777291" />
-      <entry key="D1" value="0.9708580121418546" />
-      <entry key="W1" value="0.9957839056620689" />
+      <entry key="S5" value="1.614265119208219E-227" />
+      <entry key="S10" value="4.017791830356841E-114" />
+      <entry key="S30" value="1.589751135233136E-38" />
+      <entry key="S60" value="1.2608533361311845E-19" />
+      <entry key="M2" value="3.5508496675178787E-10" />
+      <entry key="M5" value="1.6600948962079693E-4" />
+      <entry key="M10" value="0.012884466990170648" />
+      <entry key="M15" value="0.05495969384347621" />
+      <entry key="M30" value="0.23443483922718528" />
+      <entry key="H1" value="0.48418471601981095" />
+      <entry key="H2" value="0.6958338278783306" />
+      <entry key="H4" value="0.8341665468468102" />
+      <entry key="D1" value="0.9702317032461529" />
+      <entry key="W1" value="0.9956921104505603" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.07900309587758778" />
-      <entry key="MS500" value="0.9365873834769832" />
-      <entry key="S2" value="1.6428664687859755" />
-      <entry key="S5" value="1.9090438343951752" />
-      <entry key="S10" value="2.8696950823169183" />
-      <entry key="S30" value="8.385711236908795" />
-      <entry key="S60" value="13.556932830215947" />
-      <entry key="M2" value="18.850876030326113" />
-      <entry key="M5" value="24.08407076457742" />
-      <entry key="M10" value="27.017027812190346" />
-      <entry key="M15" value="29.744086264628155" />
-      <entry key="M30" value="38.41078569483686" />
-      <entry key="H1" value="49.714824657526194" />
-      <entry key="H2" value="59.23790054208809" />
-      <entry key="H4" value="65.4813789097055" />
-      <entry key="D1" value="71.6472994482533" />
-      <entry key="W1" value="72.8041587907601" />
+      <entry key="MS100" value="0.9726549474122855" />
+      <entry key="MS500" value="0.9948361353728616" />
+      <entry key="S2" value="1.1369268352388466" />
+      <entry key="S5" value="1.452729670684718" />
+      <entry key="S10" value="1.6838406735507392" />
+      <entry key="S30" value="3.1837203723479255" />
+      <entry key="S60" value="7.28905760118591" />
+      <entry key="M2" value="13.812845160345974" />
+      <entry key="M5" value="21.986231897863878" />
+      <entry key="M10" value="26.612994170548074" />
+      <entry key="M15" value="29.952954386795362" />
+      <entry key="M30" value="39.23704455535045" />
+      <entry key="H1" value="50.94969375325112" />
+      <entry key="H2" value="60.78039580378596" />
+      <entry key="H4" value="67.22805679234541" />
+      <entry key="D1" value="73.60103333238023" />
+      <entry key="W1" value="74.79744087547206" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -130,7 +117,7 @@
     "RunOnceActivity.typescript.service.memoryLimit.init": "true",
     "codeWithMe.voiceChat.enabledByDefault": "false",
     "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "Merging requirements",
+    "git-widget-placeholder": "requirements",
     "junie.onboarding.icon.badge.shown": "true",
     "last_opened_file_path": "C:/Users/Nobody-42/Documents/Work/Python Blockchain/Projekt-8",
     "node.js.detected.package.eslint": "true",
@@ -192,7 +179,7 @@
       <updated>1790934247554</updated>
       <workItem from="1790934248575" duration="1252000" />
       <workItem from="1790943794541" duration="3703000" />
-      <workItem from="1791012607349" duration="4741000" />
+      <workItem from="1791012607349" duration="5442000" />
     </task>
     <task id="LOCAL-00001" summary="First">
       <option name="closed" value="true" />
@@ -210,7 +197,15 @@
       <option name="project" value="LOCAL" />
       <updated>1790946983554</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="nemo db">
+      <option name="closed" value="true" />
+      <created>1791022782379</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1791022782379</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -219,6 +214,7 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="First" />
     <MESSAGE value="requirement" />
-    <option name="LAST_COMMIT_MESSAGE" value="requirement" />
+    <MESSAGE value="nemo db" />
+    <option name="LAST_COMMIT_MESSAGE" value="nemo db" />
   </component>
 </project>
