@@ -1,3 +1,4 @@
+import hashlib
 import os
 from pathlib import Path
 from urllib.parse import urlparse
@@ -6,10 +7,19 @@ import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# --- Umgebung (lokal: Standardwerte, auf Render: Umgebungsvariablen) ---
-#SECRET_KEY = os.environ.get("SECRET_KEY", "dev-only-change-me")
-#DEBUG = os.environ.get("DEBUG", "1").lower() in ("1", "true", "yes")
-RENDER_HOST = os.environ.get("RENDER_EXTERNAL_HOSTNAME", "")  # setzt Render automatisch
+# --- Umgebung: lokal Standardwerte, auf Render laeuft alles auch OHNE eigene Umgebungsvariablen ---
+RENDER_HOST = os.environ.get("RENDER_EXTERNAL_HOSTNAME", "")   # setzt Render automatisch
+ON_RENDER = bool(os.environ.get("RENDER") or RENDER_HOST)       # Render setzt RENDER=true
+
+# DEBUG: aus, sobald die App auf Render laeuft. Ueberschreibbar mit DEBUG=1/0.
+_debug = os.environ.get("DEBUG")
+DEBUG = (not ON_RENDER) if _debug is None else _debug.lower() in ("1", "true", "yes")
+
+# SECRET_KEY: aus der Umgebung, sonst auf Render stabil aus DATABASE_URL abgeleitet (gleicher Wert
+# in allen Workern und nach Neustarts, aber nicht im Code), lokal ein Entwicklungswert.
+SECRET_KEY = os.environ.get("SECRET_KEY") or (
+    hashlib.sha256(f"tradebot-secret::{os.environ['DATABASE_URL']}".encode()).hexdigest()
+    if ON_RENDER and os.environ.get("DATABASE_URL") else "dev-only-change-me")
 
 if os.environ.get("ALLOWED_HOSTS"):
     ALLOWED_HOSTS = [h.strip() for h in os.environ["ALLOWED_HOSTS"].split(",") if h.strip()]
@@ -20,6 +30,17 @@ else:
 if RENDER_HOST:  # hinter dem Render-Proxy: HTTPS erkennen, Formulare (CSRF) zulassen
     CSRF_TRUSTED_ORIGINS = [f"https://{RENDER_HOST}"]
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+if ON_RENDER and not DEBUG:
+    SESSION_COOKIE_SECURE = CSRF_COOKIE_SECURE = True
+
+# Fehler (Tracebacks) in die Konsole, damit sie im Render-Log stehen (auch mit DEBUG=False)
+LOGGING = {
+    "version": 1, "disable_existing_loggers": False,
+    "formatters": {"plain": {"format": "%(levelname)s %(name)s: %(message)s"}},
+    "handlers": {"console": {"class": "logging.StreamHandler", "formatter": "plain"}},
+    "root": {"handlers": ["console"], "level": "INFO"},
+    "loggers": {"django.request": {"handlers": ["console"], "level": "ERROR", "propagate": False}},
+}
 
 INSTALLED_APPS = [
     "django.contrib.admin", "django.contrib.auth", "django.contrib.contenttypes",

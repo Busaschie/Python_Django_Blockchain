@@ -10,12 +10,14 @@ Im Formular "Synthetisch (offline)" wählen, um ohne Börsen-API zu testen.
 ## PostgreSQL (Neon) und Render
 Die App liest die Datenbank aus der Umgebungsvariable `DATABASE_URL`. Ohne sie läuft lokal SQLite wie bisher.
 - **Treiber:** `psycopg[binary]` (psycopg 3) und `dj-database-url` stehen in `requirements.txt`. psycopg 3 ist der Treiber, den Django bevorzugt. Ein zusätzliches `psycopg2` wäre überflüssig und würde ignoriert.
-- **Render:** Umgebungsvariablen `DATABASE_URL` (Neon-Verbindungsstring), `SECRET_KEY` (zufälliger langer Wert) und `DEBUG=0`. Host und CSRF-Herkunft setzt die App aus `RENDER_EXTERNAL_HOSTNAME` selbst.
-- **Build-Befehl:** `pip install -r requirements.txt && python manage.py migrate`
+- **Render:** Nötig ist nur `DATABASE_URL` (Neon-Verbindungsstring). `SECRET_KEY` und `DEBUG` müssen nicht gesetzt werden: Auf Render ist DEBUG automatisch aus, der Secret Key wird stabil aus `DATABASE_URL` abgeleitet (nicht im Code). Wer will, kann beide trotzdem als Umgebungsvariablen setzen, sie haben Vorrang. Host und CSRF-Herkunft kommen aus `RENDER_EXTERNAL_HOSTNAME`.
+- **Migrationen:** Beim Start wendet `config/wsgi.py` fehlende Migrationen automatisch an (mit Postgres-Sperre, damit mehrere Worker sich nicht stören). Ein Build-Schritt oder eine Shell ist nicht nötig. Abschalten mit `AUTO_MIGRATE=0`, lokal einschalten mit `AUTO_MIGRATE=1`. Im Render-Log steht dann „Migrationen angewendet: …“.
+- **Build-Befehl:** `pip install -r requirements.txt`
 - **Start-Befehl:** `gunicorn config.wsgi`
+- **Fehler im Log:** Auch mit DEBUG aus erscheinen Tracebacks im Render-Log (Logs-Reiter).
 - **Neon:** SSL wird erzwungen. Der Pooler-Endpunkt (Host mit `-pooler`) funktioniert; serverseitige Cursor sind dafür abgeschaltet. Treten bei `migrate` über den Pooler Probleme auf, `migrate` einmalig mit der direkten Verbindung (ohne `-pooler`) ausführen.
 - **Aufwachen:** Neon pausiert inaktive Datenbanken. Die erste Anfrage danach kann einige Sekunden dauern (Timeout 15 s), tote Verbindungen werden automatisch ersetzt.
-- **Admin:** `python manage.py createsuperuser` einmalig ausführen. Statische Dateien des Admins werden ohne zusätzliche Konfiguration (z. B. WhiteNoise) nicht ausgeliefert, die App selbst braucht keine.
+- **Admin:** Ohne Shell lässt sich kein Superuser anlegen; die App selbst braucht den Admin nicht. Statische Dateien des Admins werden ohne WhiteNoise nicht ausgeliefert.
 
 ## TA-Lib
 Steht in `requirements.txt` und wird bei `pip install -r requirements.txt` installiert. Aktuelle Versionen bringen die C-Bibliothek in den Wheels mit. Scheitert die Installation (z. B. sehr alte Python-Version), die Zeile `TA-Lib` in `requirements.txt` entfernen; dann nutzt `indicators.py` einen pandas-Ersatz. SMA ist identisch, der RSI weicht in den ersten Kerzen leicht ab (ab ca. 100 Kerzen praktisch gleich).
