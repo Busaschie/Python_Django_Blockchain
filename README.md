@@ -7,10 +7,24 @@
 
 Im Formular "Synthetisch (offline)" wählen, um ohne Börsen-API zu testen.
 
-## TA-Lib (optional)
-Ubuntu/Debian: `sudo apt install libta-lib-dev && pip install TA-Lib`
-macOS: `brew install ta-lib && pip install TA-Lib`
-Windows: passendes Wheel installieren. Ohne TA-Lib nutzt `indicators.py` einen pandas-Fallback.
+## PostgreSQL (Neon) und Render
+Die App liest die Datenbank aus der Umgebungsvariable `DATABASE_URL`. Ohne sie läuft lokal SQLite wie bisher.
+- **Treiber:** `psycopg[binary]` (psycopg 3) und `dj-database-url` stehen in `requirements.txt`. psycopg 3 ist der Treiber, den Django bevorzugt. Ein zusätzliches `psycopg2` wäre überflüssig und würde ignoriert.
+- **Render:** Umgebungsvariablen `DATABASE_URL` (Neon-Verbindungsstring), `SECRET_KEY` (zufälliger langer Wert) und `DEBUG=0`. Host und CSRF-Herkunft setzt die App aus `RENDER_EXTERNAL_HOSTNAME` selbst.
+- **Build-Befehl:** `pip install -r requirements.txt && python manage.py migrate`
+- **Start-Befehl:** `gunicorn config.wsgi`
+- **Neon:** SSL wird erzwungen. Der Pooler-Endpunkt (Host mit `-pooler`) funktioniert; serverseitige Cursor sind dafür abgeschaltet. Treten bei `migrate` über den Pooler Probleme auf, `migrate` einmalig mit der direkten Verbindung (ohne `-pooler`) ausführen.
+- **Aufwachen:** Neon pausiert inaktive Datenbanken. Die erste Anfrage danach kann einige Sekunden dauern (Timeout 15 s), tote Verbindungen werden automatisch ersetzt.
+- **Admin:** `python manage.py createsuperuser` einmalig ausführen. Statische Dateien des Admins werden ohne zusätzliche Konfiguration (z. B. WhiteNoise) nicht ausgeliefert, die App selbst braucht keine.
+
+## TA-Lib
+Steht in `requirements.txt` und wird bei `pip install -r requirements.txt` installiert. Aktuelle Versionen bringen die C-Bibliothek in den Wheels mit. Scheitert die Installation (z. B. sehr alte Python-Version), die Zeile `TA-Lib` in `requirements.txt` entfernen; dann nutzt `indicators.py` einen pandas-Ersatz. SMA ist identisch, der RSI weicht in den ersten Kerzen leicht ab (ab ca. 100 Kerzen praktisch gleich).
+Ältere Systeme: Ubuntu/Debian `sudo apt install libta-lib-dev`, macOS `brew install ta-lib`, Windows passendes Wheel.
+
+Welche Bibliothek gerechnet hat (TA-Lib oder pandas-Ersatz), steht in der Kopfzeile jedes Laufs unter „Indikatoren“.
+
+## Zeitraum
+Start- und Enddatum frei wählbar (Enddatum eingeschlossen, 30 bis 1500 Tage, nicht in der Zukunft). Es werden nur abgeschlossene Kerzen verwendet. Synthetische Kurse sind datumsfest: derselbe Tag hat immer denselben Kurs.
 
 ## Struktur
 - `data.py`        Preisdaten (ccxt / synthetisch)

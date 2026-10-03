@@ -33,9 +33,10 @@
   {% if run_done %}
   <div class="box">
    <h2>{{ run.get_chain_display }} · {{ run.strategy_label }} · {{ run.timeframe }}</h2>
-   <p class="small">{{ run.mode_label }} · {{ run.days }} Tage · {% if run.source == "ccxt" %}Börse {{ run.exchange_label }} ({{ run.symbol }}) · {% endif %}Gebühr {{ run.fee }} · Slippage {{ run.slippage }} · Ausführung: {{ run.execution_label }} · Quelle: {{ run.source }}<br>
+   <p class="small">{{ run.mode_label }} · {{ run.period_label }} · {% if run.source == "ccxt" %}Börse {{ run.exchange_label }} ({{ run.symbol }}) · {% endif %}Gebühr {{ run.fee }} · Slippage {{ run.slippage }} · Ausführung: {{ run.execution_label }} · Quelle: {{ run.source }}<br>
     Parameter{% if run.validation.kind %} (zuletzt gewählt){% endif %}: {{ run.params }}
-    {% if run.risk_label %}<br>Risiko: {{ run.risk_label }}{% endif %}</p>
+    {% if run.risk_label %}<br>Risiko: {{ run.risk_label }}{% endif %}
+    {% if run.indicator_lib %}<br>Indikatoren: {{ run.indicator_lib }}{% endif %}</p>
    {% if run.data_note %}<p class="err small">Hinweis zu den Daten: {{ run.data_note }}</p>{% endif %}
    <table>
     <tr><th colspan="2">{% if run.validation.kind == "walkforward" %}Out-of-Sample gesamt{% elif run.validation.kind == "split" %}Testphase{% else %}Gesamtzeitraum{% endif %}</th></tr>
@@ -117,7 +118,7 @@
   {% if batch_runs %}
   <div class="box">
    <h2>Chain-Vergleich</h2>
-   <p class="small">{{ batch_runs.0.strategy_label }} · {{ batch_runs.0.timeframe }} · {{ batch_runs.0.mode_label }} · {{ batch_runs.0.days }} Tage · Ausführung: {{ batch_runs.0.execution_label }}
+   <p class="small">{{ batch_runs.0.strategy_label }} · {{ batch_runs.0.timeframe }} · {{ batch_runs.0.mode_label }} · {{ batch_runs.0.period_label }} · Ausführung: {{ batch_runs.0.execution_label }}
     {% if batch_runs.0.source == "ccxt" %} · Börse {{ batch_runs.0.exchange_label }}{% endif %}<br>
     Kennzahlen: Gesamtzeitraum bzw. Testphase / Out-of-Sample, je nach Modus.</p>
    <div class="scroll"><table>
@@ -203,17 +204,17 @@
    <div class="term"><dt>USDT / Handelspaar (z. B. BTC/USDT)</dt><dd>USDT (Tether) ist ein Stablecoin, der an den US-Dollar gekoppelt ist. Ein Handelspaar nennt den Preis der ersten Währung in der zweiten: BTC/USDT = Preis von 1 BTC in USDT.</dd></div>
    <div class="term"><dt>Kerze und Zeitfenster (1h, 4h, 1d)</dt><dd>Eine Kerze fasst die Kurse eines Zeitintervalls zusammen. 1h = 1 Stunde, 4h = 4 Stunden, 1d = 1 Tag je Kerze.</dd></div>
    <div class="term"><dt>OHLCV</dt><dd>Daten je Kerze: Open (Eröffnungskurs), High (Höchstkurs), Low (Tiefstkurs), Close (Schlusskurs), Volume (gehandelte Menge).</dd></div>
-   <div class="term"><dt>Tage Historie</dt><dd>Länge des Zeitraums, der rückwirkend geladen und ausgewertet wird.</dd></div>
+   <div class="term"><dt>Zeitraum (Von / Bis)</dt><dd>Start- und Enddatum der ausgewerteten Daten, der Endtag ist eingeschlossen. Kerzen werden nach UTC-Tagen abgegrenzt. Die laufende, noch nicht abgeschlossene Kerze wird nicht verwendet, damit keine Signale auf unfertigen Kursen entstehen. Erlaubt sind mindestens 30 und höchstens 1500 Tage, das Enddatum darf nicht in der Zukunft liegen.</dd></div>
    <div class="term"><dt>ccxt</dt><dd>Python-Bibliothek mit einheitlicher Schnittstelle zu Krypto-Börsen. Hier werden damit öffentliche Kursdaten von Binance geladen (kein API-Key nötig).</dd></div>
    <div class="term"><dt>Börse</dt><dd>Handelsplattform, von der die Kursdaten stammen (Binance, Kraken, Coinbase, Bybit, OKX, Bitstamp). Kurse unterscheiden sich je Börse leicht, Umfang und Tiefe der Historie ebenfalls. Manche Börsen sind regional eingeschränkt erreichbar.</dd></div>
    <div class="term"><dt>Quote-Währung (USDT / USD / USDC)</dt><dd>Nicht jede Börse listet USDT-Paare. Fehlt BTC/USDT, wird automatisch BTC/USD oder BTC/USDC genutzt. Das tatsächlich verwendete Paar steht in der Kopfzeile des Laufs.</dd></div>
-   <div class="term"><dt>Datenhinweis</dt><dd>Erscheint, wenn eine Börse weniger Historie liefert als angefordert (z. B. begrenzen manche Börsen die Zahl abrufbarer Kerzen). Die Auswertung bezieht sich dann auf den kürzeren Zeitraum. Nicht jede Börse bietet jedes Zeitfenster an (Coinbase z. B. kein 4h).</dd></div>
+   <div class="term"><dt>Datenhinweis</dt><dd>Erscheint, wenn eine Börse für den gewählten Zeitraum weniger Daten liefert als angefordert (z. B. weil die Kryptowährung dort erst später gelistet wurde oder die Börse nur eine begrenzte Zahl von Kerzen abrufbar macht). Die Auswertung bezieht sich dann auf den kürzeren Zeitraum. Nicht jede Börse bietet jedes Zeitfenster an (Coinbase z. B. kein 4h).</dd></div>
    <div class="term"><dt>Synthetisch (offline)</dt><dd>Künstlich erzeugte Zufallskurse zum Testen ohne Internet. Sie enthalten kein echtes Marktmuster, gute Ergebnisse sind dort reiner Zufall.</dd></div>
   </dl>
 
   <h3>Strategien und Indikatoren</h3>
   <dl>
-   <div class="term"><dt>Indikator / Technische Analyse (TA), TA-Lib</dt><dd>Indikatoren sind aus Kursen berechnete Kennlinien, die Kauf- und Verkaufssignale liefern sollen. TA-Lib ist eine verbreitete Bibliothek dafür; ohne sie nutzt das Projekt eine pandas-Berechnung mit gleicher Logik.</dd></div>
+   <div class="term"><dt>Indikator / Technische Analyse (TA), TA-Lib</dt><dd>Indikatoren sind aus Kursen berechnete Kennlinien, die Kauf- und Verkaufssignale liefern sollen. TA-Lib ist eine verbreitete Bibliothek dafür; ohne sie rechnet ein pandas-Ersatz. Der SMA ist identisch, der RSI weicht in den ersten Kerzen leicht ab (ab etwa 100 Kerzen praktisch gleich). Welche Variante gerechnet hat, steht in der Kopfzeile des Laufs unter „Indikatoren“.</dd></div>
    <div class="term"><dt>Signal, Long, Flat, Long-only</dt><dd>Ein Signal sagt je Kerze „investiert“ (long, 1) oder „nicht investiert“ (flat, 0). Long-only heißt: keine Leerverkäufe (Short) und kein Hebel.</dd></div>
    <div class="term"><dt>SMA (Simple Moving Average)</dt><dd>Einfacher gleitender Durchschnitt: Mittelwert der letzten n Schlusskurse.</dd></div>
    <div class="term"><dt>SMA-Crossover, fast, slow</dt><dd>Long, solange der kurze SMA (fast, z. B. 20 Kerzen) über dem langen SMA (slow, z. B. 50 Kerzen) liegt, sonst flat. Ein kurzes Fenster reagiert schnell, ein langes träge.</dd></div>

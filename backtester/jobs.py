@@ -4,9 +4,11 @@ Bewusst ohne zusaetzliche Dienste (kein Redis/Broker), damit `runserver` genuegt
 Produktivbetrieb laesst sich `submit()` durch Celery oder django-q ersetzen, `compute()` bleibt gleich.
 """
 from concurrent.futures import ThreadPoolExecutor
+from datetime import date, timedelta
 
 from django.db import connection
 
+from . import indicators
 from .chains import CHAINS
 from .data import PERIODS_PER_YEAR, fetch_ohlcv
 from .engine import Risk, run_backtest
@@ -14,6 +16,20 @@ from .strategies import STRATEGIES, params_from_inputs
 from .validation import optimize, walk_forward
 
 _executor = ThreadPoolExecutor(max_workers=3, thread_name_prefix="backtest")
+
+
+def json_safe(obj):
+    """NaN/Infinity -> None, numpy-Werte -> Python. PostgreSQL (jsonb) lehnt NaN und Infinity ab."""
+    import math
+    if isinstance(obj, dict):
+        return {k: json_safe(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [json_safe(v) for v in obj]
+    if hasattr(obj, "item") and not isinstance(obj, (str, bytes)):
+        obj = obj.item()
+    if isinstance(obj, float) and not math.isfinite(obj):
+        return None
+    return obj
 
 
 def submit(pk: int) -> None:
@@ -25,7 +41,12 @@ def compute(run) -> None:
     j = run.job
     # Kosten je Seite = Gebuehr + Slippage/Spread
     ppy, ex, fee = PERIODS_PER_YEAR[j["timeframe"]], j["execution"], j["fee"] + (j.get("slippage") or 0.0)
-    df, info = fetch_ohlcv(CHAINS[run.chain]["symbol"], j["timeframe"], j["days"],
+    if j.get("start_date"):
+        start, end = date.fromisoformat(j["start_date"]), date.fromisoformat(j["end_date"])
+    else:  # Job aus einer älteren Version: Zeitraum aus Anzahl Tage
+        end = run.created_at.date()
+        start = end - timedelta(days=j["days"])
+    df, info = fetch_ohlcv(CHAINS[run.chain]["symbol"], j["timeframe"], start, end,
                            j["source"], j.get("exchange", "binance"))
     risk = Risk.from_inputs(j.get("stop_loss"), j.get("take_profit"), j.get("trailing_stop"),
                             j.get("size_mode", "full"), j.get("size_value"))
@@ -43,8 +64,10 @@ def compute(run) -> None:
         result = run_backtest(df, func(df, **params), fee, periods_per_year=ppy, execution=ex, risk=risk)
 
     run.symbol, run.data_note, run.params = info["symbol"], info["note"], params
-    run.metrics, run.curves = result["metrics"], result["curves"]
-    run.validation = result.get("validation", {})
+    run.indicator_lib = indicators.backend()
+    run.metrics, run.curves = json_safe(result["metrics"]), json_safe(result["curves"])
+    run.validation = json_safe(result.get("validation", {}))
+    run.params = json_safe(run.params)
     run.status, run.error = "done", ""
 
 

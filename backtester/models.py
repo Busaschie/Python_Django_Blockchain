@@ -10,7 +10,9 @@ class BacktestRun(models.Model):
     timeframe = models.CharField(max_length=5)
     strategy = models.CharField(max_length=30)
     params = models.JSONField(default=dict)
-    days = models.PositiveIntegerField()
+    days = models.PositiveIntegerField()  # Anzahl Kalendertage im Zeitraum
+    start_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
     fee = models.FloatField(default=0.001)
     slippage = models.FloatField(default=0.0)  # je Seite, zusaetzlich zur Gebuehr
     source = models.CharField(max_length=10, default="ccxt")
@@ -19,6 +21,7 @@ class BacktestRun(models.Model):
     curves = models.JSONField(default=dict)
     validation = models.JSONField(default=dict, blank=True)
     exchange = models.CharField(max_length=20, default="binance")
+    indicator_lib = models.CharField(max_length=20, blank=True, default="")  # TA-Lib oder pandas-Ersatz
     data_note = models.CharField(max_length=200, blank=True, default="")
     # Hintergrund-Berechnung: Eingaben (job) und Status
     job = models.JSONField(default=dict, blank=True)
@@ -39,6 +42,12 @@ class BacktestRun(models.Model):
         if self.job:
             return self.job.get("mode", "single")
         return self.validation.get("kind", "single") if self.validation else "single"
+
+    @property
+    def period_label(self):
+        if self.start_date and self.end_date:
+            return f"{self.start_date:%d.%m.%Y} – {self.end_date:%d.%m.%Y} ({self.days} Tage)"
+        return f"{self.days} Tage"
 
     @property
     def source_label(self):

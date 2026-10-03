@@ -1,11 +1,15 @@
 """Tests der Backtest-Engine: Regression (Risk-Engine ohne Optionen == vektorisierte Engine),
 Handrechnungen fuer Stops und Positionsgroesse, kein Look-ahead.   Start: python manage.py test"""
+from datetime import date, timedelta
+from unittest import mock
+
+import ccxt
 import numpy as np
 import pandas as pd
 from django.test import SimpleTestCase
 
 from . import strategies as st
-from .data import _synthetic
+from .data import synthetic_ohlcv
 from .engine import Risk, _simulate_risk, run_sim
 
 
@@ -24,7 +28,7 @@ class RegressionTests(SimpleTestCase):
 
     def test_loop_equals_vectorized(self):
         for symbol in ("BTC/USDT", "SOL/USDT"):
-            df = _synthetic(symbol, "1d", 900)
+            df = synthetic_ohlcv(symbol, "1d", date(2023, 6, 1), date(2025, 11, 16))
             signals = [st.sma_cross(df, f, s) for f, s in [(5, 30), (10, 40), (20, 50), (15, 100)]]
             signals += [st.rsi_reversion(df, p, lo, 100 - lo) for p, lo in [(14, 30), (7, 20), (21, 35)]]
             for execution in ("open", "close"):
@@ -122,7 +126,7 @@ class SizingTests(SimpleTestCase):
 
 class NoLookaheadTests(SimpleTestCase):
     def test_future_data_does_not_change_the_past(self):
-        df = _synthetic("ETH/USDT", "1d", 600)
+        df = synthetic_ohlcv("ETH/USDT", "1d", date(2024, 1, 1), date(2025, 8, 22))
         risks = [Risk(sl=0.05, tp=0.12, trail=0.08), Risk(size_mode="vol", size_value=0.4),
                  Risk(trail=0.06, size_mode="fixed", size_value=0.5)]
         for execution in ("open", "close"):
@@ -132,3 +136,94 @@ class NoLookaheadTests(SimpleTestCase):
                     part = df.iloc[:k]
                     sim = _simulate_risk(part, st.sma_cross(part, 10, 40), 0.001, execution, risk, 365)
                     np.testing.assert_allclose(sim.strat.values, full.strat.iloc[:k].values, atol=1e-12)
+
+
+class DateRangeTests(SimpleTestCase):
+    """Zeitraum von-bis: Daten, Formular-Validierung, Börsen-Abruf (mit nachgebauter ccxt-Börse)."""
+
+    def test_same_date_gives_same_price_in_any_range(self):
+        a = synthetic_ohlcv("BTC/USDT", "1d", date(2024, 1, 1), date(2024, 12, 31))
+        b = synthetic_ohlcv("BTC/USDT", "1d", date(2024, 3, 1), date(2025, 2, 1))
+        common = a.index.intersection(b.index)
+        self.assertGreater(len(common), 250)
+        np.testing.assert_allclose(a.loc[common, "close"], b.loc[common, "close"])
+        self.assertEqual(a.index[0].date(), date(2024, 1, 1))
+        self.assertEqual(a.index[-1].date(), date(2024, 12, 31))  # Enddatum eingeschlossen
+
+    def test_unfinished_candle_is_not_used(self):
+        df = synthetic_ohlcv("ETH/USDT", "1d", date.today() - timedelta(days=100), date.today())
+        self.assertLess(df.index[-1].date(), date.today())  # heutige Kerze laeuft noch
+
+    def test_form_validation(self):
+        from .forms import BacktestForm
+        base = dict(chain="btc", strategy="sma_cross", mode="single", param_a=10, param_b=40, timeframe="1d",
+                    fee=0.001, execution="open", source="synthetic", exchange="binance")
+        ok = lambda s, e: BacktestForm({**base, "start_date": s, "end_date": e}).is_valid()  # noqa: E731
+        today = date.today()
+        self.assertTrue(ok("2024-01-01", "2025-01-01"))
+        self.assertFalse(ok("2025-01-01", "2024-01-01"))                       # Ende vor Start
+        self.assertFalse(ok("2024-01-01", "2024-01-20"))                       # zu kurz
+        self.assertFalse(ok("2020-01-01", "2025-01-01"))                       # zu lang (> 1500 Tage)
+        self.assertFalse(ok("2025-01-01", (today + timedelta(days=3)).isoformat()))  # Zukunft
+        self.assertFalse(ok("2009-01-01", "2010-06-01"))                       # vor 2010
+        self.assertTrue(ok((today - timedelta(days=400)).isoformat(), today.isoformat()))
+
+    def _fake_exchange(self, history_days=5000, max_candles=300):
+        day = 86_400_000
+
+        class Fake:
+            timeframes = {"1d": "1d", "1h": "1h"}
+            markets = {"BTC/USDT": {"active": True}}
+            calls = 0
+
+            def __init__(self, cfg=None):
+                pass
+
+            def load_markets(self):
+                return self.markets
+
+            def milliseconds(self):
+                import time
+                return int(time.time() * 1000)
+
+            def fetch_ohlcv(self, sym, tf, since=None, limit=None):
+                Fake.calls += 1
+                now = self.milliseconds()
+                t = max(since, now - history_days * day) // day * day
+                out = []
+                while t <= now and len(out) < min(limit, max_candles):
+                    out.append([t, 100.0, 101.0, 99.0, 100.5, 1.0])
+                    t += day
+                return out
+        return Fake
+
+    def test_fetch_returns_only_requested_window(self):
+        from .data import fetch_ohlcv
+        fake = self._fake_exchange()
+        with mock.patch.object(ccxt, "binance", fake):
+            df, info = fetch_ohlcv("BTC/USDT", "1d", date(2024, 3, 1), date(2025, 2, 28), "ccxt", "binance")
+        self.assertEqual(df.index[0].date(), date(2024, 3, 1))
+        self.assertEqual(df.index[-1].date(), date(2025, 2, 28))
+        self.assertEqual(len(df), 365)
+        self.assertGreater(fake.calls, 1)  # in mehreren Etappen geladen
+        self.assertEqual(info["note"], "")
+
+    def test_fetch_drops_running_candle_and_reports_short_history(self):
+        from .data import fetch_ohlcv
+        fake = self._fake_exchange(history_days=200)
+        with mock.patch.object(ccxt, "binance", fake):
+            df, info = fetch_ohlcv("BTC/USDT", "1d", date.today() - timedelta(days=500), date.today(), "ccxt", "binance")
+        self.assertLess(df.index[-1].date(), date.today())
+        self.assertIn("lieferte nur", info["note"])
+        self.assertLess(len(df), 210)
+
+
+class IndicatorBackendTests(SimpleTestCase):
+    def test_backend_reports_active_library(self):
+        from unittest import mock
+
+        from backtester import indicators
+        with mock.patch.object(indicators, "talib", None):
+            self.assertEqual(indicators.backend(), "pandas (Ersatz)")
+        with mock.patch.object(indicators, "talib", object()):
+            self.assertEqual(indicators.backend(), "TA-Lib")

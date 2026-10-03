@@ -31,15 +31,17 @@ def _expire_stale():
 
 def _initial(run):
     """Formular mit den Einstellungen eines gespeicherten Laufs vorbelegen."""
+    end = run.end_date or run.created_at.date()  # ältere Läufe: Zeitraum aus Anzahl Tage und Laufdatum
+    period = {"start_date": run.start_date or end - timedelta(days=run.days), "end_date": end}
     if run.job:
-        return {k: v for k, v in run.job.items() if v is not None}
+        return {**{k: v for k, v in run.job.items() if v is not None}, **period}
     v, p = run.validation or {}, run.params  # Laeufe aus aelteren Versionen
     if run.strategy == "sma_cross":
         a, b, c = p.get("fast"), p.get("slow"), None
     else:
         a, b, c = p.get("period"), p.get("low"), p.get("high")
     initial = {"chain": run.chain, "strategy": run.strategy, "mode": run.mode,
-               "timeframe": run.timeframe, "days": run.days, "fee": run.fee,
+               "timeframe": run.timeframe, **period, "fee": run.fee,
                "execution": run.execution, "source": run.source, "exchange": run.exchange,
                "param_a": a, "param_b": b, "param_c": c}
     if v.get("kind") == "split":
@@ -76,10 +78,12 @@ def dashboard(request, pk=None, batch=None):
             for ch in chains:
                 new = BacktestRun.objects.create(
                     chain=ch, symbol=CHAINS[ch]["symbol"], timeframe=d["timeframe"],
-                    strategy=d["strategy"], days=d["days"], fee=d["fee"], slippage=d["slippage"],
+                    strategy=d["strategy"], days=(d["end_date"] - d["start_date"]).days + 1,
+                    start_date=d["start_date"], end_date=d["end_date"], fee=d["fee"], slippage=d["slippage"],
                     source=d["source"],
                     exchange=d["exchange"], execution=d["execution"], status="queued",
-                    batch=bid, job={**d, "chain": ch})
+                    batch=bid, job={**d, "chain": ch, "start_date": d["start_date"].isoformat(),
+                                    "end_date": d["end_date"].isoformat()})
                 created.append(new)
                 jobs.submit(new.pk)
             return redirect("compare", batch=bid) if compare else redirect("detail", pk=created[0].pk)

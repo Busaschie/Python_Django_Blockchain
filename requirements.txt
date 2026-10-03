@@ -2,6 +2,9 @@ django>=5.0
 pandas
 numpy
 ccxt
-gunicorn==21.2.0
-# optional: TA-Lib (braucht die C-Bibliothek, siehe README). Ohne TA-Lib greift ein pandas-Fallback.
-# TA-Lib
+TA-Lib>=0.6
+# PostgreSQL (Neon): psycopg 3 ist der Treiber, den Django 5/6 bevorzugt; die Binär-Wheels brauchen keine Systembibliotheken
+psycopg[binary]>=3.2
+dj-database-url>=2.2
+# Produktivserver (Render)
+gunicorn==26.2.0
