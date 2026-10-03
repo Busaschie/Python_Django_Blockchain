@@ -4,7 +4,10 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9aa04bb0-a51b-42e3-bb80-523c848c1994" name="Changes" comment="nemo db" />
+    <list default="true" id="9aa04bb0-a51b-42e3-bb80-523c848c1994" name="Changes" comment="nemo db - fix">
+      <change beforePath="$PROJECT_DIR$/config/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/config/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -42,60 +45,60 @@
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
       <entry key="MS100" value="1.0" />
-      <entry key="MS500" value="1.0003690234199991" />
-      <entry key="S2" value="1.1386000804518484" />
-      <entry key="S5" value="1.4536626453598338" />
-      <entry key="S10" value="1.684617444281348" />
-      <entry key="S30" value="3.18965583747567" />
-      <entry key="S60" value="7.299223931528004" />
-      <entry key="M2" value="13.82259855780851" />
-      <entry key="M5" value="21.991900980103328" />
-      <entry key="M10" value="26.60367553141504" />
-      <entry key="M15" value="29.900977169316942" />
-      <entry key="M30" value="39.005239844269305" />
-      <entry key="H1" value="50.46760123705882" />
-      <entry key="H2" value="60.08593731171249" />
-      <entry key="H4" value="66.39468568741329" />
-      <entry key="D1" value="72.630951898769" />
-      <entry key="W1" value="73.80177070560906" />
+      <entry key="MS500" value="1.0" />
+      <entry key="S2" value="1.0" />
+      <entry key="S5" value="1.0" />
+      <entry key="S10" value="1.0" />
+      <entry key="S30" value="1.0000002270112975" />
+      <entry key="S60" value="1.001947280479565" />
+      <entry key="M2" value="1.225769674388355" />
+      <entry key="M5" value="5.241242805619879" />
+      <entry key="M10" value="12.683065853024242" />
+      <entry key="M15" value="18.27542881047904" />
+      <entry key="M30" value="30.647950723951006" />
+      <entry key="H1" value="44.99957956102334" />
+      <entry key="H2" value="57.103605513069255" />
+      <entry key="H4" value="65.15673958844653" />
+      <entry key="D1" value="73.21707546036261" />
+      <entry key="W1" value="74.74154515553782" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
       <entry key="MS500" value="0.0" />
       <entry key="S2" value="0.0" />
-      <entry key="S5" value="1.614265119208219E-227" />
-      <entry key="S10" value="4.017791830356841E-114" />
-      <entry key="S30" value="1.589751135233136E-38" />
-      <entry key="S60" value="1.2608533361311845E-19" />
-      <entry key="M2" value="3.5508496675178787E-10" />
-      <entry key="M5" value="1.6600948962079693E-4" />
-      <entry key="M10" value="0.012884466990170648" />
-      <entry key="M15" value="0.05495969384347621" />
-      <entry key="M30" value="0.23443483922718528" />
-      <entry key="H1" value="0.48418471601981095" />
-      <entry key="H2" value="0.6958338278783306" />
-      <entry key="H4" value="0.8341665468468102" />
-      <entry key="D1" value="0.9702317032461529" />
-      <entry key="W1" value="0.9956921104505603" />
+      <entry key="S5" value="2.0979577431439E-270" />
+      <entry key="S10" value="1.4484328576581993E-135" />
+      <entry key="S30" value="1.1314432853097393E-45" />
+      <entry key="S60" value="3.363693335174508E-23" />
+      <entry key="M2" value="5.799735627745892E-12" />
+      <entry key="M5" value="3.2015720430709424E-5" />
+      <entry key="M10" value="0.005658243581776014" />
+      <entry key="M15" value="0.03175321906914073" />
+      <entry key="M30" value="0.17819432950894012" />
+      <entry key="H1" value="0.42213070192647667" />
+      <entry key="H2" value="0.64971586245564" />
+      <entry key="H4" value="0.8060495409437567" />
+      <entry key="D1" value="0.964702985374905" />
+      <entry key="W1" value="0.9948795810968585" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.9726549474122855" />
-      <entry key="MS500" value="0.9948361353728616" />
-      <entry key="S2" value="1.1369268352388466" />
-      <entry key="S5" value="1.452729670684718" />
-      <entry key="S10" value="1.6838406735507392" />
-      <entry key="S30" value="3.1837203723479255" />
-      <entry key="S60" value="7.28905760118591" />
-      <entry key="M2" value="13.812845160345974" />
-      <entry key="M5" value="21.986231897863878" />
-      <entry key="M10" value="26.612994170548074" />
-      <entry key="M15" value="29.952954386795362" />
-      <entry key="M30" value="39.23704455535045" />
-      <entry key="H1" value="50.94969375325112" />
-      <entry key="H2" value="60.78039580378596" />
-      <entry key="H4" value="67.22805679234541" />
-      <entry key="D1" value="73.60103333238023" />
-      <entry key="W1" value="74.79744087547206" />
+      <entry key="MS100" value="0.9526379980439373" />
+      <entry key="MS500" value="0.9903428719330246" />
+      <entry key="S2" value="0.9975769252644544" />
+      <entry key="S5" value="0.9990300646389034" />
+      <entry key="S10" value="0.9995149146655609" />
+      <entry key="S30" value="0.9998385053250269" />
+      <entry key="S60" value="1.0018637044135792" />
+      <entry key="M2" value="1.2255699357299643" />
+      <entry key="M5" value="5.240133322816549" />
+      <entry key="M10" value="12.687150068342362" />
+      <entry key="M15" value="18.305453498808465" />
+      <entry key="M30" value="30.824143192907663" />
+      <entry key="H1" value="45.41988485555973" />
+      <entry key="H2" value="57.75203651932755" />
+      <entry key="H4" value="65.96202016225526" />
+      <entry key="D1" value="74.18162897623351" />
+      <entry key="W1" value="75.73640280592909" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -179,7 +182,7 @@
       <updated>1790934247554</updated>
       <workItem from="1790934248575" duration="1252000" />
       <workItem from="1790943794541" duration="3703000" />
-      <workItem from="1791012607349" duration="5442000" />
+      <workItem from="1791012607349" duration="6173000" />
     </task>
     <task id="LOCAL-00001" summary="First">
       <option name="closed" value="true" />
@@ -205,7 +208,15 @@
       <option name="project" value="LOCAL" />
       <updated>1791022782379</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="nemo db - fix">
+      <option name="closed" value="true" />
+      <created>1791023502666</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1791023502666</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -215,6 +226,7 @@
     <MESSAGE value="First" />
     <MESSAGE value="requirement" />
     <MESSAGE value="nemo db" />
-    <option name="LAST_COMMIT_MESSAGE" value="nemo db" />
+    <MESSAGE value="nemo db - fix" />
+    <option name="LAST_COMMIT_MESSAGE" value="nemo db - fix" />
   </component>
 </project>

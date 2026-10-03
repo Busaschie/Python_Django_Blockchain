@@ -7,8 +7,8 @@ import dj_database_url
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # --- Umgebung (lokal: Standardwerte, auf Render: Umgebungsvariablen) ---
-SECRET_KEY = os.environ.get("SECRET_KEY", "dev-only-change-me")
-DEBUG = os.environ.get("DEBUG", "1").lower() in ("1", "true", "yes")
+#SECRET_KEY = os.environ.get("SECRET_KEY", "dev-only-change-me")
+#DEBUG = os.environ.get("DEBUG", "1").lower() in ("1", "true", "yes")
 RENDER_HOST = os.environ.get("RENDER_EXTERNAL_HOSTNAME", "")  # setzt Render automatisch
 
 if os.environ.get("ALLOWED_HOSTS"):
