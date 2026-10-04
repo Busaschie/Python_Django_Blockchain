@@ -59,6 +59,11 @@ Oben Auswahl Bitcoin / Solana / Ethereum, darunter drei Spalten (1: Einstellunge
 - **Hintergrund**: Backtests laufen im Thread-Pool (`jobs.py`), die Seite aktualisiert sich selbst. Für Produktivbetrieb kann `jobs.submit()` durch Celery oder django-q ersetzt werden, `compute()` bleibt gleich.
 - **Chain-Vergleich**: Button "Auf allen 3 Chains vergleichen" startet dieselben Einstellungen auf BTC, SOL und ETH.
 
+## Strategien und Vergleiche
+- **SMA-Crossover**, **RSI** und **Kombiniert (SMA + RSI)**. Kombiniert hat zwei Verknüpfungen: *Trendfilter + RSI-Einstieg* (Standard: Kauf nur im Aufwärtstrend bei RSI unter der Einstiegsschwelle, Verkauf bei RSI über der Ausstiegsschwelle oder Trendbruch) und *ODER* (long, wenn SMA oder RSI long sind). Die Grid-Search optimiert nur den SMA-Teil (34 gültige Kombinationen), der RSI-Teil bleibt fest, um Überanpassung zu begrenzen.
+- **Strategien vergleichen**: SMA, RSI und Kombiniert mit denselben Einstellungen auf der gewählten Chain, dazu Buy & Hold. Im Einzellauf gelten Standardparameter je Strategie; bei Train/Test-Split und Walk-Forward wählt die Grid-Search die Parameter, und der Chart zeigt nur Testphase bzw. Out-of-Sample.
+- **Auf allen 3 Chains vergleichen**: dieselbe Strategie auf Bitcoin, Solana und Ethereum.
+
 ## Risikomanagement
 Stop-Loss, Take-Profit, Trailing-Stop und Positionsgröße (voll / fest / Volatilitätsziel) im Formular unter "Risikomanagement". Ohne diese Optionen rechnet die schnelle vektorisierte Engine, mit ihnen eine Kerze-für-Kerze-Simulation (`_simulate_risk`). Tests: `python manage.py test backtester` (u. a. Regressionstest, dass beide Wege ohne Optionen identische Zahlen liefern, Handrechnungen für Stops und Sizing, Look-ahead-Test).
 

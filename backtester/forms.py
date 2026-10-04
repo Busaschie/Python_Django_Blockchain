@@ -30,6 +30,12 @@ class BacktestForm(forms.Form):
     param_a = forms.IntegerField(label="Parameter 1", initial=20, required=False)
     param_b = forms.IntegerField(label="Parameter 2", initial=50, required=False)
     param_c = forms.IntegerField(label="Parameter 3", initial=70, required=False)
+    # Nur fuer "Kombiniert (SMA + RSI)": Verknuepfung und RSI-Teil (der SMA-Teil nutzt Parameter 1/2 bzw. die Grid-Search)
+    combo_logic = forms.ChoiceField(label="Verknüpfung (Kombiniert)", initial="trend", required=False, choices=[
+        ("trend", "Trendfilter + RSI-Einstieg"), ("or", "ODER (SMA oder RSI)")])
+    rsi_period = forms.IntegerField(label="RSI period (Kombiniert)", initial=14, min_value=2, max_value=100, required=False)
+    rsi_entry = forms.IntegerField(label="RSI Einstieg unter (Kombiniert)", initial=40, min_value=1, max_value=99, required=False)
+    rsi_exit = forms.IntegerField(label="RSI Ausstieg über (Kombiniert)", initial=70, min_value=2, max_value=99, required=False)
     timeframe = forms.ChoiceField(label="Zeitfenster", choices=[("1h", "1h"), ("4h", "4h"), ("1d", "1d")],
                                   initial="1d")
     start_date = forms.DateField(label="Von", widget=_date_widget(),
@@ -74,6 +80,9 @@ class BacktestForm(forms.Form):
         d = super().clean()
         if d.get("mode") == "single" and (d.get("param_a") is None or d.get("param_b") is None):
             raise forms.ValidationError("Beim Einzellauf werden Parameter 1 und 2 benötigt.")
+        entry, exit_ = d.get("rsi_entry"), d.get("rsi_exit")
+        if entry and exit_ and entry >= exit_:
+            self.add_error("rsi_exit", "Der RSI-Ausstieg muss über dem RSI-Einstieg liegen.")
         start, end = d.get("start_date"), d.get("end_date")
         if start and start < EARLIEST:
             self.add_error("start_date", "Kursdaten gibt es erst ab 2010.")
@@ -96,4 +105,4 @@ class BacktestForm(forms.Form):
 
     def strategy_params(self) -> dict:
         d = self.cleaned_data
-        return params_from_inputs(d["strategy"], d["param_a"], d["param_b"], d["param_c"])
+        return params_from_inputs(d["strategy"], d["param_a"], d["param_b"], d["param_c"], d)

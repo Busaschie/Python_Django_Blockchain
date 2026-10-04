@@ -30,6 +30,7 @@
     {% endif %}{% endfor %}
     <button type="submit">Backtest starten</button>
     <button type="submit" name="compare" value="1" class="secondary" title="Gleiche Einstellungen auf Bitcoin, Solana und Ethereum">Auf allen 3 Chains vergleichen</button>
+    <button type="submit" name="compare_strategies" value="1" class="secondary" title="Gleiche Einstellungen mit SMA-Crossover, RSI und Kombiniert auf der gewählten Chain">Strategien vergleichen</button>
    </form>
   </div>
 
@@ -120,14 +121,25 @@
 
   {% if batch_runs %}
   <div class="box">
+   {% if compare_kind == "strategy" %}
+   <h2>Strategie-Vergleich</h2>
+   <p class="small">{{ batch_runs.0.get_chain_display }} <small>{{ batch_runs.0.symbol }}</small> · {{ batch_runs.0.timeframe }} · {{ batch_runs.0.mode_label }} · {{ batch_runs.0.period_label }} · Ausführung: {{ batch_runs.0.execution_label }}
+    {% if batch_runs.0.source == "ccxt" %} · Börse {{ batch_runs.0.exchange_label }}{% endif %}<br>
+    {% if batch_runs.0.mode == "single" %}Einzellauf: Standardparameter je Strategie (SMA 20/50, RSI 14/30/70, Kombiniert mit SMA 20/50 und den RSI-Feldern des Formulars).
+    {% else %}Parameter wählt je Strategie die Grid-Search auf den Trainingsdaten; verglichen wird nur auf ungesehenen Daten (Testphase bzw. Out-of-Sample).{% endif %}
+    Kennzahlen: {% if batch_runs.0.mode == "single" %}Gesamtzeitraum{% else %}Testphase / Out-of-Sample{% endif %}.</p>
+   {% else %}
    <h2>Chain-Vergleich</h2>
    <p class="small">{{ batch_runs.0.strategy_label }} · {{ batch_runs.0.timeframe }} · {{ batch_runs.0.mode_label }} · {{ batch_runs.0.period_label }} · Ausführung: {{ batch_runs.0.execution_label }}
     {% if batch_runs.0.source == "ccxt" %} · Börse {{ batch_runs.0.exchange_label }}{% endif %}<br>
     Kennzahlen: Gesamtzeitraum bzw. Testphase / Out-of-Sample, je nach Modus.</p>
+   {% endif %}
    <div class="scroll"><table>
-    <tr><th>Chain</th><th>Rendite %</th><th>B&amp;H %</th><th>Max DD %</th><th>Sharpe</th><th>Trades</th><th>CAGR %</th><th>Zeit im Markt %</th></tr>
+    <tr><th>{% if compare_kind == "strategy" %}Strategie{% else %}Chain{% endif %}</th><th>Rendite %</th><th>B&amp;H %</th><th>Max DD %</th><th>Sharpe</th><th>Trades</th><th>CAGR %</th><th>Zeit im Markt %</th></tr>
     {% for r in batch_runs %}
-    <tr><td><a href="{% url 'detail' r.pk %}">{{ r.get_chain_display }}</a> <small>{{ r.symbol }}</small></td>
+    <tr><td><a href="{% url 'detail' r.pk %}">{% if compare_kind == "strategy" %}{{ r.strategy_label }}{% else %}{{ r.get_chain_display }}{% endif %}</a>
+     {% if compare_kind == "strategy" %}{% if r.status == "done" %}<br><small>{{ r.params }}</small>{% endif %}{% else %}<small>{{ r.symbol }}</small>{% endif %}
+     {% if r.validation.overfit_warning %}<br><small class="err" title="Test-Sharpe unter der Hälfte des Train-Sharpe oder negative Test-Rendite">⚠ Overfitting-Warnung</small>{% endif %}</td>
     {% if r.status == "done" %}
      <td>{{ r.metrics.total_return_pct }}</td><td>{{ r.metrics.buyhold_return_pct }}</td>
      <td>{{ r.metrics.max_drawdown_pct }}</td><td>{{ r.metrics.sharpe }}</td><td>{{ r.metrics.trades }}</td>
@@ -137,6 +149,7 @@
     {% endif %}</tr>
     {% endfor %}
    </table></div>
+   {% if compare_kind == "strategy" %}<p class="small">Wenige Trades sagen statistisch wenig aus, auch wenn die Kurve gut aussieht. Je mehr Strategien und Parameter getestet werden, desto wahrscheinlicher ist ein Scheinerfolg.</p>{% endif %}
   </div>
   {% endif %}
  </section>
@@ -187,7 +200,7 @@
      {% if r.status == "done" %}<span class="small">{{ r.created_at|date:"d.m. H:i" }} · {{ r.source_label }} · {{ r.metrics.total_return_pct }} % (B&amp;H {{ r.metrics.buyhold_return_pct }} %)</span>
      {% elif r.status == "error" %}<span class="small err">{{ r.created_at|date:"d.m. H:i" }} · {{ r.source_label }} · ⚠ Fehler</span>
      {% else %}<span class="small">{{ r.created_at|date:"d.m. H:i" }} · {{ r.source_label }} · ⏳ {{ r.status_label }} …</span>{% endif %}
-     {% if r.batch %}<a class="small" href="{% url 'compare' r.batch %}">Chain-Vergleich ansehen</a>{% endif %}
+     {% if r.batch %}<a class="small" href="{% url 'compare' r.batch %}">Vergleich ansehen</a>{% endif %}
     </li>
     {% empty %}<li class="muted small">Noch keine Läufe.</li>{% endfor %}
    </ul>
@@ -225,6 +238,7 @@
    <div class="term"><dt>SMA (Simple Moving Average)</dt><dd>Einfacher gleitender Durchschnitt: Mittelwert der letzten n Schlusskurse.</dd></div>
    <div class="term"><dt>SMA-Crossover, fast, slow</dt><dd>Long, solange der kurze SMA (fast, z. B. 20 Kerzen) über dem langen SMA (slow, z. B. 50 Kerzen) liegt, sonst flat. Ein kurzes Fenster reagiert schnell, ein langes träge.</dd></div>
    <div class="term"><dt>RSI (Relative Strength Index), period, low, high</dt><dd>Momentum-Indikator zwischen 0 und 100: Verhältnis der durchschnittlichen Kursgewinne zu den durchschnittlichen Kursverlusten der letzten n Kerzen (period, üblich 14), nach Wilder geglättet. Unter low (z. B. 30, „überverkauft“) wird gekauft, über high (z. B. 70, „überkauft“) verkauft; dazwischen bleibt die Position bestehen. In der Grid-Search gilt high = 100 − low.</dd></div>
+   <div class="term"><dt>Kombiniert (SMA + RSI)</dt><dd>Verbindet den SMA-Crossover mit dem RSI. Es gibt zwei Verknüpfungen. <strong>Trendfilter + RSI-Einstieg</strong> (Standard): Gekauft wird nur im Aufwärtstrend (SMA fast über slow) bei einem Rücksetzer, also wenn der RSI unter die Einstiegsschwelle fällt (z. B. 40). Verkauft wird, wenn der RSI über die Ausstiegsschwelle steigt (z. B. 70) oder der Trend bricht. <strong>ODER</strong>: Long, sobald der SMA-Crossover oder die RSI-Strategie (Kauf unter Einstiegs-, Verkauf über Ausstiegsschwelle) long ist; das ergibt mehr Zeit im Markt. Eine reine UND-Verknüpfung wäre sinnlos, weil sich Trendfolge und „überverkauft“ meist ausschließen und fast nie gehandelt würde. Der RSI-Ausstieg muss über dem RSI-Einstieg liegen.</dd></div>
    <div class="term"><dt>Parameter</dt><dd>Einstellbare Werte einer Strategie, z. B. fast und slow beim SMA-Crossover.</dd></div>
   </dl>
 
@@ -285,9 +299,11 @@
    <div class="term"><dt>Hintergrund-Berechnung, Status</dt><dd>Jeder Backtest läuft im Hintergrund, die Seite bleibt bedienbar und aktualisiert sich selbst. Status: wartet (in der Warteschlange), läuft, fertig oder Fehler (mit Begründung, z. B. Börse nicht erreichbar).</dd></div>
    <div class="term"><dt>Chain-Vergleich</dt><dd>Startet dieselben Einstellungen auf Bitcoin, Solana und Ethereum. Die Tabelle zeigt die Kennzahlen nebeneinander, der Chart die Equity-Kurven.</dd></div>
    <div class="term"><dt>Normiert (Start = 100)</dt><dd>Alle Kurven werden auf den Startwert 100 umgerechnet, damit Chains mit sehr unterschiedlichen Kursniveaus vergleichbar sind. Eine Linie bei 120 heißt +20 % seit Beginn.</dd></div>
+   <div class="term"><dt>Strategie-Vergleich</dt><dd>Startet SMA-Crossover, RSI und Kombiniert mit denselben Einstellungen (Chain, Zeitraum, Kosten, Risiko, Ausführung) und zeigt Kennzahlen und Equity-Kurven gemeinsam, dazu einmal Buy &amp; Hold. Im Einzellauf gelten die Standardparameter jeder Strategie. Bei Train/Test-Split und Walk-Forward wählt die Grid-Search die Parameter je Strategie, und der Chart zeigt nur Testphase bzw. Out-of-Sample (alle Kurven starten dort bei 100). Nur dort ist der Vergleich fair: Wer im Training vorn liegt, ist oft nur überangepasst.</dd></div>
+     <div class="term"><dt>Mehrfachtests (Multiple Testing)</dt><dd>Je mehr Strategien, Parameter und Zeiträume ausprobiert werden, desto wahrscheinlicher ist ein gutes Ergebnis allein durch Zufall. Deshalb optimiert die Kombi-Strategie nur den SMA-Teil (34 gültige Kombinationen, statt rund 500 bei allen Parametern); der RSI-Teil bleibt fest. Eine Strategie, die nur bei einer einzigen Parameterkombination gut ist, ist verdächtig.</dd></div>
   </dl>
 
-  <h3>Hinweis</h3>
+    <h3>Hinweis</h3>
   <dl><div class="term"><dd>Ein Backtest bildet nur die Vergangenheit ab und garantiert keine künftigen Ergebnisse. Das Projekt dient Lern- und Analysezwecken und ist keine Anlageberatung.</dd></div></dl>
  </div>
 </section>
@@ -300,6 +316,7 @@
    const labels = {
      sma_cross: ["SMA fast (kurzes Fenster, Kerzen)", "SMA slow (langes Fenster, Kerzen)", ""],
      rsi: ["RSI period (Kerzen)", "RSI low (Kaufschwelle)", "RSI high (Verkaufsschwelle)"],
+     combo: ["SMA fast (kurzes Fenster, Kerzen)", "SMA slow (langes Fenster, Kerzen)", ""],
    };
    function sync() {
      const mode = f.elements["mode"].value, strat = f.elements["strategy"].value;
@@ -311,6 +328,7 @@
      show("param_a", mode === "single");
      show("param_b", mode === "single");
      show("param_c", mode === "single" && strat === "rsi");
+     ["combo_logic", "rsi_period", "rsi_entry", "rsi_exit"].forEach(n => show(n, strat === "combo"));
      const sm = f.elements["size_mode"].value;
      show("size_value", sm !== "full");
      field("size_value").querySelector("label").textContent =
@@ -372,18 +390,27 @@
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
 <script>
  (function () {
-   const data = JSON.parse(document.getElementById("cmpdata").textContent);
-   const colors = {btc:"#f7931a", sol:"#9945ff", eth:"#4f6bed"};
+   const P = JSON.parse(document.getElementById("cmpdata").textContent);
+   const chainColors = {btc:"#f7931a", sol:"#9945ff", eth:"#4f6bed"};
+   const stratColors = {sma_cross:"#2f5bea", rsi:"#e8590c", combo:"#2b8a3e"};
    const norm = a => a.map(v => v / a[0] * 100);
    const traces = [];
-   data.forEach(d => {
-     traces.push({x:d.index, y:norm(d.strategy), name:d.name + " Strategie", legendgroup:d.key,
-                  line:{color:colors[d.key], width:2}});
-     traces.push({x:d.index, y:norm(d.buyhold), name:d.name + " Buy & Hold", legendgroup:d.key,
-                  line:{color:colors[d.key], width:1.5, dash:"dot"}});
+   P.series.forEach(d => {
+     if (P.kind === "strategy") {
+       traces.push({x:d.index, y:norm(d.strategy), name:d.name, line:{color:stratColors[d.key], width:2}});
+     } else {
+       traces.push({x:d.index, y:norm(d.strategy), name:d.name + " Strategie", legendgroup:d.key,
+                    line:{color:chainColors[d.key], width:2}});
+       traces.push({x:d.index, y:norm(d.buyhold), name:d.name + " Buy & Hold", legendgroup:d.key,
+                    line:{color:chainColors[d.key], width:1.5, dash:"dot"}});
+     }
    });
+   if (P.kind === "strategy" && P.series.length) {  // Buy & Hold ist für alle Strategien dasselbe
+     traces.push({x:P.series[0].index, y:norm(P.series[0].buyhold), name:"Buy & Hold",
+                  line:{color:"#868e96", width:1.5, dash:"dot"}});
+   }
    if (traces.length && document.getElementById("cmp")) {
-     Plotly.newPlot("cmp", traces, {title:"Equity im Vergleich (Start = 100)",
+     Plotly.newPlot("cmp", traces, {title:P.title,
        margin:{t:40, l:55, r:10, b:40}, legend:{orientation:"h", y:-0.2}}, {responsive:true});
    }
  })();

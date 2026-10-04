@@ -12,7 +12,8 @@ from .engine import make_curves, run_sim, summarize
 from .strategies import GRIDS, STRATEGIES
 
 
-def _grid_search(train: pd.DataFrame, strategy: str, fee: float, ppy: int, execution: str, risk=None):
+def _grid_search(train: pd.DataFrame, strategy: str, fee: float, ppy: int, execution: str, risk=None,
+                 fixed=None):
     func, _ = STRATEGIES[strategy]
     grid = GRIDS[strategy]
     (x_name, xs), (y_name, ys) = grid["x"], grid["y"]
@@ -23,6 +24,7 @@ def _grid_search(train: pd.DataFrame, strategy: str, fee: float, ppy: int, execu
             params = grid["build"](xv, yv)
             if params is None:
                 continue
+            params = {**(fixed or {}), **params}  # feste Parameter (z. B. RSI-Teil der Kombi-Strategie)
             sim = run_sim(train, func(train, **params), fee, execution, risk, ppy)
             m, _, _ = sim.metrics(ppy)
             z[j][i] = m["sharpe"]
@@ -37,14 +39,14 @@ def _txt(params: dict) -> str:
 
 
 def optimize(df: pd.DataFrame, strategy: str, fee: float, periods_per_year: int,
-             train_frac: float = 0.7, execution: str = "close", risk=None) -> dict:
+             train_frac: float = 0.7, execution: str = "close", risk=None, fixed=None) -> dict:
     """Einmaliger Split: Parameter auf Train waehlen, einmal auf Test pruefen."""
     cut = int(len(df) * train_frac)
     if cut < 60 or len(df) - cut < 30:
         raise ValueError("Zu wenig Daten fuer Train/Test-Split (Zeitraum oder Zeitfenster vergroessern).")
 
     func, _ = STRATEGIES[strategy]
-    params, _, heat = _grid_search(df.iloc[:cut], strategy, fee, periods_per_year, execution, risk)
+    params, _, heat = _grid_search(df.iloc[:cut], strategy, fee, periods_per_year, execution, risk, fixed)
 
     sim = run_sim(df, func(df, **params), fee, execution, risk, periods_per_year, with_trades=True)
     train_m = sim.metrics(periods_per_year, slice(0, cut))[0]
@@ -64,7 +66,7 @@ def optimize(df: pd.DataFrame, strategy: str, fee: float, periods_per_year: int,
 
 
 def walk_forward(df: pd.DataFrame, strategy: str, fee: float, periods_per_year: int,
-                 n_folds: int = 5, train_mult: int = 3, execution: str = "close", risk=None) -> dict:
+                 n_folds: int = 5, train_mult: int = 3, execution: str = "close", risk=None, fixed=None) -> dict:
     """Rollierend: Fold k trainiert auf `train_mult` Testfenstern und testet auf dem naechsten.
     Die Testfenster aller Folds werden zu einer reinen Out-of-Sample-Kurve zusammengesetzt."""
     T = len(df) // (train_mult + n_folds)  # Laenge eines Testfensters
@@ -81,7 +83,7 @@ def walk_forward(df: pd.DataFrame, strategy: str, fee: float, periods_per_year: 
         a = start0 + k * T
         block = df.iloc[a: a + train_len + T]
         params, train_sharpe, _ = _grid_search(block.iloc[:train_len], strategy, fee,
-                                               periods_per_year, execution, risk)
+                                               periods_per_year, execution, risk, fixed)
         sim = run_sim(block, func(block, **params), fee, execution, risk, periods_per_year, with_trades=True)
         s, r, tr, mask, inv = sim.parts(test_sl)
         m, _, _ = summarize(s, r, tr, periods_per_year=periods_per_year, exposure=mask, invested=inv)

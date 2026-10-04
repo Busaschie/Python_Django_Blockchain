@@ -12,7 +12,7 @@ from . import indicators
 from .chains import CHAINS
 from .data import PERIODS_PER_YEAR, fetch_ohlcv
 from .engine import Risk, run_backtest
-from .strategies import STRATEGIES, params_from_inputs
+from .strategies import STRATEGIES, fixed_params, params_from_inputs
 from .validation import optimize, walk_forward
 
 _executor = ThreadPoolExecutor(max_workers=3, thread_name_prefix="backtest")
@@ -52,14 +52,16 @@ def compute(run) -> None:
                             j.get("size_mode", "full"), j.get("size_value"))
     if j["mode"] == "split":
         result = optimize(df, j["strategy"], fee, ppy, (j.get("train_frac") or 70) / 100,
-                          execution=ex, risk=risk)
+                          execution=ex, risk=risk,
+                          fixed=fixed_params(j["strategy"], j))
         params = result.pop("params")
     elif j["mode"] == "walkforward":
         result = walk_forward(df, j["strategy"], fee, ppy, j.get("wf_folds") or 5,
-                              j.get("wf_train_mult") or 3, execution=ex, risk=risk)
+                              j.get("wf_train_mult") or 3, execution=ex, risk=risk,
+                              fixed=fixed_params(j["strategy"], j))
         params = result.pop("params")
     else:
-        params = params_from_inputs(j["strategy"], j.get("param_a"), j.get("param_b"), j.get("param_c"))
+        params = params_from_inputs(j["strategy"], j.get("param_a"), j.get("param_b"), j.get("param_c"), j)
         func, _ = STRATEGIES[j["strategy"]]
         result = run_backtest(df, func(df, **params), fee, periods_per_year=ppy, execution=ex, risk=risk)
 

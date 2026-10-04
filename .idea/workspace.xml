@@ -4,7 +4,9 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9aa04bb0-a51b-42e3-bb80-523c848c1994" name="Changes" comment="nemo db - fix 3" />
+    <list default="true" id="9aa04bb0-a51b-42e3-bb80-523c848c1994" name="Changes" comment="nemo db - boerse temp">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -41,61 +43,61 @@
 }</component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="0.0" />
-      <entry key="MS500" value="1.84167917002848E-105" />
-      <entry key="S2" value="2.252198258294008E-26" />
-      <entry key="S5" value="1.5935017611318656E-10" />
-      <entry key="S10" value="3.0880095981456794E-5" />
-      <entry key="S30" value="0.10660597265124204" />
-      <entry key="S60" value="0.8437038272236038" />
-      <entry key="M2" value="2.4151268843802707" />
-      <entry key="M5" value="5.129218664317395" />
-      <entry key="M10" value="9.830001889034481" />
-      <entry key="M15" value="14.789563250263512" />
-      <entry key="M30" value="27.69095236780635" />
-      <entry key="H1" value="44.15779224721136" />
-      <entry key="H2" value="58.937544885592054" />
-      <entry key="H4" value="69.15146813869302" />
-      <entry key="D1" value="79.64481632554767" />
-      <entry key="W1" value="81.65785110653366" />
+      <entry key="MS100" value="1.3542077661246732" />
+      <entry key="MS500" value="2.973570118135239" />
+      <entry key="S2" value="5.162081611923559" />
+      <entry key="S5" value="6.272173048683558" />
+      <entry key="S10" value="7.503608516626789" />
+      <entry key="S30" value="10.447917061409997" />
+      <entry key="S60" value="11.943843168002847" />
+      <entry key="M2" value="12.89358142544128" />
+      <entry key="M5" value="13.977374935526768" />
+      <entry key="M10" value="16.75743473827602" />
+      <entry key="M15" value="20.583705293769853" />
+      <entry key="M30" value="32.81358923497102" />
+      <entry key="H1" value="50.95961081047084" />
+      <entry key="H2" value="68.84234114362323" />
+      <entry key="H4" value="81.89551348146394" />
+      <entry key="D1" value="95.8119437310551" />
+      <entry key="W1" value="98.5354492327087" />
     </decayedCancelled>
     <decayedSelected>
-      <entry key="MS100" value="1.0" />
-      <entry key="MS500" value="1.0" />
-      <entry key="S2" value="1.0" />
-      <entry key="S5" value="1.0" />
-      <entry key="S10" value="1.0" />
-      <entry key="S30" value="1.0" />
-      <entry key="S60" value="1.0" />
-      <entry key="M2" value="1.0000000000000226" />
-      <entry key="M5" value="1.0000034828425064" />
-      <entry key="M10" value="1.0018662375268148" />
-      <entry key="M15" value="1.0151580945629715" />
-      <entry key="M30" value="1.1231182137742888" />
-      <entry key="H1" value="1.350882051085958" />
-      <entry key="H2" value="1.5923529784562218" />
-      <entry key="H4" value="1.7696447092368155" />
-      <entry key="D1" value="1.9573007107928995" />
-      <entry key="W1" value="1.9937854315900747" />
+      <entry key="MS100" value="0.0" />
+      <entry key="MS500" value="0.0" />
+      <entry key="S2" value="2.186067621649561E-190" />
+      <entry key="S5" value="1.367305109560237E-76" />
+      <entry key="S10" value="1.1693182242487445E-38" />
+      <entry key="S30" value="2.269747637821893E-13" />
+      <entry key="S60" value="4.764186853831295E-7" />
+      <entry key="M2" value="6.902308928055529E-4" />
+      <entry key="M5" value="0.05440004636618256" />
+      <entry key="M10" value="0.23367304610284642" />
+      <entry key="M15" value="0.3846504702039529" />
+      <entry key="M30" value="0.6913401240027787" />
+      <entry key="H1" value="1.0598650661836417" />
+      <entry key="H2" value="1.410444227633918" />
+      <entry key="H4" value="1.6654989706627104" />
+      <entry key="D1" value="1.9376140200657237" />
+      <entry key="W1" value="1.9909081969343199" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="3.510237314700606E-6" />
-      <entry key="MS500" value="0.08110867293369894" />
-      <entry key="S2" value="0.5336626690199799" />
-      <entry key="S5" value="0.7778694755993377" />
-      <entry key="S10" value="0.8819998957510519" />
-      <entry key="S30" value="1.06552251114722" />
-      <entry key="S60" value="1.8226764002900426" />
-      <entry key="M2" value="3.4042812367994864" />
-      <entry key="M5" value="6.12459992521275" />
-      <entry key="M10" value="10.829061274664069" />
-      <entry key="M15" value="15.80236128474594" />
-      <entry key="M30" value="28.811914779593604" />
-      <entry key="H1" value="45.5067692811942" />
-      <entry key="H2" value="60.52853224136114" />
-      <entry key="H4" value="70.92028141919693" />
-      <entry key="D1" value="81.6019525026852" />
-      <entry key="W1" value="83.65161231536713" />
+      <entry key="MS100" value="1.2904505083388398" />
+      <entry key="MS500" value="2.883653459696357" />
+      <entry key="S2" value="5.117348209986028" />
+      <entry key="S5" value="6.250538162289294" />
+      <entry key="S10" value="7.489806586079431" />
+      <entry key="S30" value="10.440644471909286" />
+      <entry key="S60" value="11.939516458962762" />
+      <entry key="M2" value="12.891881166712567" />
+      <entry key="M5" value="14.030496314789392" />
+      <entry key="M10" value="16.989905126544155" />
+      <entry key="M15" value="20.967080878761546" />
+      <entry key="M30" value="33.503400328827645" />
+      <entry key="H1" value="52.01787619559175" />
+      <entry key="H2" value="70.25152203061874" />
+      <entry key="H4" value="83.56020276558323" />
+      <entry key="D1" value="97.74939029327953" />
+      <entry key="W1" value="100.52633258648751" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -107,29 +109,29 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.OpenDjangoStructureViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.pycharm.django.structure.promotion.once.per.project": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "codeWithMe.voiceChat.enabledByDefault": "false",
-    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "main",
-    "junie.onboarding.icon.badge.shown": "true",
-    "last_opened_file_path": "C:/Users/Nobody-42/Documents/Work/Python Blockchain/Projekt-8",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "python.packages.toolwindow.project.migrated.to.right.top.v2": "true",
-    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable",
-    "to.speed.mode.migration.done": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.OpenDjangoStructureViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.pycharm.django.structure.promotion.once.per.project&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/Nobody-42/Documents/Work/Python Blockchain/Projekt-8&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;python.packages.toolwindow.project.migrated.to.right.top.v2&quot;: &quot;true&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\Nobody-42\Documents\Work\Python Blockchain\Projekt-8" />
@@ -180,6 +182,7 @@
       <workItem from="1790934248575" duration="1252000" />
       <workItem from="1790943794541" duration="3703000" />
       <workItem from="1791012607349" duration="6788000" />
+      <workItem from="1791095064079" duration="1941000" />
     </task>
     <task id="LOCAL-00001" summary="First">
       <option name="closed" value="true" />
@@ -221,7 +224,15 @@
       <option name="project" value="LOCAL" />
       <updated>1791024203051</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="nemo db - boerse temp">
+      <option name="closed" value="true" />
+      <created>1791095193594</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1791095193594</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -233,6 +244,7 @@
     <MESSAGE value="nemo db" />
     <MESSAGE value="nemo db - fix" />
     <MESSAGE value="nemo db - fix 2" />
-    <option name="LAST_COMMIT_MESSAGE" value="nemo db - fix 2" />
+    <MESSAGE value="nemo db - boerse temp" />
+    <option name="LAST_COMMIT_MESSAGE" value="nemo db - boerse temp" />
   </component>
 </project>
