@@ -92,3 +92,47 @@ class BacktestRun(models.Model):
 
     def __str__(self):
         return f"{self.strategy_label} {self.symbol} {self.timeframe}"
+
+
+class Candle(models.Model):
+    """Abgeschlossene Kerze einer Börse (Cache, damit die Börsen-API nicht bei jedem Lauf belastet wird)."""
+    exchange = models.CharField(max_length=20)
+    symbol = models.CharField(max_length=20)
+    timeframe = models.CharField(max_length=5)
+    ts = models.BigIntegerField()  # Kerzenbeginn, Millisekunden seit 1970 (UTC)
+    open = models.FloatField()
+    high = models.FloatField()
+    low = models.FloatField()
+    close = models.FloatField()
+    volume = models.FloatField()
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["exchange", "symbol", "timeframe", "ts"],
+                                               name="uniq_candle")]
+
+
+class CandleCoverage(models.Model):
+    """Welcher lückenlose Zeitraum je Börse/Paar/Zeitfenster bereits im Cache liegt."""
+    exchange = models.CharField(max_length=20)
+    symbol = models.CharField(max_length=20)
+    timeframe = models.CharField(max_length=5)
+    covered_from = models.BigIntegerField()          # ms, einschließlich
+    covered_to = models.BigIntegerField()            # ms, ausschließlich (Ende der letzten Kerze)
+    floor_ts = models.BigIntegerField(null=True, blank=True)  # davor gibt es bei der Börse keine Daten
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["exchange", "symbol", "timeframe"],
+                                               name="uniq_candle_coverage")]
+
+
+class ExchangeBlock(models.Model):
+    """Sperre einer Börse (IP-Sperre/Limit): bis dahin werden keine Anfragen mehr gesendet."""
+    exchange = models.CharField(max_length=20, unique=True)
+    until = models.DateTimeField()
+    reason = models.CharField(max_length=200, blank=True, default="")
+    updated_at = models.DateTimeField(auto_now=True)
+
+    @property
+    def exchange_label(self):
+        return EXCHANGES.get(self.exchange, self.exchange)

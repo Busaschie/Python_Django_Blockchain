@@ -9,7 +9,7 @@ from django.utils import timezone
 from . import jobs
 from .chains import CHAINS
 from .forms import BacktestForm
-from .models import BacktestRun
+from .models import BacktestRun, ExchangeBlock
 from .strategies import params_from_inputs
 
 STALE_AFTER = timedelta(minutes=15)
@@ -104,6 +104,7 @@ def dashboard(request, pk=None, batch=None):
                     for r in (batch_runs or []) if r.status == "done"]
     return render(request, "backtester/dashboard.html", {
         "form": form, "run": run, "groups": _history(),
+        "blocks": ExchangeBlock.objects.filter(until__gt=timezone.now()),
         "run_done": bool(run and run.status == "done"), "exit_reasons": exit_reasons,
         "batch_runs": batch_runs, "compare_data": compare_data,
         "pending_ids": ",".join(str(r.pk) for r in shown if r.is_pending),

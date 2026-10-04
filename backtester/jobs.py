@@ -63,7 +63,7 @@ def compute(run) -> None:
         func, _ = STRATEGIES[j["strategy"]]
         result = run_backtest(df, func(df, **params), fee, periods_per_year=ppy, execution=ex, risk=risk)
 
-    run.symbol, run.data_note, run.params = info["symbol"], info["note"], params
+    run.symbol, run.data_note, run.params = info["symbol"], info["note"][:200], params
     run.indicator_lib = indicators.backend()
     run.metrics, run.curves = json_safe(result["metrics"]), json_safe(result["curves"])
     run.validation = json_safe(result.get("validation", {}))

@@ -6,7 +6,7 @@ from datetime import date, datetime, timezone
 import numpy as np
 import pandas as pd
 
-from .chains import EXCHANGE_LIMITS, EXCHANGES
+from .chains import EXCHANGES
 
 TIMEFRAME_MS = {"15m": 900_000, "1h": 3_600_000, "4h": 14_400_000, "1d": 86_400_000}
 DAY_MS = 86_400_000
@@ -31,49 +31,10 @@ def fetch_ohlcv(symbol: str, timeframe: str, start: date, end: date, source: str
     if source == "synthetic":
         return synthetic_ohlcv(symbol, timeframe, start, end), {"symbol": symbol, "note": ""}
 
-    import ccxt
     if exchange not in EXCHANGES:
         raise ValueError(f"Unbekannte Börse: {exchange}")
-    name = EXCHANGES[exchange]
-    ex = getattr(ccxt, exchange)({"enableRateLimit": True})
-    tfs = ex.timeframes or {}
-    if tfs and timeframe not in tfs:
-        raise ValueError(f"{name} bietet das Zeitfenster {timeframe} nicht an.")
-
-    # Handelspaar auflösen: USDT bevorzugt, sonst USD/USDC (nicht jede Börse listet USDT-Paare)
-    ex.load_markets()
-    base = symbol.split("/")[0]
-    sym = next((c for q in ("USDT", "USD", "USDC")
-                if (c := f"{base}/{q}") in ex.markets and ex.markets[c].get("active") is not False), None)
-    if sym is None:
-        raise ValueError(f"{base} wird auf {name} weder gegen USDT noch gegen USD/USDC gehandelt.")
-
-    tf_ms, limit = TIMEFRAME_MS[timeframe], EXCHANGE_LIMITS.get(exchange, 500)
-    start_ms, end_ms = period_ms(start, end, ex.milliseconds())
-    since, rows = start_ms, []
-    for _ in range(2000):  # Sicherung gegen Endlosschleifen
-        batch = ex.fetch_ohlcv(sym, timeframe, since=since, limit=limit)
-        new = [r for r in batch if not rows or r[0] > rows[-1][0]]
-        if not new:
-            break
-        rows += new
-        since = rows[-1][0] + tf_ms
-        if since >= end_ms:
-            break
-    rows = [r for r in rows if r[0] >= start_ms and r[0] + tf_ms <= end_ms]  # im Zeitraum, abgeschlossen
-    if len(rows) < MIN_CANDLES:
-        raise ValueError(f"{name} lieferte für {sym} ({timeframe}) von {start:%d.%m.%Y} bis {end:%d.%m.%Y} "
-                         f"nur {len(rows)} abgeschlossene Kerzen (mindestens {MIN_CANDLES} nötig).")
-
-    df = pd.DataFrame(rows, columns=["ts", "open", "high", "low", "close", "volume"])
-    df["ts"] = pd.to_datetime(df["ts"], unit="ms", utc=True)
-    df = df.drop_duplicates("ts").set_index("ts")
-    requested = (end - start).days + 1
-    got = (df.index[-1] - df.index[0]).days + 1
-    note = ""
-    if got < requested * 0.9:
-        note = f"{name} lieferte nur {got} von {requested} angeforderten Tagen (Daten ab {df.index[0]:%d.%m.%Y})."
-    return df, {"symbol": sym, "note": note}
+    from . import marketdata  # Cache, Sperren-Schutz, Binance-Archiv
+    return marketdata.get_candles(exchange, symbol.split("/")[0], timeframe, start, end)
 
 
 START_PRICE = {"BTC": 60_000, "ETH": 3_000, "SOL": 150}

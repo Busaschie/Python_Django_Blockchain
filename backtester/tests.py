@@ -6,7 +6,7 @@ from unittest import mock
 import ccxt
 import numpy as np
 import pandas as pd
-from django.test import SimpleTestCase
+from django.test import SimpleTestCase, TestCase
 
 from . import strategies as st
 from .data import synthetic_ohlcv
@@ -138,8 +138,15 @@ class NoLookaheadTests(SimpleTestCase):
                     np.testing.assert_allclose(sim.strat.values, full.strat.iloc[:k].values, atol=1e-12)
 
 
-class DateRangeTests(SimpleTestCase):
+class DateRangeTests(TestCase):
     """Zeitraum von-bis: Daten, Formular-Validierung, Börsen-Abruf (mit nachgebauter ccxt-Börse)."""
+
+    def setUp(self):
+        from . import binance_archive, marketdata
+        marketdata.reset_state()
+        p = mock.patch.object(binance_archive, "http_get", side_effect=binance_archive.ArchiveError("kein Netz"))
+        p.start()
+        self.addCleanup(p.stop)
 
     def test_same_date_gives_same_price_in_any_range(self):
         a = synthetic_ohlcv("BTC/USDT", "1d", date(2024, 1, 1), date(2024, 12, 31))

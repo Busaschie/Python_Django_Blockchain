@@ -16,6 +16,9 @@
  <section>
   <div class="box">
    <h2>Einstellungen</h2>
+   {% for b in blocks %}
+   <p class="err small"><strong>{{ b.exchange_label }} gesperrt bis {{ b.until|date:"d.m.Y H:i" }} Uhr</strong> ({{ b.reason }}). Bis dahin werden keine Anfragen an diese Börse gesendet, damit sich die Sperre nicht verlängert. Bereits zwischengespeicherte Kerzen sind weiter nutzbar, sonst bitte eine andere Börse wählen.</p>
+   {% endfor %}
    {% if error %}<p class="err">{{ error }}</p>{% endif %}
    <form method="post" id="bt-form" action="{% url 'index' %}">{% csrf_token %}
     {{ form.non_field_errors }}
@@ -208,6 +211,9 @@
    <div class="term"><dt>ccxt</dt><dd>Python-Bibliothek mit einheitlicher Schnittstelle zu Krypto-Börsen. Hier werden damit öffentliche Kursdaten von Binance geladen (kein API-Key nötig).</dd></div>
    <div class="term"><dt>Börse</dt><dd>Handelsplattform, von der die Kursdaten stammen (Binance, Kraken, Coinbase, Bybit, OKX, Bitstamp). Kurse unterscheiden sich je Börse leicht, Umfang und Tiefe der Historie ebenfalls. Manche Börsen sind regional eingeschränkt erreichbar.</dd></div>
    <div class="term"><dt>Quote-Währung (USDT / USD / USDC)</dt><dd>Nicht jede Börse listet USDT-Paare. Fehlt BTC/USDT, wird automatisch BTC/USD oder BTC/USDC genutzt. Das tatsächlich verwendete Paar steht in der Kopfzeile des Laufs.</dd></div>
+   <div class="term"><dt>Kerzen-Cache</dt><dd>Abgeschlossene Kerzen werden in der Datenbank gespeichert und nicht erneut bei der Börse abgefragt. Nur fehlende Zeiträume werden nachgeladen. Wiederholte Läufe brauchen dadurch keine Börsen-Aufrufe, das schont die Limits der Börsen.</dd></div>
+   <div class="term"><dt>Binance-Archiv (data.binance.vision)</dt><dd>Für Binance werden Kerzen vergangener Tage aus den öffentlichen Archiv-Dateien geladen. Das ist ein einfacher Download ohne API-Limits. Die Börsen-API wird nur für die jüngsten Tage genutzt, die das Archiv noch nicht enthält.</dd></div>
+   <div class="term"><dt>IP-Sperre / Anfragelimit (HTTP 418, 429)</dt><dd>Börsen sperren Server-IP-Adressen, die zu viele Anfragen senden. Erkennt die App eine Sperre, sendet sie bis zu deren Ende nichts mehr an diese Börse, weil weitere Anfragen die Sperre verlängern würden (Hinweis über dem Formular). Zwischengespeicherte Kerzen bleiben nutzbar. Fehlen nur wenige letzte Tage, wird mit dem vorhandenen Zeitraum gerechnet und ein Datenhinweis angezeigt; fehlt mehr als ein Zehntel, bricht der Lauf mit einer Erklärung ab.</dd></div>
    <div class="term"><dt>Datenhinweis</dt><dd>Erscheint, wenn eine Börse für den gewählten Zeitraum weniger Daten liefert als angefordert (z. B. weil die Kryptowährung dort erst später gelistet wurde oder die Börse nur eine begrenzte Zahl von Kerzen abrufbar macht). Die Auswertung bezieht sich dann auf den kürzeren Zeitraum. Nicht jede Börse bietet jedes Zeitfenster an (Coinbase z. B. kein 4h).</dd></div>
    <div class="term"><dt>Synthetisch (offline)</dt><dd>Künstlich erzeugte Zufallskurse zum Testen ohne Internet. Sie enthalten kein echtes Marktmuster, gute Ergebnisse sind dort reiner Zufall.</dd></div>
   </dl>

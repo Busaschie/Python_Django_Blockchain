@@ -7,6 +7,15 @@
 
 Im Formular "Synthetisch (offline)" wählen, um ohne Börsen-API zu testen.
 
+## Börsendaten: Cache, Archiv, Sperren-Schutz
+Gegen IP-Sperren der Börsen (z. B. Binance HTTP 418 / Code -1003 auf geteilten Render-IPs):
+- **Kerzen-Cache** in der Datenbank (`Candle`, `CandleCoverage`): Abgeschlossene Kerzen werden einmal geladen. Spätere Läufe holen nur fehlende Zeiträume. Nutzt Neon/Postgres, auf Render darf die Datenbank nicht flüchtig sein.
+- **Binance-Archiv:** Vergangene Tage kommen von `data.binance.vision` (Download, keine API-Limits). Die API wird nur für die jüngsten Tage genutzt.
+- **Sperren-Schutz** (`ExchangeBlock`): Eine erkannte Sperre wird gemerkt (bei Binance mit der genauen Zeit aus der Fehlermeldung). Bis dahin gehen keine Anfragen mehr an die Börse. Ein Hinweis erscheint über dem Formular.
+- **Ein Client je Prozess**, ein API-Abruf je Börse gleichzeitig, Märkte nur einmal je 12 Stunden (bei Binance gar nicht).
+- Zum manuellen Aufheben einer Sperre im Neon-SQL-Editor: `delete from backtester_exchangeblock;`
+- Die Log-Zeile `tradebot.marketdata: … (Cache n, Archiv n, API n)` zeigt je Lauf, woher die Kerzen kamen.
+
 ## PostgreSQL (Neon) und Render
 Die App liest die Datenbank aus der Umgebungsvariable `DATABASE_URL`. Ohne sie läuft lokal SQLite wie bisher.
 - **Treiber:** `psycopg[binary]` (psycopg 3) und `dj-database-url` stehen in `requirements.txt`. psycopg 3 ist der Treiber, den Django bevorzugt. Ein zusätzliches `psycopg2` wäre überflüssig und würde ignoriert.
