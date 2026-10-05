@@ -1,5 +1,5 @@
 """E-Mail-Versand per HTTPS-API (Port 443). Noetig, weil Render bei kostenlosen Diensten ausgehendes SMTP
-(Ports 25/465/587) sperrt. Unterstuetzt Brevo und Resend; Konfiguration ueber Umgebungsvariablen."""
+(Ports 25/465/587) sperrt. Unterstuetzt Brevo und Resend; Konfiguration ueber Umgebungsvariablen. Jojo"""
 import json
 import os
 import urllib.error
