@@ -467,7 +467,8 @@
      ...band("5", "95", "5–95 %", "rgba(65,118,144,0.25)"), ...band("25", "75", "25–75 %", "rgba(65,118,144,0.5)"),
      {x:x, y:f["50"], name:"Median", line:{color:"#81d4fa", width:2}},
      {x:x, y:MC.actual, name:"Tatsächliche Reihenfolge", line:{color:"#f5dd5d", width:2, dash:"dot"}}],
-     {...base, shapes:[], title:"Monte-Carlo: Rendite in % nach Trade Nr.", xaxis:{title:"Trade Nr."}, yaxis:{title:"%"}}, cfg);
+     {...base, shapes:[], title:"Monte-Carlo: Rendite in % nach Trade Nr.", margin:{t:40, l:55, r:10, b:70},
+      legend:{orientation:"h", y:-0.3}, xaxis:{title:"Trade Nr.", type:"linear", rangemode:"tozero"}, yaxis:{title:"%"}}, cfg);
  }
  const H = JSON.parse(document.getElementById("heat").textContent);
  if (H && H.z && document.getElementById("heatmap")) {

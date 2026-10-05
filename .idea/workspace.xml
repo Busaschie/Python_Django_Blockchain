@@ -4,14 +4,8 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d8010543-1eed-4775-a043-da519baf32cf" name="Changes" comment="Design">
-      <change afterPath="$PROJECT_DIR$/backtester/montecarlo.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtester/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/forms.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtester/jobs.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/jobs.py" afterDir="false" />
+    <list default="true" id="d8010543-1eed-4775-a043-da519baf32cf" name="Changes" comment="Monte-Carlo-Test">
       <change beforePath="$PROJECT_DIR$/backtester/templates/backtester/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/templates/backtester/dashboard.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtester/test_tooltips.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/test_tooltips.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtester/tests.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/tests.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -163,7 +157,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1791181412234</updated>
-      <workItem from="1791181413299" duration="9828000" />
+      <workItem from="1791181413299" duration="10437000" />
     </task>
     <task id="LOCAL-00001" summary="Backtest Manuell">
       <option name="closed" value="true" />
@@ -237,7 +231,15 @@
       <option name="project" value="LOCAL" />
       <updated>1791200062644</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="Monte-Carlo-Test">
+      <option name="closed" value="true" />
+      <created>1791200716101</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1791200716102</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -253,6 +255,7 @@
     <MESSAGE value="Admin 2" />
     <MESSAGE value="Admin 3" />
     <MESSAGE value="Design" />
-    <option name="LAST_COMMIT_MESSAGE" value="Design" />
+    <MESSAGE value="Monte-Carlo-Test" />
+    <option name="LAST_COMMIT_MESSAGE" value="Monte-Carlo-Test" />
   </component>
 </project>
