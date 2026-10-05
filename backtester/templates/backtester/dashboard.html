@@ -406,6 +406,15 @@
  const linesRaw = JSON.parse(document.getElementById("lines").textContent);
  const shapes = (Array.isArray(linesRaw) ? linesRaw : []).map(x => ({
    type:"line", x0:x, x1:x, yref:"paper", y0:0, y1:1, line:{dash:"dot", color:"gray"}}));
+ // Dunkles Diagramm-Design passend zum Rest (Admin-Look)
+ (function(){
+   const dark = {paper_bgcolor:"rgba(0,0,0,0)", plot_bgcolor:"rgba(0,0,0,0)", font:{color:"#e8e8e8"},
+                 xaxis:{gridcolor:"#333", zerolinecolor:"#444"}, yaxis:{gridcolor:"#333", zerolinecolor:"#444"}};
+   const merge = (a, b) => { const o = Object.assign({}, a); for (const k in b) o[k] = (b[k] && typeof b[k] === "object" && !Array.isArray(b[k])) ? merge(a && a[k] || {}, b[k]) : b[k]; return o; };
+   if (typeof Plotly === "undefined") return;
+   const orig = Plotly.newPlot;
+   Plotly.newPlot = (id, data, layout, cfg) => orig.call(Plotly, id, data, merge(dark, layout || {}), cfg);
+ })();
  const base = {margin:{t:40, l:55, r:10, b:40}, legend:{orientation:"h", y:-0.18}, shapes};
  const cfg = {responsive:true};
 
