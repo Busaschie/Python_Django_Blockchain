@@ -4,142 +4,67 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9aa04bb0-a51b-42e3-bb80-523c848c1994" name="Changes" comment="nemo db - boerse temp">
+    <list default="true" id="d8010543-1eed-4775-a043-da519baf32cf" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/requirements-dev.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tools/crosscheck_backtestingpy.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/Projekt-8.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtester/engine.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/engine.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="DjangoConsoleOptions" custom-start-script="import sys; print('Python %s on %s' % (sys.version, sys.platform))&#10;import django; print('Django %s' % django.get_version())&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;if 'setup' in dir(django): django.setup()&#10;import django_manage_shell; django_manage_shell.run(PROJECT_ROOT)">
-    <option name="myCustomStartScript" value="import sys; print('Python %s on %s' % (sys.version, sys.platform))&#10;import django; print('Django %s' % django.get_version())&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;if 'setup' in dir(django): django.setup()&#10;import django_manage_shell; django_manage_shell.run(PROJECT_ROOT)" />
-  </component>
   <component name="Git.Settings">
-    <option name="PUSH_TAGS">
-      <GitPushTagMode>
-        <option name="argument" value="--follow-tags" />
-        <option name="title" value="Current Branch" />
-      </GitPushTagMode>
-    </option>
-    <option name="RECENT_BRANCH_BY_REPOSITORY">
-      <map>
-        <entry key="$PROJECT_DIR$" value="main" />
-      </map>
-    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory">{
-  &quot;lastFilter&quot;: {
-    &quot;state&quot;: &quot;OPEN&quot;,
-    &quot;assignee&quot;: &quot;Busaschie&quot;
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "Busaschie"
   }
-}</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/Busaschie/Python_Django_Blockchain.git&quot;,
-    &quot;accountId&quot;: &quot;5667b3cb-b0dc-4e03-825b-1f14ee9d9f2c&quot;
+}]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/Busaschie/Python_Django_Blockchain.git",
+    "accountId": "5667b3cb-b0dc-4e03-825b-1f14ee9d9f2c"
   }
-}</component>
-  <component name="NextEditCompletionFeaturesState">
-    <decayedCancelled>
-      <entry key="MS100" value="1.3542077661246732" />
-      <entry key="MS500" value="2.973570118135239" />
-      <entry key="S2" value="5.162081611923559" />
-      <entry key="S5" value="6.272173048683558" />
-      <entry key="S10" value="7.503608516626789" />
-      <entry key="S30" value="10.447917061409997" />
-      <entry key="S60" value="11.943843168002847" />
-      <entry key="M2" value="12.89358142544128" />
-      <entry key="M5" value="13.977374935526768" />
-      <entry key="M10" value="16.75743473827602" />
-      <entry key="M15" value="20.583705293769853" />
-      <entry key="M30" value="32.81358923497102" />
-      <entry key="H1" value="50.95961081047084" />
-      <entry key="H2" value="68.84234114362323" />
-      <entry key="H4" value="81.89551348146394" />
-      <entry key="D1" value="95.8119437310551" />
-      <entry key="W1" value="98.5354492327087" />
-    </decayedCancelled>
-    <decayedSelected>
-      <entry key="MS100" value="0.0" />
-      <entry key="MS500" value="0.0" />
-      <entry key="S2" value="2.186067621649561E-190" />
-      <entry key="S5" value="1.367305109560237E-76" />
-      <entry key="S10" value="1.1693182242487445E-38" />
-      <entry key="S30" value="2.269747637821893E-13" />
-      <entry key="S60" value="4.764186853831295E-7" />
-      <entry key="M2" value="6.902308928055529E-4" />
-      <entry key="M5" value="0.05440004636618256" />
-      <entry key="M10" value="0.23367304610284642" />
-      <entry key="M15" value="0.3846504702039529" />
-      <entry key="M30" value="0.6913401240027787" />
-      <entry key="H1" value="1.0598650661836417" />
-      <entry key="H2" value="1.410444227633918" />
-      <entry key="H4" value="1.6654989706627104" />
-      <entry key="D1" value="1.9376140200657237" />
-      <entry key="W1" value="1.9909081969343199" />
-    </decayedSelected>
-    <decayedShown>
-      <entry key="MS100" value="1.2904505083388398" />
-      <entry key="MS500" value="2.883653459696357" />
-      <entry key="S2" value="5.117348209986028" />
-      <entry key="S5" value="6.250538162289294" />
-      <entry key="S10" value="7.489806586079431" />
-      <entry key="S30" value="10.440644471909286" />
-      <entry key="S60" value="11.939516458962762" />
-      <entry key="M2" value="12.891881166712567" />
-      <entry key="M5" value="14.030496314789392" />
-      <entry key="M10" value="16.989905126544155" />
-      <entry key="M15" value="20.967080878761546" />
-      <entry key="M30" value="33.503400328827645" />
-      <entry key="H1" value="52.01787619559175" />
-      <entry key="H2" value="70.25152203061874" />
-      <entry key="H4" value="83.56020276558323" />
-      <entry key="D1" value="97.74939029327953" />
-      <entry key="W1" value="100.52633258648751" />
-    </decayedShown>
-  </component>
-  <component name="ProjectColorInfo">{
-  &quot;associatedIndex&quot;: 4,
-  &quot;fromUser&quot;: false
-}</component>
-  <component name="ProjectId" id="3K8LSRIWiIWWOEhl7bTcYxfQoqo" />
+}]]></component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "associatedIndex": 0,
+  "fromUser": false
+}]]></component>
+  <component name="ProjectId" id="3KGQQrdYv83Q4teLs0VnyXFFtYN" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.OpenDjangoStructureViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.pycharm.django.structure.promotion.once.per.project&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
-    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
-    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/Nobody-42/Documents/Work/Python Blockchain/Projekt-8&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;python.packages.toolwindow.project.migrated.to.right.top.v2&quot;: &quot;true&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;,
-    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.OpenDjangoStructureViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
+    "git-widget-placeholder": "main",
+    "junie.onboarding.icon.badge.shown": "true",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "python.packages.toolwindow.project.migrated.to.right.top.v2": "true",
+    "to.speed.mode.migration.done": "true"
   }
-}</component>
-  <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="C:\Users\Nobody-42\Documents\Work\Python Blockchain\Projekt-8" />
-    </key>
-  </component>
+}]]></component>
   <component name="RunManager">
-    <configuration name="Projekt-8" type="Python.DjangoServer" factoryName="Django server">
-      <module name="Projekt-8" />
+    <configuration name="Projekt_Live" type="Python.DjangoServer" factoryName="Django server">
+      <module name="Projekt_Live" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -174,77 +99,16 @@
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="9aa04bb0-a51b-42e3-bb80-523c848c1994" name="Changes" comment="" />
-      <created>1790934247554</created>
+      <changelist id="d8010543-1eed-4775-a043-da519baf32cf" name="Changes" comment="" />
+      <created>1791181412234</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1790934247554</updated>
-      <workItem from="1790934248575" duration="1252000" />
-      <workItem from="1790943794541" duration="3703000" />
-      <workItem from="1791012607349" duration="6788000" />
-      <workItem from="1791095064079" duration="1941000" />
+      <updated>1791181412234</updated>
+      <workItem from="1791181413299" duration="1636000" />
     </task>
-    <task id="LOCAL-00001" summary="First">
-      <option name="closed" value="true" />
-      <created>1790944233210</created>
-      <option name="number" value="00001" />
-      <option name="presentableId" value="LOCAL-00001" />
-      <option name="project" value="LOCAL" />
-      <updated>1790944233210</updated>
-    </task>
-    <task id="LOCAL-00002" summary="requirement">
-      <option name="closed" value="true" />
-      <created>1790946983554</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1790946983554</updated>
-    </task>
-    <task id="LOCAL-00003" summary="nemo db">
-      <option name="closed" value="true" />
-      <created>1791022782379</created>
-      <option name="number" value="00003" />
-      <option name="presentableId" value="LOCAL-00003" />
-      <option name="project" value="LOCAL" />
-      <updated>1791022782379</updated>
-    </task>
-    <task id="LOCAL-00004" summary="nemo db - fix">
-      <option name="closed" value="true" />
-      <created>1791023502666</created>
-      <option name="number" value="00004" />
-      <option name="presentableId" value="LOCAL-00004" />
-      <option name="project" value="LOCAL" />
-      <updated>1791023502666</updated>
-    </task>
-    <task id="LOCAL-00005" summary="nemo db - fix 2">
-      <option name="closed" value="true" />
-      <created>1791024203051</created>
-      <option name="number" value="00005" />
-      <option name="presentableId" value="LOCAL-00005" />
-      <option name="project" value="LOCAL" />
-      <updated>1791024203051</updated>
-    </task>
-    <task id="LOCAL-00006" summary="nemo db - boerse temp">
-      <option name="closed" value="true" />
-      <created>1791095193594</created>
-      <option name="number" value="00006" />
-      <option name="presentableId" value="LOCAL-00006" />
-      <option name="project" value="LOCAL" />
-      <updated>1791095193594</updated>
-    </task>
-    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
-  </component>
-  <component name="VcsManagerConfiguration">
-    <MESSAGE value="First" />
-    <MESSAGE value="requirement" />
-    <MESSAGE value="nemo db" />
-    <MESSAGE value="nemo db - fix" />
-    <MESSAGE value="nemo db - fix 2" />
-    <MESSAGE value="nemo db - boerse temp" />
-    <option name="LAST_COMMIT_MESSAGE" value="nemo db - boerse temp" />
   </component>
 </project>

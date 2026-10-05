@@ -26,7 +26,8 @@ def simulate(df: pd.DataFrame, signal: pd.Series, fee: float = 0.001, execution:
         b = a.shift(1).fillna(0)  # Position, die ueber die Kerzengrenze (Vortagesschluss -> Open) gehalten wird
         gap = (df["open"] / df["close"].shift(1) - 1).fillna(0)
         intra = df["close"] / df["open"] - 1
-        strat = b * gap + a * intra - (a - b).abs() * fee
+        # Luecke (Vortagesschluss -> Open) und Intraday-Teil wirken nacheinander: multiplikativ verknuepfen
+        strat = (1 + b * gap) * (1 + a * intra) - 1 - (a - b).abs() * fee
     else:
         turnover = a.diff().abs().fillna(a.abs())
         strat = a * ret - turnover * fee
@@ -248,10 +249,10 @@ def _simulate_risk(df: pd.DataFrame, signal: pd.Series, cost: float, execution: 
                        "ret_pct": round(float(net) * 100, 2), "open": False, "reason": reason})
 
     for t in range(1, n):
-        pc, want, f_start, r = c[t - 1], sig[t - 1], f, 0.0
+        pc, want, f_start, gap_leg, in_leg, costs = c[t - 1], sig[t - 1], f, 0.0, 0.0, 0.0
         if open_mode:
             if f > 0:
-                r += f * (o[t] / pc - 1)  # Kurslucke ueber die Kerzengrenze
+                gap_leg = f * (o[t] / pc - 1)  # Kurslucke ueber die Kerzengrenze
             px = ref = o[t]
             exit_i = t
         else:
@@ -259,12 +260,12 @@ def _simulate_risk(df: pd.DataFrame, signal: pd.Series, cost: float, execution: 
             exit_i = t - 1
 
         if f > 0 and want == 0:  # Ausstieg per Signal
-            r -= f * cost
+            costs += f * cost
             finish(px, exit_i, "Signal")
             f = 0.0
         elif f == 0 and want == 1 and not blocked and size[t - 1] > 1e-9:  # Einstieg
             f = float(size[t - 1])
-            r -= f * cost
+            costs += f * cost
             entry = hwm = px
             k += 1
             cur = {"entry_ts": idx[t if open_mode else t - 1].isoformat(), "entry_px": round(float(px), 6),
@@ -291,14 +292,16 @@ def _simulate_risk(df: pd.DataFrame, signal: pd.Series, cost: float, execution: 
                 exit_px, reason = tpl, "Take-Profit"
             if exit_px is not None:
                 reason = reason or ("Trailing-Stop" if tr_lvl > sl_lvl else "Stop-Loss")
-                r += f * (exit_px / ref - 1) - f * cost
+                in_leg = f * (exit_px / ref - 1)
+                costs += f * cost
                 finish(exit_px, t, reason)
                 f, blocked = 0.0, True
             else:
-                r += f * (c[t] / ref - 1)
+                in_leg = f * (c[t] / ref - 1)
                 hwm = max(hwm, h[t])
 
-        strat[t], mask[t], tid[t] = r, in_bar, (k if in_bar else 0)
+        # Luecke und Kerzenverlauf wirken nacheinander (multiplikativ), Kosten werden abgezogen
+        strat[t], mask[t], tid[t] = (1 + gap_leg) * (1 + in_leg) - 1 - costs, in_bar, (k if in_bar else 0)
 
     if f > 0 and not open_mode and sig[n - 1] == 0:  # Ausstiegssignal auf der letzten Kerze (Close-Modus)
         r_net = (1 - cost) ** 2 * c[-1] / entry - 1

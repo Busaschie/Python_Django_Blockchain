@@ -1,0 +1,2 @@
+# Nur für den Abgleich mit einer unabhängigen Bibliothek (tools/crosscheck_backtestingpy.py)
+backtesting
