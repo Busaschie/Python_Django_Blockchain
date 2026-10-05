@@ -8,7 +8,7 @@ from django.utils import timezone
 
 from . import jobs
 from .chains import CHAINS
-from .forms import BacktestForm
+from .forms import PARAM_TIPS, SIZE_TIPS, UI_TIPS, BacktestForm
 from .models import BacktestRun, ExchangeBlock
 from .strategies import STRATEGIES, default_inputs, params_from_inputs
 
@@ -148,6 +148,7 @@ def dashboard(request, pk=None, batch=None):
         "blocks": ExchangeBlock.objects.filter(until__gt=timezone.now()),
         "run_done": bool(run and run.status == "done"), "exit_reasons": exit_reasons,
         "batch_runs": batch_runs, "compare_data": compare_data, "compare_kind": compare_kind,
+        "tip_data": {"params": PARAM_TIPS, "size": SIZE_TIPS}, "ui_tips": UI_TIPS,
         "pending_ids": ",".join(str(r.pk) for r in shown if r.is_pending),
         "chains": [{"key": k, **m} for k, m in CHAINS.items()],
     })

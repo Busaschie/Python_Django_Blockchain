@@ -53,6 +53,7 @@ Start- und Enddatum frei wählbar (Enddatum eingeschlossen, 30 bis 1500 Tage, ni
 
 ## Oberfläche
 Oben Auswahl Bitcoin / Solana / Ethereum, darunter drei Spalten (1: Einstellungen und Kennzahlen, 2: Charts und Trades, 3: gelaufene Auswertungen je Chain), unten die Legende.
+Neben jedem Eingabefeld, der Chain-Auswahl und den Start-Buttons steht ein i-Symbol: Mit der Maus darüberfahren (am Handy antippen, mit der Tastatur anspringen) zeigt, was der Begriff bedeutet und wofür er gut ist. Die Texte stehen gesammelt in `backtester/forms.py` (`HELP`, `PARAM_TIPS`, `SIZE_TIPS`, `UI_TIPS`); die Erklärungen der Parameter 1 bis 3 wechseln mit der gewählten Strategie.
 
 ## Börsen, Hintergrund-Berechnung, Chain-Vergleich
 - **Börse** (Dropdown): Binance, Kraken, Coinbase, Bybit, OKX, Bitstamp über ccxt. Fehlt ein USDT-Paar, wird USD bzw. USDC genutzt. Begrenzt eine Börse die Historie, erscheint ein Datenhinweis.

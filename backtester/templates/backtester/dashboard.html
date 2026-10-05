@@ -7,6 +7,7 @@
          {% if form.chain.value == c.key %}checked{% endif %}>
   <label for="chain-{{ c.key }}">{{ c.name }} <small>{{ c.symbol }}</small></label>
  {% endfor %}
+ <button type="button" class="tip" data-tip="{{ ui_tips.chain }}" aria-label="Erklärung: Blockchain">i</button>
 </nav>
 {{ form.chain.errors }}
 
@@ -25,12 +26,13 @@
     {% for field in form %}{% if field.name != "chain" %}
      {% if field.name == "stop_loss" %}<h3 class="sect" data-field="risk_heading">Risikomanagement</h3>{% endif %}
      <div class="field" data-field="{{ field.name }}">
-      <label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{{ field.errors }}
+      <div class="lbl"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{% if field.help_text %}<button type="button" class="tip" data-tip="{{ field.help_text }}" aria-label="Erklärung: {{ field.label }}">i</button>{% endif %}</div>
+      {{ field }}{{ field.errors }}{% if field.help_text %}<span id="{{ field.auto_id }}_helptext" class="sr-only">{{ field.help_text }}</span>{% endif %}
      </div>
     {% endif %}{% endfor %}
-    <button type="submit">Backtest starten</button>
-    <button type="submit" name="compare" value="1" class="secondary" title="Gleiche Einstellungen auf Bitcoin, Solana und Ethereum">Auf allen 3 Chains vergleichen</button>
-    <button type="submit" name="compare_strategies" value="1" class="secondary" title="Gleiche Einstellungen mit SMA-Crossover, RSI und Kombiniert auf der gewählten Chain">Strategien vergleichen</button>
+    <button type="submit" data-tip="{{ ui_tips.run }}">Backtest starten</button>
+    <button type="submit" name="compare" value="1" class="secondary" data-tip="{{ ui_tips.compare_chains }}">Auf allen 3 Chains vergleichen</button>
+    <button type="submit" name="compare_strategies" value="1" class="secondary" data-tip="{{ ui_tips.compare_strategies }}">Strategien vergleichen</button>
    </form>
   </div>
 
@@ -308,10 +310,52 @@
  </div>
 </section>
 
+{{ tip_data|json_script:"tipdata" }}
 <script>
- // Felder je Modus/Strategie ein- und ausblenden, Parameter-Beschriftungen anpassen
+ // Tooltips: ein Element für alle Erklärungen (Maus: Hover, Tastatur: Fokus, Touch: Antippen)
+ (function () {
+   const bubble = document.createElement("div");
+   bubble.id = "tip"; bubble.setAttribute("role", "tooltip"); document.body.appendChild(bubble);
+   let current = null;
+   function place(el) {
+     const r = el.getBoundingClientRect();
+     bubble.style.maxWidth = Math.min(320, window.innerWidth - 16) + "px";
+     bubble.style.left = "0px"; bubble.style.top = "0px";
+     const w = bubble.offsetWidth, h = bubble.offsetHeight;
+     const left = Math.max(8, Math.min(r.left + r.width / 2 - w / 2, window.innerWidth - w - 8));
+     let top = r.bottom + 8;
+     if (top + h > window.innerHeight - 8 && r.top - h - 8 > 8) top = r.top - h - 8;  // nach oben ausweichen
+     bubble.style.left = (left + window.scrollX) + "px"; bubble.style.top = (top + window.scrollY) + "px";
+   }
+   function show(el) {
+     const text = el.getAttribute("data-tip");
+     if (!text) return;
+     current = el; bubble.textContent = text; bubble.style.display = "block"; place(el);
+   }
+   function hide() { bubble.style.display = "none"; current = null; }
+   document.addEventListener("pointerover", e => {
+     if (e.pointerType !== "mouse") return;
+     const el = e.target.closest("[data-tip]");
+     if (el) show(el); else hide();
+   });
+   document.addEventListener("focusin", e => { const el = e.target.closest("[data-tip]"); if (el) show(el); });
+   document.addEventListener("focusout", hide);
+   document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+   document.addEventListener("click", e => {
+     const el = e.target.closest(".tip");
+     if (!el) { if (!e.target.closest("[data-tip]")) hide(); return; }
+     e.preventDefault();
+     if (e.pointerType === "mouse") show(el); else if (current === el) hide(); else show(el);  // Touch/Tastatur: umschalten
+   });
+   window.addEventListener("scroll", () => current && place(current), true);
+   window.addEventListener("resize", hide);
+ })();
+</script>
+<script>
+ // Felder je Modus/Strategie ein- und ausblenden, Parameter-Beschriftungen und Erklärungen anpassen
  (function () {
    const f = document.getElementById("bt-form");
+   const TIPS = JSON.parse(document.getElementById("tipdata").textContent);
    const field = n => f.querySelector('[data-field="' + n + '"]');
    const labels = {
      sma_cross: ["SMA fast (kurzes Fenster, Kerzen)", "SMA slow (langes Fenster, Kerzen)", ""],
@@ -335,7 +379,14 @@
        sm === "vol" ? "Ziel-Volatilität (% p. a.)" : "Positionsgröße (% des Kapitals)";
      ["param_a", "param_b", "param_c"].forEach((n, i) => {
        const l = field(n).querySelector("label"); if (labels[strat][i]) l.textContent = labels[strat][i];
+       const b = field(n).querySelector(".tip"), t = (TIPS.params[strat] || [])[i];
+       if (b && t) { b.setAttribute("data-tip", t); const sr = document.getElementById("id_" + n + "_helptext"); if (sr) sr.textContent = t; }  // Erklärung passend zur gewählten Strategie
      });
+     const sb = field("size_value").querySelector(".tip");
+     if (sb) {
+       const t = TIPS.size[sm] || TIPS.size.fixed; sb.setAttribute("data-tip", t);
+       const sr = document.getElementById("id_size_value_helptext"); if (sr) sr.textContent = t;
+     }
    }
    f.elements["mode"].addEventListener("change", sync);
    f.elements["strategy"].addEventListener("change", sync);

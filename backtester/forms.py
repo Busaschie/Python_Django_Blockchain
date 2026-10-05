@@ -8,6 +8,92 @@ from .strategies import LABELS, STRATEGIES, params_from_inputs
 
 MIN_DAYS, MAX_DAYS, EARLIEST = 30, 1500, date(2010, 1, 1)
 
+# --- Erklaerungen (i-Symbol neben jedem Feld): was es ist und wofuer es gut ist ---
+SMA_FAST = ("SMA fast: Länge des kurzen gleitenden Durchschnitts in Kerzen. Er reagiert schnell auf Kursänderungen. "
+            "Kreuzt er den langen Durchschnitt nach oben, entsteht ein Kaufsignal. Typisch: 10 bis 20.")
+SMA_SLOW = ("SMA slow: Länge des langen gleitenden Durchschnitts in Kerzen. Er zeigt den Haupttrend und muss größer "
+            "als fast sein. Typisch: 50 bis 200.")
+PARAM_TIPS = {  # je Strategie die Erklärung für Parameter 1, 2, 3 (das Skript tauscht sie beim Wechsel der Strategie)
+    "sma_cross": [SMA_FAST, SMA_SLOW, ""],
+    "rsi": ["RSI period: Anzahl der Kerzen, aus denen der RSI berechnet wird (Standard 14). Kürzer reagiert nervöser "
+            "und erzeugt mehr Signale, länger glättet stärker.",
+            "RSI low: Kaufschwelle. Fällt der RSI darunter (überverkauft, z. B. 30), wird gekauft, in der Erwartung "
+            "einer Gegenbewegung nach oben.",
+            "RSI high: Verkaufsschwelle. Steigt der RSI darüber (überkauft, z. B. 70), wird verkauft."],
+    "combo": ["SMA fast (Trend-Teil der Kombi-Strategie): " + SMA_FAST.split(": ", 1)[1],
+              "SMA slow (Trend-Teil der Kombi-Strategie): " + SMA_SLOW.split(": ", 1)[1], ""],
+}
+SIZE_TIPS = {
+    "fixed": "Anteil des Kapitals, der je Trade eingesetzt wird (0 bis 100 %). 50 bedeutet eine halbe Position. "
+             "Der Rest bleibt in bar. Weniger Risiko, dafür weniger Gewinn und weniger Verlust.",
+    "vol": "Ziel-Schwankung (Volatilität) in % pro Jahr. Die Position ist Ziel geteilt durch die aktuelle Schwankung, "
+           "höchstens 100 % (kein Hebel). Unruhige Märkte führen zu kleineren Positionen. Kryptowährungen schwanken "
+           "oft 50 bis 80 % p. a.; ein niedriger Wert ist vorsichtiger.",
+}
+HELP = {
+    "strategy": "Das Handelsverfahren, das Kauf- und Verkaufssignale erzeugt. SMA-Crossover folgt dem Trend, RSI kauft "
+                "nach starken Kursrückgängen auf eine Gegenbewegung, Kombiniert verbindet beides. Mit „Strategien "
+                "vergleichen“ siehst du alle drei nebeneinander.",
+    "mode": "Wie ausgewertet wird. Train/Test-Split: Parameter werden auf den ersten Daten gesucht und auf ungesehenen "
+            "Daten geprüft. Walk-Forward: wiederholt das rollierend und ist am aussagekräftigsten. Einzellauf: eigene "
+            "Parameter über den ganzen Zeitraum, schnell, aber anfällig für Überanpassung.",
+    "train_frac": "Anteil des Zeitraums, auf dem die besten Parameter gesucht werden (Training). Der Rest ist die "
+                  "Testphase mit ungesehenen Daten, nur sie zeigt, ob die Strategie wirklich taugt. Üblich: 70 %.",
+    "wf_folds": "Anzahl der Wiederholungen beim Walk-Forward. Jeder Fold trainiert und testet auf einem neuen, weiter "
+                "verschobenen Zeitfenster. Mehr Folds bedeuten mehr Stichproben, aber kürzere Testfenster. Üblich: 4 bis 6.",
+    "wf_train_mult": "Wie viel länger das Trainingsfenster als das Testfenster ist. 3 heißt: Training dreimal so lang "
+                     "wie jeder Test. Längeres Training macht die Parameter stabiler, lässt aber weniger Folds zu.",
+    "param_a": PARAM_TIPS["sma_cross"][0],
+    "param_b": PARAM_TIPS["sma_cross"][1],
+    "param_c": PARAM_TIPS["rsi"][2],
+    "combo_logic": "Wie SMA und RSI zusammenspielen. Trendfilter + RSI-Einstieg: Kauf nur im Aufwärtstrend bei einem "
+                   "Rücksetzer. ODER: long, sobald SMA oder RSI long sind, das ergibt mehr Zeit im Markt.",
+    "rsi_period": "Anzahl der Kerzen für den RSI-Teil der Kombi-Strategie (Standard 14). Wird nicht optimiert, sondern "
+                  "für alle Parameterkombinationen gleich verwendet.",
+    "rsi_entry": "RSI-Schwelle für den Einstieg (Kombi): Gekauft wird, wenn der RSI darunter fällt, beim Trendfilter nur "
+                 "im Aufwärtstrend. Höher steigt früher und öfter ein. Typisch: 30 bis 45.",
+    "rsi_exit": "RSI-Schwelle für den Ausstieg (Kombi): Verkauf, sobald der RSI darüber steigt. Muss über dem "
+                "Einstieg liegen. Typisch: 65 bis 75.",
+    "timeframe": "Länge einer Kerze: 1h = eine Stunde, 4h = vier Stunden, 1d = ein Tag. Kürzere Zeitfenster liefern mehr "
+                 "Signale und Trades, aber mehr Rauschen, mehr Kosten und mehr Daten (längere Ladezeit). Nicht jede "
+                 "Börse bietet jedes Zeitfenster an.",
+    "start_date": f"Beginn des ausgewerteten Zeitraums (UTC, einschließlich). Zwischen Von und Bis müssen "
+                  f"{MIN_DAYS} bis {MAX_DAYS} Tage liegen, Daten gibt es ab 2010. Längere Zeiträume enthalten mehr "
+                  f"Marktphasen und sind aussagekräftiger.",
+    "end_date": "Ende des Zeitraums (UTC, einschließlich), höchstens heute. Es zählen nur abgeschlossene Kerzen, die "
+                "laufende Kerze von heute ist noch nicht dabei.",
+    "fee": "Handelsgebühr der Börse je Kauf und je Verkauf als Anteil des Handelsbetrags: 0.001 sind 0,1 %, ein "
+           "üblicher Wert im Spot-Handel. Ohne Gebühren wirken Strategien mit vielen Trades zu gut.",
+    "slippage": "Pauschaler Aufschlag je Kauf und Verkauf für Spread und ungünstigere Ausführung (der Preis weicht vom "
+                "erwarteten ab): 0.0005 sind 0,05 %. Macht Ergebnisse realistischer, vor allem bei vielen Trades.",
+    "stop_loss": "Verkauft automatisch, wenn der Kurs um diesen Prozentsatz unter den Einstiegskurs fällt. Begrenzt den "
+                 "Verlust je Trade, kann aber bei kurzen Rücksetzern zu früh aussteigen. Leer = aus.",
+    "take_profit": "Verkauft automatisch, sobald der Kurs diesen Prozentsatz über dem Einstiegskurs liegt. Sichert "
+                   "Gewinne, schneidet aber starke Trends ab. Leer = aus.",
+    "trailing_stop": "Stop, der dem Höchstkurs seit dem Einstieg nach oben folgt und nie sinkt. Verkauft, wenn der Kurs "
+                     "um diesen Prozentsatz unter den Höchststand fällt. Sichert Gewinne in Trends. Leer = aus.",
+    "size_mode": "Wie viel Kapital je Trade eingesetzt wird. Voll investiert: 100 %. Feste Größe: ein fester Anteil. "
+                 "Volatilitätsziel: je unruhiger der Markt, desto kleiner die Position (höchstens 100 %, kein Hebel). "
+                 "Weniger Risiko, dafür meist weniger Rendite.",
+    "size_value": SIZE_TIPS["fixed"],
+    "execution": "Zu welchem Preis ein Signal umgesetzt wird. Eröffnungskurs der Folgekerze: realistisch, weil das "
+                 "Signal erst nach Kerzenende bekannt ist. Schlusskurs der Signalkerze: optimistischer, die "
+                 "Ergebnisse fallen meist etwas besser aus.",
+    "source": "Woher die Kursdaten kommen. Börse (ccxt): echte historische Kurse. Synthetisch: künstliche Zufallskurse "
+              "zum Testen ohne Internet, sie enthalten kein echtes Marktmuster.",
+    "exchange": "Börse, von der die Kurse geladen werden. Preise und Länge der Historie unterscheiden sich leicht, manche "
+                "Börsen sind regional gesperrt. Geladene Kerzen werden zwischengespeichert.",
+}
+UI_TIPS = {
+    "chain": "Die Kryptowährung, deren Kurse ausgewertet werden: Bitcoin (BTC), Solana (SOL) oder Ethereum (ETH), jeweils "
+             "gegen USDT bzw. USD. Der Chain-Vergleich testet alle drei auf einmal.",
+    "run": "Startet einen Backtest mit diesen Einstellungen. Er läuft im Hintergrund, die Seite aktualisiert sich selbst.",
+    "compare_chains": "Startet dieselben Einstellungen auf Bitcoin, Solana und Ethereum und zeigt die Ergebnisse "
+                      "nebeneinander.",
+    "compare_strategies": "Startet dieselben Einstellungen mit SMA-Crossover, RSI und Kombiniert auf der gewählten "
+                          "Chain und zeigt die Ergebnisse nebeneinander. Im Einzellauf gelten Standardparameter.",
+}
+
 
 def _date_widget():
     return forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d")
@@ -68,6 +154,8 @@ class BacktestForm(forms.Form):
         super().__init__(*args, **kwargs)
         for name in ("start_date", "end_date"):  # Datumsauswahl im Browser auf heute begrenzen
             self.fields[name].widget.attrs["max"] = date.today().isoformat()
+        for name, text in HELP.items():  # Erklärung für das i-Symbol neben dem Feld
+            self.fields[name].help_text = text
 
     def clean_size_mode(self):
         return self.cleaned_data.get("size_mode") or "full"

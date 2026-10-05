@@ -29,7 +29,16 @@
  .scroll{overflow-x:auto}
  table{border-collapse:collapse;width:100%} td,th{padding:.28rem .5rem;border-bottom:1px solid var(--line);text-align:left;font-size:.9rem}
  th{font-weight:600;color:#394150}
- .field{margin:.4rem 0} .field label{display:block;font-size:.82rem;color:var(--muted);margin-bottom:.15rem}
+ .field{margin:.4rem 0} .field label{display:block;font-size:.82rem;color:var(--muted)}
+ .lbl{display:flex;align-items:center;gap:.35rem;margin-bottom:.15rem}
+ /* Erklärungs-Symbol (i) und Tooltip */
+ .tip{display:inline-flex;align-items:center;justify-content:center;flex:none;width:1.05rem;height:1.05rem;padding:0;margin:0;
+   border:1px solid var(--muted);border-radius:50%;background:none;color:var(--muted);font:italic 700 .72rem/1 Georgia,serif;cursor:help}
+ .tip:hover,.tip:focus-visible{background:var(--accent);border-color:var(--accent);color:#fff;outline:none}
+ .chains .tip{align-self:center}
+ .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+ #tip{position:absolute;z-index:1000;display:none;max-width:320px;background:#1c2330;color:#fff;padding:.55rem .7rem;border-radius:6px;
+   font-size:.8rem;line-height:1.45;box-shadow:0 6px 18px rgba(0,0,0,.28);pointer-events:none}
  .field input:not([type=radio]),.field select{width:100%;padding:.4rem .5rem;border:1px solid var(--line);border-radius:6px;font:inherit;background:#fff}
  button{background:var(--accent);color:#fff;border:0;border-radius:6px;padding:.55rem 1rem;font:inherit;font-weight:600;cursor:pointer;margin-top:.5rem}
  button.secondary{background:#fff;color:var(--accent);border:1px solid var(--accent);margin-left:.4rem}
