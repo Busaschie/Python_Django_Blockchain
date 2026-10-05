@@ -4,8 +4,12 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d8010543-1eed-4775-a043-da519baf32cf" name="Changes" comment="Admin">
+    <list default="true" id="d8010543-1eed-4775-a043-da519baf32cf" name="Changes" comment="Admin 2">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/accounts/mailapi.py" beforeDir="false" afterPath="$PROJECT_DIR$/accounts/mailapi.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/automigrate.py" beforeDir="false" afterPath="$PROJECT_DIR$/config/automigrate.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/config/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gunicorn.conf.py" beforeDir="false" afterPath="$PROJECT_DIR$/gunicorn.conf.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -30,22 +34,22 @@
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
       <entry key="MS100" value="1.0" />
-      <entry key="MS500" value="1.0" />
-      <entry key="S2" value="1.0" />
-      <entry key="S5" value="1.0" />
-      <entry key="S10" value="1.0" />
-      <entry key="S30" value="1.0000000137561686" />
-      <entry key="S60" value="1.0001931445342105" />
-      <entry key="M2" value="1.0236965186095914" />
-      <entry key="M5" value="1.4309423761728026" />
-      <entry key="M10" value="2.1511954154506894" />
-      <entry key="M15" value="2.6618901627369347" />
-      <entry key="M30" value="3.830977254489181" />
-      <entry key="H1" value="5.861511154084495" />
-      <entry key="H2" value="8.846098458723617" />
-      <entry key="H4" value="11.845201085600097" />
-      <entry key="D1" value="15.926760613098171" />
-      <entry key="W1" value="16.840292242821437" />
+      <entry key="MS500" value="1.0000046899370851" />
+      <entry key="S2" value="1.0465362896784567" />
+      <entry key="S5" value="1.2931680927633837" />
+      <entry key="S10" value="1.5414499910087578" />
+      <entry key="S30" value="1.8150535116625561" />
+      <entry key="S60" value="1.9029775064271326" />
+      <entry key="M2" value="1.9726750043241048" />
+      <entry key="M5" value="2.4019765736322722" />
+      <entry key="M10" value="3.1293113522706464" />
+      <entry key="M15" value="3.643806515226778" />
+      <entry key="M30" value="4.817942136557471" />
+      <entry key="H1" value="6.851530594506001" />
+      <entry key="H2" value="9.83856399999287" />
+      <entry key="H4" value="12.840155573683003" />
+      <entry key="D1" value="16.92562973421971" />
+      <entry key="W1" value="17.840121417030407" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -67,23 +71,23 @@
       <entry key="W1" value="0.0" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.0802141185976815" />
-      <entry key="MS500" value="0.6037402957432482" />
-      <entry key="S2" value="0.88148015790717" />
-      <entry key="S5" value="0.9507908997003193" />
-      <entry key="S10" value="0.9750850730578944" />
-      <entry key="S30" value="0.9916250934585611" />
-      <entry key="S60" value="0.995989226239872" />
-      <entry key="M2" value="1.0211565504958664" />
-      <entry key="M5" value="1.4270581953592767" />
-      <entry key="M10" value="2.1468338687017994" />
-      <entry key="M15" value="2.65798999871504" />
-      <entry key="M30" value="3.828220391290663" />
-      <entry key="H1" value="5.859652979803116" />
-      <entry key="H2" value="8.844906750886237" />
-      <entry key="H4" value="11.844499063829415" />
-      <entry key="D1" value="15.926623266121306" />
-      <entry key="W1" value="16.84027202928282" />
+      <entry key="MS100" value="0.9265880618903709" />
+      <entry key="MS500" value="0.9848692743995533" />
+      <entry key="S2" value="1.0372157641072342" />
+      <entry key="S5" value="1.2772177929902035" />
+      <entry key="S10" value="1.5271976327415666" />
+      <entry key="S30" value="1.807973381886175" />
+      <entry key="S60" value="1.8990551269028235" />
+      <entry key="M2" value="1.9701980929386054" />
+      <entry key="M5" value="2.3981456031435378" />
+      <entry key="M10" value="3.1249814678223884" />
+      <entry key="M15" value="3.6399243753478467" />
+      <entry key="M30" value="4.815190417852271" />
+      <entry key="H1" value="6.849673466242656" />
+      <entry key="H2" value="9.837372248190642" />
+      <entry key="H4" value="12.83945332145408" />
+      <entry key="D1" value="16.92549230874726" />
+      <entry key="W1" value="17.840101191089985" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo"><![CDATA[{
@@ -157,7 +161,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1791181412234</updated>
-      <workItem from="1791181413299" duration="8127000" />
+      <workItem from="1791181413299" duration="8536000" />
     </task>
     <task id="LOCAL-00001" summary="Backtest Manuell">
       <option name="closed" value="true" />
@@ -207,7 +211,15 @@
       <option name="project" value="LOCAL" />
       <updated>1791198096523</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="Admin 2">
+      <option name="closed" value="true" />
+      <created>1791198932552</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1791198932552</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -220,6 +232,7 @@
     <MESSAGE value="Login" />
     <MESSAGE value="Email Api" />
     <MESSAGE value="Admin" />
-    <option name="LAST_COMMIT_MESSAGE" value="Admin" />
+    <MESSAGE value="Admin 2" />
+    <option name="LAST_COMMIT_MESSAGE" value="Admin 2" />
   </component>
 </project>

@@ -88,6 +88,7 @@ TIME_ZONE = "Europe/Berlin"
 USE_TZ = True
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"   # Admin-CSS/JS; wird beim Start gesammelt (config/automigrate.py)
+WHITENOISE_USE_FINDERS = True   # Admin-Static auch ohne collectstatic direkt aus den Paketen ausliefern
 STORAGES = {"default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
             "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"}}
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

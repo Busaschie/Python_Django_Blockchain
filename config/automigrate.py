@@ -16,7 +16,6 @@ def run() -> None:
     import django
     from django.core.management import call_command
     django.setup()
-    collect_static()
     from django.db import connections
     for attempt in range(1, 4):
         try:
