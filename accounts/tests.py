@@ -120,3 +120,24 @@ class AdminTests(TestCase):
                 automigrate.ensure_admin()   # bestehendes Passwort bleibt
             u.refresh_from_db()
             self.assertTrue(u.check_password("pw-Aaaa-1234"))
+
+
+class DeleteRunTests(TestCase):
+    def test_delete_own_only(self):
+        from backtester.models import BacktestRun
+        a = User.objects.create_user("a@b.de", "a@b.de", "pw-Aaaa-1234")
+        b = User.objects.create_user("b@b.de", "b@b.de", "pw-Bbbb-1234")
+        mk = lambda o: BacktestRun.objects.create(owner=o, chain="btc", symbol="BTC/USDT", timeframe="1d",
+                                                  strategy="rsi", days=10, status="done")
+        ra, rb, rc = mk(a), mk(b), mk(a)
+        self.client.force_login(a)
+        self.assertEqual(self.client.get(f"/loeschen/{ra.pk}/").status_code, 405)      # nur POST
+        self.assertEqual(self.client.post(f"/loeschen/{rb.pk}/").status_code, 404)     # fremder Lauf
+        self.assertTrue(BacktestRun.objects.filter(pk=rb.pk).exists())
+        self.assertIn(f"/loeschen/{ra.pk}/", self.client.get("/").content.decode())
+        self.assertNotIn(f"/loeschen/{rb.pk}/", self.client.get("/").content.decode())
+        r = self.client.post(f"/loeschen/{ra.pk}/", {"next": f"/run/{ra.pk}/"})        # gerade angezeigter Lauf
+        self.assertRedirects(r, "/", fetch_redirect_response=False)
+        r = self.client.post(f"/loeschen/{rc.pk}/", {"next": "https://evil.example/"})   # kein Open Redirect
+        self.assertRedirects(r, "/", fetch_redirect_response=False)
+        self.assertFalse(BacktestRun.objects.filter(owner=a).exists())

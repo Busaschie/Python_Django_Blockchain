@@ -3,6 +3,8 @@ from collections import Counter
 from datetime import timedelta
 
 from django.http import Http404, JsonResponse
+from django.utils.http import url_has_allowed_host_and_scheme
+from django.views.decorators.http import require_POST
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
@@ -160,3 +162,16 @@ def status(request):
     runs = BacktestRun.objects.filter(owner=request.user, pk__in=ids)
     return JsonResponse({"runs": [{"id": r.pk, "status": r.status} for r in runs],
                          "pending": sum(r.is_pending for r in runs)})
+
+
+@require_POST
+def delete_run(request, pk):
+    """Eigenen Lauf loeschen (fremde Laeufe: 404). Danach zurueck zur aktuellen Seite bzw. zur Startseite."""
+    run = get_object_or_404(BacktestRun, pk=pk, owner=request.user)
+    here = request.POST.get("next", "")
+    run.delete()
+    gone = (f"/run/{pk}/", )
+    if here and here not in gone and url_has_allowed_host_and_scheme(here, request.get_host()):
+        if not here.startswith("/vergleich/") or BacktestRun.objects.filter(owner=request.user, batch=here.split("/")[2]).exists():
+            return redirect(here)
+    return redirect("index")

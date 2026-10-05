@@ -91,3 +91,5 @@ Static-Dateien liefert WhiteNoise (werden beim Start per `collectstatic` gesamme
 
 ## Robustheit (Monte-Carlo)
 Jeder Lauf mit mindestens 5 Trades bekommt einen Robustheits-Test (`backtester/montecarlo.py`, fester Seed, 1.000 Durchläufe): Bootstrap der Trades (Gewinnwahrscheinlichkeit, Rendite- und Drawdown-Spanne, Fächer-Chart) und Vergleich mit Zufalls-Einstiegen gleicher Haltedauer (p-Wert). Unter 30 Trades Hinweis „statistisch nicht belastbar“. Ältere Läufe haben den Block nicht (neu starten).
+
+Gelaufene Auswertungen löschen: rotes × rechts neben dem Titel in der Verlaufsliste (mit Rückfrage, nur eigene Läufe, nur per POST).

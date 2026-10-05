@@ -218,6 +218,9 @@
    <ul>
     {% for r in g.runs %}
     <li {% if r.pk == run.pk or r.batch and r.batch == batch_runs.0.batch %}class="cur"{% endif %}>
+     <form method="post" action="{% url 'delete' r.pk %}" class="delform" onsubmit="return confirm('Diese Auswertung wirklich löschen?')">{% csrf_token %}
+      <input type="hidden" name="next" value="{{ request.path }}">
+      <button type="submit" class="del" title="Auswertung löschen" aria-label="Auswertung löschen">×</button></form>
      <a href="{% url 'detail' r.pk %}">{{ r.strategy_label }} · {{ r.timeframe }} · {{ r.mode_label }}</a>
      {% if r.status == "done" %}<span class="small">{{ r.created_at|date:"d.m. H:i" }} · {{ r.source_label }} · {{ r.metrics.total_return_pct }} % (B&amp;H {{ r.metrics.buyhold_return_pct }} %)</span>
      {% elif r.status == "error" %}<span class="small err">{{ r.created_at|date:"d.m. H:i" }} · {{ r.source_label }} · ⚠ Fehler</span>
