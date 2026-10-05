@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 
 from .chains import CHAIN_CHOICES, EXCHANGES
@@ -5,6 +6,8 @@ from .strategies import LABELS
 
 
 class BacktestRun(models.Model):
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.CASCADE,
+                              related_name="runs")
     chain = models.CharField(max_length=3, choices=CHAIN_CHOICES, default="btc")
     symbol = models.CharField(max_length=20)
     timeframe = models.CharField(max_length=5)

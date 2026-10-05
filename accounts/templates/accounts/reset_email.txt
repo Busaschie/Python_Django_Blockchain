@@ -1,0 +1,9 @@
+{% autoescape off %}Hallo,
+
+für dein Konto ({{ user.get_username }}) wurde das Zurücksetzen des Passworts angefordert.
+Öffne diesen Link, um ein neues Passwort festzulegen:
+
+{{ protocol }}://{{ domain }}{% url 'password_reset_confirm' uidb64=uid token=token %}
+
+Wenn du das nicht warst, ignoriere diese Nachricht - dein Passwort bleibt unverändert.
+{% endautoescape %}

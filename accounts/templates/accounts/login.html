@@ -1,0 +1,6 @@
+{% extends "accounts/base.html" %}
+{% block auth %}<h2>Anmelden</h2>
+<form method="post">{% csrf_token %}{% for f in form %}<div class="field"><label for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}{{ f.errors }}</div>{% endfor %}{{ form.non_field_errors }}<input type="hidden" name="next" value="{{ next }}">
+<button>Anmelden</button></form>
+<p class="alt">Noch kein Konto? <a href="{% url 'register' %}">Konto erstellen</a><br>
+<a href="{% url 'forgot' %}">Passwort vergessen?</a></p>{% endblock %}

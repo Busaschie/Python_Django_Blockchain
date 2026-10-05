@@ -79,3 +79,8 @@ Stop-Loss, Take-Profit, Trailing-Stop und Positionsgröße (voll / fest / Volati
 - Stops: Stop zuerst, wenn Stop und Ziel in derselben Kerze möglich sind; Kurslücken werden zum Open ausgeführt; kein Wiedereinstieg bis zu einem neuen Signal
 - Risiko-Einstellungen sind nicht Teil der Grid-Search
 - Long-only, kein Hebel
+
+## Anmeldung
+Alle Seiten außer Anmelden/Registrieren/Passwort vergessen erfordern eine Sitzung (Benutzername = E-Mail, Django-Auth, Konten in der Neon-DB). Seiten: `/anmelden/`, `/registrieren/`, `/passwort-vergessen/` (Reset-Link per E-Mail, einmal nutzbar), `/konto/` (Passwort ändern).
+**E-Mail-Versand** auf Render über Umgebungsvariablen: `EMAIL_HOST`, `EMAIL_PORT` (587), `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`, optional `EMAIL_USE_TLS` (1), `DEFAULT_FROM_EMAIL`. Ohne `EMAIL_HOST` wird die Mail nur ins Log geschrieben (Entwicklung).
+Jeder Benutzer sieht nur seine eigenen Auswertungen (Verlauf, Detail, Vergleich, Status). Früher angelegte Läufe ohne Besitzer sind nicht mehr sichtbar.

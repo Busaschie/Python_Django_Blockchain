@@ -1,0 +1,4 @@
+{% extends "accounts/base.html" %}
+{% block auth %}<h2>Link gesendet</h2>
+<div class="msg">Falls ein Konto zu dieser E-Mail existiert, wurde ein Link zum Zurücksetzen gesendet. Er ist begrenzt gültig.</div>
+<p class="alt"><a href="{% url 'login' %}">Zurück zur Anmeldung</a></p>{% endblock %}

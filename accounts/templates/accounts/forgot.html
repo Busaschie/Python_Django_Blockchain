@@ -1,0 +1,6 @@
+{% extends "accounts/base.html" %}
+{% block auth %}<h2>Passwort vergessen</h2>
+<p class="small">Wir senden dir einen Link, mit dem du ein neues Passwort festlegen kannst.</p>
+<form method="post">{% csrf_token %}{% for f in form %}<div class="field"><label for="{{ f.id_for_label }}">E-Mail</label>{{ f }}{{ f.errors }}</div>{% endfor %}
+<button>Link senden</button></form>
+<p class="alt"><a href="{% url 'login' %}">Zurück zur Anmeldung</a></p>{% endblock %}

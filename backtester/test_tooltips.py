@@ -36,6 +36,8 @@ class TooltipContentTests(TestCase):
 
 class TooltipRenderTests(TestCase):
     def setUp(self):
+        from django.contrib.auth import get_user_model
+        self.client.force_login(get_user_model().objects.create_user("t@t.de", "t@t.de", "x"))
         self.html = self.client.get("/").content.decode()
 
     def test_every_field_has_an_info_icon_with_text(self):

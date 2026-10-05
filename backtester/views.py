@@ -15,11 +15,11 @@ from .strategies import STRATEGIES, default_inputs, params_from_inputs
 STALE_AFTER = timedelta(minutes=15)
 
 
-def _history():
+def _history(user):
     """Gelaufene Auswertungen, gegliedert nach Chain."""
     return [{"key": k, "name": m["name"], "symbol": m["symbol"],
-             "total": BacktestRun.objects.filter(chain=k).count(),
-             "runs": BacktestRun.objects.filter(chain=k)[:20]} for k, m in CHAINS.items()]
+             "total": BacktestRun.objects.filter(owner=user, chain=k).count(),
+             "runs": BacktestRun.objects.filter(owner=user, chain=k)[:20]} for k, m in CHAINS.items()]
 
 
 def _expire_stale():
@@ -94,10 +94,10 @@ def _job_for_strategy(d: dict, strategy: str) -> dict:
 
 def dashboard(request, pk=None, batch=None):
     _expire_stale()
-    run = get_object_or_404(BacktestRun, pk=pk) if pk else None
+    run = get_object_or_404(BacktestRun, pk=pk, owner=request.user) if pk else None
     batch_runs = None
     if batch:
-        found = list(BacktestRun.objects.filter(batch=batch))
+        found = list(BacktestRun.objects.filter(owner=request.user, batch=batch))
         if not found:
             raise Http404
         order = list(CHAINS)
@@ -121,7 +121,7 @@ def dashboard(request, pk=None, batch=None):
             created = []
             for ch, strategy, job in variants:
                 new = BacktestRun.objects.create(
-                    chain=ch, symbol=CHAINS[ch]["symbol"], timeframe=d["timeframe"],
+                    owner=request.user, chain=ch, symbol=CHAINS[ch]["symbol"], timeframe=d["timeframe"],
                     strategy=strategy, days=(d["end_date"] - d["start_date"]).days + 1,
                     start_date=d["start_date"], end_date=d["end_date"], fee=d["fee"], slippage=d["slippage"],
                     source=d["source"],
@@ -144,7 +144,7 @@ def dashboard(request, pk=None, batch=None):
     compare_kind = _compare_kind(batch_runs) if batch_runs else ""
     compare_data = _compare_payload(batch_runs, compare_kind) if batch_runs else {}
     return render(request, "backtester/dashboard.html", {
-        "form": form, "run": run, "groups": _history(),
+        "form": form, "run": run, "groups": _history(request.user),
         "blocks": ExchangeBlock.objects.filter(until__gt=timezone.now()),
         "run_done": bool(run and run.status == "done"), "exit_reasons": exit_reasons,
         "batch_runs": batch_runs, "compare_data": compare_data, "compare_kind": compare_kind,
@@ -157,6 +157,6 @@ def dashboard(request, pk=None, batch=None):
 def status(request):
     """Status-Abfrage fuer die automatische Aktualisierung waehrend der Berechnung."""
     ids = [int(x) for x in request.GET.get("ids", "").split(",") if x.isdigit()]
-    runs = BacktestRun.objects.filter(pk__in=ids)
+    runs = BacktestRun.objects.filter(owner=request.user, pk__in=ids)
     return JsonResponse({"runs": [{"id": r.pk, "status": r.status} for r in runs],
                          "pending": sum(r.is_pending for r in runs)})
