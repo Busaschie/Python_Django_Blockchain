@@ -4,10 +4,14 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d8010543-1eed-4775-a043-da519baf32cf" name="Changes" comment="Admin 3">
-      <change beforePath="$PROJECT_DIR$/accounts/templates/accounts/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/accounts/templates/accounts/base.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtester/templates/backtester/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/templates/backtester/base.html" afterDir="false" />
+    <list default="true" id="d8010543-1eed-4775-a043-da519baf32cf" name="Changes" comment="Design">
+      <change afterPath="$PROJECT_DIR$/backtester/montecarlo.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtester/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/forms.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtester/jobs.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/jobs.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backtester/templates/backtester/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/templates/backtester/dashboard.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtester/test_tooltips.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/test_tooltips.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtester/tests.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/tests.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -31,23 +35,23 @@
 }]]></component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0" />
-      <entry key="MS500" value="1.0" />
-      <entry key="S2" value="1.0" />
-      <entry key="S5" value="1.0" />
-      <entry key="S10" value="1.0000000000007" />
-      <entry key="S30" value="1.0001395121846326" />
-      <entry key="S60" value="1.0166838012604715" />
-      <entry key="M2" value="1.1847082178971093" />
-      <entry key="M5" value="1.931410303769736" />
-      <entry key="M10" value="2.9486547969582446" />
-      <entry key="M15" value="3.657129564347097" />
-      <entry key="M30" value="5.1142463411335015" />
-      <entry key="H1" value="7.331432150812489" />
-      <entry key="H2" value="10.457773149836445" />
-      <entry key="H4" value="13.589221498765589" />
-      <entry key="D1" value="17.87004602722668" />
-      <entry key="W1" value="18.831740057147" />
+      <entry key="MS100" value="1.0287558640820313" />
+      <entry key="MS500" value="1.493353966868352" />
+      <entry key="S2" value="2.1573281870890133" />
+      <entry key="S5" value="2.8879508361329718" />
+      <entry key="S10" value="3.347172147080924" />
+      <entry key="S30" value="3.756122137600777" />
+      <entry key="S60" value="3.8746842070505854" />
+      <entry key="M2" value="3.9551694391369017" />
+      <entry key="M5" value="4.343226357373776" />
+      <entry key="M10" value="5.275848761064536" />
+      <entry key="M15" value="6.09760808477833" />
+      <entry key="M30" value="7.876863718664068" />
+      <entry key="H1" value="10.384587679412762" />
+      <entry key="H2" value="13.759702055836529" />
+      <entry key="H4" value="17.128025098729267" />
+      <entry key="D1" value="21.767537888568544" />
+      <entry key="W1" value="22.81627063846304" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -69,23 +73,23 @@
       <entry key="W1" value="0.0" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.8179020585577811" />
-      <entry key="MS500" value="0.9605948639534766" />
-      <entry key="S2" value="0.9899997047180724" />
-      <entry key="S5" value="0.9959878167538044" />
-      <entry key="S10" value="0.9979918921289835" />
-      <entry key="S30" value="0.9994691501315379" />
-      <entry key="S60" value="1.0163144479159858" />
-      <entry key="M2" value="1.1843087997856585" />
-      <entry key="M5" value="1.929857772983023" />
-      <entry key="M10" value="2.945925031227887" />
-      <entry key="M15" value="3.6542763032935417" />
-      <entry key="M30" value="5.111885363824035" />
-      <entry key="H1" value="7.329710413148464" />
-      <entry key="H2" value="10.456624731644297" />
-      <entry key="H4" value="13.58853157467218" />
-      <entry key="D1" value="17.869908820405445" />
-      <entry key="W1" value="18.831719807472584" />
+      <entry key="MS100" value="0.9798427031469451" />
+      <entry key="MS500" value="1.4782458592529504" />
+      <entry key="S2" value="2.1505455330111425" />
+      <entry key="S5" value="2.8833034072125527" />
+      <entry key="S10" value="3.344190845092647" />
+      <entry key="S30" value="3.7549271773152664" />
+      <entry key="S60" value="3.874057122386563" />
+      <entry key="M2" value="3.954841827361349" />
+      <entry key="M5" value="4.342799382345969" />
+      <entry key="M10" value="5.274590158036509" />
+      <entry key="M15" value="6.095921078759579" />
+      <entry key="M30" value="7.87505007327796" />
+      <entry key="H1" value="10.38307682993799" />
+      <entry key="H2" value="13.758624692665931" />
+      <entry key="H4" value="17.127355819048653" />
+      <entry key="D1" value="21.767401010849625" />
+      <entry key="W1" value="22.816250340082956" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo"><![CDATA[{
@@ -159,7 +163,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1791181412234</updated>
-      <workItem from="1791181413299" duration="9168000" />
+      <workItem from="1791181413299" duration="9828000" />
     </task>
     <task id="LOCAL-00001" summary="Backtest Manuell">
       <option name="closed" value="true" />
@@ -225,7 +229,15 @@
       <option name="project" value="LOCAL" />
       <updated>1791199336405</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="Design">
+      <option name="closed" value="true" />
+      <created>1791200062643</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1791200062644</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -240,6 +252,7 @@
     <MESSAGE value="Admin" />
     <MESSAGE value="Admin 2" />
     <MESSAGE value="Admin 3" />
-    <option name="LAST_COMMIT_MESSAGE" value="Admin 3" />
+    <MESSAGE value="Design" />
+    <option name="LAST_COMMIT_MESSAGE" value="Design" />
   </component>
 </project>

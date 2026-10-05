@@ -234,3 +234,36 @@ class IndicatorBackendTests(SimpleTestCase):
             self.assertEqual(indicators.backend(), "pandas (Ersatz)")
         with mock.patch.object(indicators, "talib", object()):
             self.assertEqual(indicators.backend(), "TA-Lib")
+
+
+class MonteCarloTests(TestCase):
+    def _curves(self, rets, n=400):
+        import numpy as np
+        close = (100 * np.cumprod(1 + np.random.default_rng(1).normal(0.001, 0.02, n))).tolist()
+        idx = [f"t{i}" for i in range(n)]
+        trades = [{"entry_ts": idx[10 + 12 * i], "exit_ts": idx[16 + 12 * i], "ret_pct": r, "size_pct": 100.0}
+                  for i, r in enumerate(rets)]
+        return {"index": idx, "close": close, "trades": trades}
+
+    def test_too_few_trades(self):
+        from . import montecarlo
+        self.assertFalse(montecarlo.analyze(self._curves([1, 2, 3]), 0.001)["ok"])
+
+    def test_distribution_and_random_baseline(self):
+        from . import montecarlo
+        mc = montecarlo.analyze(self._curves([5, -2, 4, 6, -1, 3, 5, -2, 4, 3] * 3), 0.001)
+        self.assertTrue(mc["ok"])
+        self.assertEqual(mc["n_trades"], 30)
+        self.assertLessEqual(mc["return_p5"], mc["return_p50"])
+        self.assertLessEqual(mc["return_p50"], mc["return_p95"])
+        self.assertLessEqual(mc["dd_p95"], mc["dd_median"] + 1e-9)   # 95-%-Fall ist schlechter
+        self.assertGreater(mc["prob_profit"], 90)                    # klar positive Trades
+        self.assertEqual(len(mc["fan"]["50"]), 31)
+        self.assertTrue(mc["beats_random"])                          # +Ø 2,6 % je Trade vs. Zufall ~0
+        self.assertEqual(mc, montecarlo.analyze(self._curves([5, -2, 4, 6, -1, 3, 5, -2, 4, 3] * 3), 0.001))  # deterministisch
+
+    def test_losing_strategy_not_better_than_random(self):
+        from . import montecarlo
+        mc = montecarlo.analyze(self._curves([-3, 1, -4, 2, -2, -3, 1, -2] * 3), 0.001)
+        self.assertLess(mc["prob_profit"], 10)
+        self.assertFalse(mc["beats_random"])

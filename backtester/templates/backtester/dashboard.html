@@ -161,6 +161,26 @@
   {% if run_done %}
   <div class="box"><div id="price" style="height:380px"></div></div>
   <div class="box"><div id="chart" style="height:330px"></div></div>
+  {% with mc=run.curves.mc %}{% if mc %}
+  <div class="box" id="mcbox">
+   <h3 class="lbl">Robustheit (Monte-Carlo) <button type="button" class="tip" data-tip="{{ ui_tips.montecarlo }}" aria-label="Erklärung: Robustheit">i</button></h3>
+   {% if mc.ok %}
+   {% if mc.n_trades < mc.reliable_trades %}<p class="err small">Nur {{ mc.n_trades }} Trades (unter {{ mc.reliable_trades }}): statistisch nicht belastbar, die Verteilung ist nur ein Anhaltspunkt.</p>{% endif %}
+   <table>
+    <tr><td>Wahrscheinlichkeit auf Gewinn</td><td>{{ mc.prob_profit }} %</td></tr>
+    <tr><td>Rendite (5 % / Median / 95 %)</td><td>{{ mc.return_p5 }} % / {{ mc.return_p50 }} % / {{ mc.return_p95 }} %</td></tr>
+    <tr><td>Max Drawdown (Median / 95-%-Fall)</td><td>{{ mc.dd_median }} % / {{ mc.dd_p95 }} %</td></tr>
+    {% if mc.p_value is not None %}
+    <tr><td>Zufalls-Einstiege (Median)</td><td>{{ mc.random_median }} % (95 %: {{ mc.random_p95 }} %)</td></tr>
+    <tr><td>Besser als Zufall?</td><td>{% if mc.beats_random %}<strong class="good">ja</strong>{% else %}<strong class="err">nein</strong>{% endif %} (p = {{ mc.p_value }})</td></tr>
+    {% endif %}
+   </table>
+   <div id="mcfan" style="height:300px"></div>
+   {% else %}
+   <p class="small muted">Zu wenige Trades ({{ mc.n_trades }}, mindestens {{ mc.min_trades }} nötig) für einen Robustheits-Test.</p>
+   {% endif %}
+  </div>
+  {% endif %}{% endwith %}
   {% if run.validation.kind == "split" %}<div class="box"><div id="heatmap" style="height:340px"></div></div>{% endif %}
   {% if run.curves.trades %}
   <div class="box">
@@ -272,6 +292,8 @@
   <dl>
    <div class="term"><dt>Rendite Strategie</dt><dd>Gesamtveränderung des Kapitals im Zeitraum nach Gebühren, ausgehend von 10.000 Startkapital.</dd></div>
    <div class="term"><dt>Buy &amp; Hold (B&amp;H)</dt><dd>Vergleichsstrategie: am Anfang kaufen, am Ende verkaufen. Eine Strategie lohnt sich nur, wenn sie B&amp;H schlägt, am besten bei geringerem Risiko.</dd></div>
+   <div class="term"><dt>Monte-Carlo / Robustheit</dt><dd>Die Trades eines Laufs werden 1.000-mal mit Zurücklegen neu gezogen. Das ergibt eine Verteilung statt einer einzelnen Zahl: „Wahrscheinlichkeit auf Gewinn“ ist der Anteil der Durchläufe mit positiver Rendite, „95-%-Fall“ beim Drawdown der Wert, der nur in 5 % der Durchläufe unterschritten wird (realistischer Worst Case). Der Chart zeigt den Fächer (Bänder 5–95 % und 25–75 %, Median) und die tatsächliche Reihenfolge gestrichelt.</dd></div>
+   <div class="term"><dt>Besser als Zufall (p-Wert)</dt><dd>Dieselben Haltedauern werden 1.000-mal an zufälligen Zeitpunkten eingekauft (gleiche Kosten und Positionsgröße). Der p-Wert ist der Anteil dieser Zufallsläufe, die mindestens so gut abschneiden wie die Strategie. Unter 0,05 gilt sie als besser als Zufall. Bei unter 30 Trades ist die Aussage statistisch nicht belastbar.</dd></div>
    <div class="term"><dt>Equity-Kurve</dt><dd>Verlauf des Kapitals über die Zeit.</dd></div>
    <div class="term"><dt>Max Drawdown (MDD)</dt><dd>Größter prozentualer Rückgang der Equity vom bisherigen Höchststand bis zum folgenden Tiefpunkt, ein Maß für den schlimmsten Verlustabschnitt.</dd></div>
    <div class="term"><dt>Sharpe Ratio</dt><dd>Mittlere Rendite je Kerze geteilt durch deren Standardabweichung, hochgerechnet auf ein Jahr (× √Kerzen pro Jahr; 1d = 365, 4h = 2190, 1h = 8760), ohne risikofreien Zins. Sie misst Rendite im Verhältnis zum Schwankungsrisiko. Grobe Orientierung: unter 0 verlustbringend, 0 bis 1 schwach, über 1 gut.</dd></div>
@@ -435,6 +457,18 @@
    {x:c.index, y:c.buyhold, name:"Buy & Hold"}],
    {...base, title:"Equity-Kurve"}, cfg);
 
+ const MC = (c.mc && c.mc.ok) ? c.mc : null;
+ if (MC && document.getElementById("mcfan")) {
+   const x = MC.actual.map((_, i) => i), f = MC.fan;
+   const band = (lo, hi, name, col) => [
+     {x:x, y:f[hi], mode:"lines", line:{width:0}, showlegend:false, hoverinfo:"skip"},
+     {x:x, y:f[lo], mode:"lines", line:{width:0}, fill:"tonexty", fillcolor:col, name:name, hoverinfo:"skip"}];
+   Plotly.newPlot("mcfan", [
+     ...band("5", "95", "5–95 %", "rgba(65,118,144,0.25)"), ...band("25", "75", "25–75 %", "rgba(65,118,144,0.5)"),
+     {x:x, y:f["50"], name:"Median", line:{color:"#81d4fa", width:2}},
+     {x:x, y:MC.actual, name:"Tatsächliche Reihenfolge", line:{color:"#f5dd5d", width:2, dash:"dot"}}],
+     {...base, shapes:[], title:"Monte-Carlo: Rendite in % nach Trade Nr.", xaxis:{title:"Trade Nr."}, yaxis:{title:"%"}}, cfg);
+ }
  const H = JSON.parse(document.getElementById("heat").textContent);
  if (H && H.z && document.getElementById("heatmap")) {
    Plotly.newPlot("heatmap", [{type:"heatmap", x:H.x, y:H.y, z:H.z, colorscale:"RdYlGn",

@@ -88,3 +88,6 @@ Jeder Benutzer sieht nur seine eigenen Auswertungen (Verlauf, Detail, Vergleich,
 
 ## Admin-Bereich (`/admin/`)
 Static-Dateien liefert WhiteNoise (werden beim Start per `collectstatic` gesammelt). Anmeldung mit der Admin-E-Mail. Admin auf Render anlegen: Umgebungsvariablen `ADMIN_EMAIL` und `ADMIN_PASSWORD` setzen und neu deployen - das Konto wird beim Start als Superuser angelegt (ein bestehendes Passwort wird nie überschrieben). Lokal: `python manage.py createsuperuser`.
+
+## Robustheit (Monte-Carlo)
+Jeder Lauf mit mindestens 5 Trades bekommt einen Robustheits-Test (`backtester/montecarlo.py`, fester Seed, 1.000 Durchläufe): Bootstrap der Trades (Gewinnwahrscheinlichkeit, Rendite- und Drawdown-Spanne, Fächer-Chart) und Vergleich mit Zufalls-Einstiegen gleicher Haltedauer (p-Wert). Unter 30 Trades Hinweis „statistisch nicht belastbar“. Ältere Läufe haben den Block nicht (neu starten).

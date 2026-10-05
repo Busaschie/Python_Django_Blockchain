@@ -8,7 +8,7 @@ from datetime import date, timedelta
 
 from django.db import connection
 
-from . import indicators
+from . import indicators, montecarlo
 from .chains import CHAINS
 from .data import PERIODS_PER_YEAR, fetch_ohlcv
 from .engine import Risk, run_backtest
@@ -68,6 +68,7 @@ def compute(run) -> None:
     run.symbol, run.data_note, run.params = info["symbol"], info["note"][:200], params
     run.indicator_lib = indicators.backend()
     run.metrics, run.curves = json_safe(result["metrics"]), json_safe(result["curves"])
+    run.curves["mc"] = json_safe(montecarlo.analyze(run.curves, fee))   # Robustheits-Test (Trades)
     run.validation = json_safe(result.get("validation", {}))
     run.params = json_safe(run.params)
     run.status, run.error = "done", ""

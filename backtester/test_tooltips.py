@@ -31,7 +31,7 @@ class TooltipContentTests(TestCase):
         self.assertEqual(set(SIZE_TIPS), {"fixed", "vol"})
 
     def test_all_ui_tips_present(self):
-        self.assertEqual(set(UI_TIPS), {"chain", "run", "compare_chains", "compare_strategies"})
+        self.assertEqual(set(UI_TIPS), {"chain", "run", "compare_chains", "compare_strategies", "montecarlo"})
 
 
 class TooltipRenderTests(TestCase):

@@ -90,6 +90,9 @@ UI_TIPS = {
     "run": "Startet einen Backtest mit diesen Einstellungen. Er läuft im Hintergrund, die Seite aktualisiert sich selbst.",
     "compare_chains": "Startet dieselben Einstellungen auf Bitcoin, Solana und Ethereum und zeigt die Ergebnisse "
                       "nebeneinander.",
+    "montecarlo": "Robustheits-Test: Die Trades werden 1.000-mal zufällig neu gemischt bzw. gezogen. Statt einer einzelnen "
+                  "Zahl siehst du, wie stark Rendite und Drawdown streuen, und ob die Strategie besser ist als "
+                  "zufällige Einstiege mit gleicher Haltedauer.",
     "compare_strategies": "Startet dieselben Einstellungen mit SMA-Crossover, RSI und Kombiniert auf der gewählten "
                           "Chain und zeigt die Ergebnisse nebeneinander. Im Einzellauf gelten Standardparameter.",
 }
