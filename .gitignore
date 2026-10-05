@@ -1,6 +1,8 @@
 # ==========================================
 # PyCharm & JetBrains IDEs
 # ==========================================
+staticfiles/
+db.sqlite3
 .idea/
 *.iml
 *.iws
@@ -21,6 +23,7 @@ __pycache__/
 venv/
 ENV/
 env/
+zip/
 pip-log.txt
 pip-delete-this-directory.txt
 

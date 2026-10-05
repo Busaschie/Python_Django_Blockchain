@@ -85,3 +85,6 @@ Alle Seiten außer Anmelden/Registrieren/Passwort vergessen erfordern eine Sitzu
 **E-Mail-Versand** auf Render über Umgebungsvariablen: `EMAIL_HOST`, `EMAIL_PORT` (587), `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`, optional `EMAIL_USE_TLS` (1), `DEFAULT_FROM_EMAIL`. Ohne `EMAIL_HOST` wird die Mail nur ins Log geschrieben (Entwicklung).
 Jeder Benutzer sieht nur seine eigenen Auswertungen (Verlauf, Detail, Vergleich, Status). Früher angelegte Läufe ohne Besitzer sind nicht mehr sichtbar.
 **Render sperrt ausgehendes SMTP** (Ports 25/465/587) bei kostenlosen Diensten. Deshalb E-Mail per HTTPS-API: `EMAIL_API_KEY` (und `EMAIL_API=brevo` oder `resend`) setzen, dazu `DEFAULT_FROM_EMAIL` mit beim Anbieter verifizierter Absenderadresse. Hat `EMAIL_API_KEY` Vorrang vor `EMAIL_HOST`.
+
+## Admin-Bereich (`/admin/`)
+Static-Dateien liefert WhiteNoise (werden beim Start per `collectstatic` gesammelt). Anmeldung mit der Admin-E-Mail. Admin auf Render anlegen: Umgebungsvariablen `ADMIN_EMAIL` und `ADMIN_PASSWORD` setzen und neu deployen - das Konto wird beim Start als Superuser angelegt (ein bestehendes Passwort wird nie überschrieben). Lokal: `python manage.py createsuperuser`.

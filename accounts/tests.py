@@ -95,3 +95,28 @@ class MailApiTests(TestCase):
         self.assertEqual(headers, {"api-key": "k"})
         self.assertEqual(payload["sender"], {"email": "t@x.de", "name": "Trading"})
         self.assertEqual(payload["to"], [{"email": "a@b.de"}])
+
+
+class AdminTests(TestCase):
+    def test_admin_login_page_and_access(self):
+        self.assertEqual(self.client.get("/admin/login/").status_code, 200)
+        User.objects.create_user("n@b.de", "n@b.de", "pw-Aaaa-1234")
+        self.client.login(username="n@b.de", password="pw-Aaaa-1234")
+        self.assertEqual(self.client.get("/admin/").status_code, 302)   # normaler Benutzer: kein Zugang
+        User.objects.create_superuser("a@b.de", "a@b.de", "pw-Aaaa-1234")
+        self.client.login(username="a@b.de", password="pw-Aaaa-1234")
+        r = self.client.get("/admin/")
+        self.assertEqual(r.status_code, 200)
+
+    def test_ensure_admin(self):
+        import os
+        from unittest import mock
+        from config import automigrate
+        with mock.patch.dict(os.environ, {"ADMIN_EMAIL": "Root@B.de", "ADMIN_PASSWORD": "pw-Aaaa-1234"}):
+            automigrate.ensure_admin()
+            u = User.objects.get(username="root@b.de")
+            self.assertTrue(u.is_superuser and u.check_password("pw-Aaaa-1234"))
+            with mock.patch.dict(os.environ, {"ADMIN_PASSWORD": "anders"}):
+                automigrate.ensure_admin()   # bestehendes Passwort bleibt
+            u.refresh_from_db()
+            self.assertTrue(u.check_password("pw-Aaaa-1234"))

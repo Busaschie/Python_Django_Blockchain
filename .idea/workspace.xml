@@ -4,11 +4,14 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d8010543-1eed-4775-a043-da519baf32cf" name="Changes" comment="Login">
-      <change afterPath="$PROJECT_DIR$/accounts/mailapi.py" afterDir="false" />
+    <list default="true" id="d8010543-1eed-4775-a043-da519baf32cf" name="Changes" comment="Email Api">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/accounts/tests.py" beforeDir="false" afterPath="$PROJECT_DIR$/accounts/tests.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtester/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/automigrate.py" beforeDir="false" afterPath="$PROJECT_DIR$/config/automigrate.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/config/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/config/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -33,22 +36,22 @@
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
       <entry key="MS100" value="1.0" />
-      <entry key="MS500" value="1.000003598931316" />
-      <entry key="S2" value="1.0435555387089834" />
-      <entry key="S5" value="1.2855073912799733" />
-      <entry key="S10" value="1.53432891675444" />
-      <entry key="S30" value="1.811464564034874" />
-      <entry key="S60" value="1.9008132792843975" />
-      <entry key="M2" value="1.9491193059084373" />
-      <entry key="M5" value="1.989433026582525" />
-      <entry key="M10" value="2.144986407516529" />
-      <entry key="M15" value="2.434899509572794" />
-      <entry key="M30" value="3.493421099339702" />
-      <entry key="H1" value="5.187832255473696" />
-      <entry key="H2" value="6.9367235426794025" />
-      <entry key="H4" value="8.247923294462115" />
-      <entry key="D1" value="9.670877934158318" />
-      <entry key="W1" value="9.951973970048781" />
+      <entry key="MS500" value="1.0" />
+      <entry key="S2" value="1.0" />
+      <entry key="S5" value="1.0" />
+      <entry key="S10" value="1.0" />
+      <entry key="S30" value="1.0" />
+      <entry key="S60" value="1.0" />
+      <entry key="M2" value="1.0000000015425439" />
+      <entry key="M5" value="1.000577612851363" />
+      <entry key="M10" value="1.0420860990950966" />
+      <entry key="M15" value="1.1819717781500991" />
+      <entry key="M30" value="1.9302933151713244" />
+      <entry key="H1" value="3.740766319159523" />
+      <entry key="H2" value="6.532785794279844" />
+      <entry key="H4" value="9.312049993875062" />
+      <entry key="D1" value="13.03235264741899" />
+      <entry key="W1" value="13.856260557225717" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -70,23 +73,23 @@
       <entry key="W1" value="0.0" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="7.02215397692221E-26" />
-      <entry key="MS500" value="1.286141654849781E-5" />
-      <entry key="S2" value="0.09866127175790156" />
-      <entry key="S5" value="0.5991394671672331" />
-      <entry key="S10" value="1.0943438124272193" />
-      <entry key="S30" value="1.6357242579681455" />
-      <entry key="S60" value="1.8087001127279505" />
-      <entry key="M2" value="1.9019500897146573" />
-      <entry key="M5" value="1.9702911407956618" />
-      <entry key="M10" value="2.1353675026351224" />
-      <entry key="M15" value="2.428474227866167" />
-      <entry key="M30" value="3.4901981846913532" />
-      <entry key="H1" value="5.186214557597793" />
-      <entry key="H2" value="6.93591153711473" />
-      <entry key="H4" value="8.247516096673682" />
-      <entry key="D1" value="9.670809849547304" />
-      <entry key="W1" value="9.951964237479276" />
+      <entry key="MS100" value="0.0028006938437809123" />
+      <entry key="MS500" value="0.30864065172338456" />
+      <entry key="S2" value="0.7453551933994602" />
+      <entry key="S5" value="0.8890891548528642" />
+      <entry key="S10" value="0.942915242666521" />
+      <entry key="S30" value="0.980597734288247" />
+      <entry key="S60" value="0.9902513490464161" />
+      <entry key="M2" value="0.9951137382813254" />
+      <entry key="M5" value="0.9986202194259969" />
+      <entry key="M10" value="1.0411043298819354" />
+      <entry key="M15" value="1.1812943363822266" />
+      <entry key="M30" value="1.9297705668037846" />
+      <entry key="H1" value="3.7402038701588918" />
+      <entry key="H2" value="6.532300147078637" />
+      <entry key="H4" value="9.311721412698715" />
+      <entry key="D1" value="13.032281379868795" />
+      <entry key="W1" value="13.856249896302407" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo"><![CDATA[{
@@ -160,7 +163,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1791181412234</updated>
-      <workItem from="1791181413299" duration="5973000" />
+      <workItem from="1791181413299" duration="7294000" />
     </task>
     <task id="LOCAL-00001" summary="Backtest Manuell">
       <option name="closed" value="true" />
@@ -194,7 +197,15 @@
       <option name="project" value="LOCAL" />
       <updated>1791190714136</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="Email Api">
+      <option name="closed" value="true" />
+      <created>1791194326100</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1791194326101</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -205,6 +216,7 @@
     <MESSAGE value="Tooltips" />
     <MESSAGE value="Tooltips 2" />
     <MESSAGE value="Login" />
-    <option name="LAST_COMMIT_MESSAGE" value="Login" />
+    <MESSAGE value="Email Api" />
+    <option name="LAST_COMMIT_MESSAGE" value="Email Api" />
   </component>
 </project>
