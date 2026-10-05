@@ -93,7 +93,9 @@ LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = "index"
 LOGOUT_REDIRECT_URL = "login"
 # E-Mail-Versand (Passwort vergessen): SMTP ueber Umgebungsvariablen, sonst Ausgabe in der Konsole/im Log
-if os.environ.get("EMAIL_HOST"):
+if os.environ.get("EMAIL_API_KEY"):   # HTTPS-API (Brevo/Resend) - funktioniert auch dort, wo SMTP gesperrt ist (Render)
+    EMAIL_BACKEND = "accounts.mailapi.ApiEmailBackend"
+elif os.environ.get("EMAIL_HOST"):
     EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
     EMAIL_HOST = os.environ["EMAIL_HOST"]
     EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))

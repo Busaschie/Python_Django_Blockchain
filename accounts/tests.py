@@ -79,3 +79,19 @@ class AuthTests(TestCase):
         self.assertRedirects(r, reverse("account"))
         self.assertEqual(self.client.get("/").status_code, 200)   # Sitzung bleibt
         self.assertTrue(User.objects.get().check_password("Neu-Passwort-42x"))
+
+
+class MailApiTests(TestCase):
+    def test_brevo_payload(self):
+        import os
+        from unittest import mock
+        from django.core.mail import EmailMessage
+        from accounts import mailapi
+        with mock.patch.dict(os.environ, {"EMAIL_API": "brevo", "EMAIL_API_KEY": "k"}), \
+                mock.patch.object(mailapi, "_post", return_value=201) as p:
+            n = mailapi.ApiEmailBackend().send_messages([EmailMessage("Betreff", "Text", "Trading <t@x.de>", ["a@b.de"])])
+        self.assertEqual(n, 1)
+        url, headers, payload = p.call_args.args
+        self.assertEqual(headers, {"api-key": "k"})
+        self.assertEqual(payload["sender"], {"email": "t@x.de", "name": "Trading"})
+        self.assertEqual(payload["to"], [{"email": "a@b.de"}])

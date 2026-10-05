@@ -4,32 +4,11 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d8010543-1eed-4775-a043-da519baf32cf" name="Changes" comment="Tooltips 2">
-      <change afterPath="$PROJECT_DIR$/accounts/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/accounts/apps.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/accounts/forms.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/accounts/templates/accounts/account.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/accounts/templates/accounts/base.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/accounts/templates/accounts/forgot.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/accounts/templates/accounts/forgot_done.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/accounts/templates/accounts/login.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/accounts/templates/accounts/register.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/accounts/templates/accounts/reset_confirm.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/accounts/templates/accounts/reset_done.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/accounts/templates/accounts/reset_email.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/accounts/templates/accounts/reset_subject.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/accounts/tests.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/accounts/urls.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/accounts/views.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backtester/migrations/0008_backtestrun_owner.py" afterDir="false" />
+    <list default="true" id="d8010543-1eed-4775-a043-da519baf32cf" name="Changes" comment="Login">
+      <change afterPath="$PROJECT_DIR$/accounts/mailapi.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtester/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtester/templates/backtester/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/templates/backtester/base.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtester/test_tooltips.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/test_tooltips.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtester/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/accounts/tests.py" beforeDir="false" afterPath="$PROJECT_DIR$/accounts/tests.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/config/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/config/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/config/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -54,22 +33,22 @@
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
       <entry key="MS100" value="1.0" />
-      <entry key="MS500" value="1.0" />
-      <entry key="S2" value="1.0" />
-      <entry key="S5" value="1.0" />
-      <entry key="S10" value="1.0" />
-      <entry key="S30" value="1.0000000000001144" />
-      <entry key="S60" value="1.0000005855323524" />
-      <entry key="M2" value="1.0013253550848136" />
-      <entry key="M5" value="1.1365372127529192" />
-      <entry key="M10" value="1.6476049144281228" />
-      <entry key="M15" value="2.1325880996379074" />
-      <entry key="M30" value="3.2886170517593714" />
-      <entry key="H1" value="4.727625522605075" />
-      <entry key="H2" value="6.011331733190066" />
-      <entry key="H4" value="6.894354489848876" />
-      <entry key="D1" value="7.79777065654116" />
-      <entry key="W1" value="7.970633521262997" />
+      <entry key="MS500" value="1.000003598931316" />
+      <entry key="S2" value="1.0435555387089834" />
+      <entry key="S5" value="1.2855073912799733" />
+      <entry key="S10" value="1.53432891675444" />
+      <entry key="S30" value="1.811464564034874" />
+      <entry key="S60" value="1.9008132792843975" />
+      <entry key="M2" value="1.9491193059084373" />
+      <entry key="M5" value="1.989433026582525" />
+      <entry key="M10" value="2.144986407516529" />
+      <entry key="M15" value="2.434899509572794" />
+      <entry key="M30" value="3.493421099339702" />
+      <entry key="H1" value="5.187832255473696" />
+      <entry key="H2" value="6.9367235426794025" />
+      <entry key="H4" value="8.247923294462115" />
+      <entry key="D1" value="9.670877934158318" />
+      <entry key="W1" value="9.951973970048781" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -91,23 +70,23 @@
       <entry key="W1" value="0.0" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.9330329915368074" />
-      <entry key="MS500" value="0.9862327044933592" />
-      <entry key="S2" value="0.9965402628278678" />
-      <entry key="S5" value="0.9986146661010289" />
-      <entry key="S10" value="0.9993070929904525" />
-      <entry key="S30" value="0.9997689776297062" />
-      <entry key="S60" value="0.9998850676050322" />
-      <entry key="M2" value="1.001267515363476" />
-      <entry key="M5" value="1.1365108476168189" />
-      <entry key="M10" value="1.6475855308000198" />
-      <entry key="M15" value="2.1325708451836816" />
-      <entry key="M30" value="3.28860191691716" />
-      <entry key="H1" value="4.727613086960623" />
-      <entry key="H2" value="6.01132317742959" />
-      <entry key="H4" value="6.894349383672186" />
-      <entry key="D1" value="7.797769662024024" />
-      <entry key="W1" value="7.970633375237358" />
+      <entry key="MS100" value="7.02215397692221E-26" />
+      <entry key="MS500" value="1.286141654849781E-5" />
+      <entry key="S2" value="0.09866127175790156" />
+      <entry key="S5" value="0.5991394671672331" />
+      <entry key="S10" value="1.0943438124272193" />
+      <entry key="S30" value="1.6357242579681455" />
+      <entry key="S60" value="1.8087001127279505" />
+      <entry key="M2" value="1.9019500897146573" />
+      <entry key="M5" value="1.9702911407956618" />
+      <entry key="M10" value="2.1353675026351224" />
+      <entry key="M15" value="2.428474227866167" />
+      <entry key="M30" value="3.4901981846913532" />
+      <entry key="H1" value="5.186214557597793" />
+      <entry key="H2" value="6.93591153711473" />
+      <entry key="H4" value="8.247516096673682" />
+      <entry key="D1" value="9.670809849547304" />
+      <entry key="W1" value="9.951964237479276" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo"><![CDATA[{
@@ -181,7 +160,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1791181412234</updated>
-      <workItem from="1791181413299" duration="5319000" />
+      <workItem from="1791181413299" duration="5973000" />
     </task>
     <task id="LOCAL-00001" summary="Backtest Manuell">
       <option name="closed" value="true" />
@@ -207,7 +186,15 @@
       <option name="project" value="LOCAL" />
       <updated>1791188677303</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Login">
+      <option name="closed" value="true" />
+      <created>1791190714136</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1791190714136</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -217,6 +204,7 @@
     <MESSAGE value="Backtest Manuell" />
     <MESSAGE value="Tooltips" />
     <MESSAGE value="Tooltips 2" />
-    <option name="LAST_COMMIT_MESSAGE" value="Tooltips 2" />
+    <MESSAGE value="Login" />
+    <option name="LAST_COMMIT_MESSAGE" value="Login" />
   </component>
 </project>
