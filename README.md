@@ -25,6 +25,7 @@ Die App liest die Datenbank aus der Umgebungsvariable `DATABASE_URL`. Ohne sie l
 - **Start-Befehl:** `gunicorn config.wsgi`
 - **Fehler im Log:** Auch mit DEBUG aus erscheinen Tracebacks im Render-Log (Logs-Reiter).
 - **Neon:** SSL wird erzwungen. Der Pooler-Endpunkt (Host mit `-pooler`) funktioniert; serverseitige Cursor sind dafür abgeschaltet. Treten bei `migrate` über den Pooler Probleme auf, `migrate` einmalig mit der direkten Verbindung (ohne `-pooler`) ausführen.
+- **Migrationen:** laufen automatisch einmalig im Gunicorn-Master (`gunicorn.conf.py`), lokal vor `runserver` (abschaltbar mit `AUTO_MIGRATE=0`). Hängt der Start trotzdem, als Start-Befehl `python manage.py migrate && gunicorn config.wsgi` setzen und `AUTO_MIGRATE=0` .
 - **Aufwachen:** Neon pausiert inaktive Datenbanken. Die erste Anfrage danach kann einige Sekunden dauern (Timeout 15 s), tote Verbindungen werden automatisch ersetzt.
 - **Admin:** Ohne Shell lässt sich kein Superuser anlegen; die App selbst braucht den Admin nicht. Statische Dateien des Admins werden ohne WhiteNoise nicht ausgeliefert.
 
