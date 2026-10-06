@@ -93,3 +93,6 @@ Static-Dateien liefert WhiteNoise (werden beim Start per `collectstatic` gesamme
 Jeder Lauf mit mindestens 5 Trades bekommt einen Robustheits-Test (`backtester/montecarlo.py`, fester Seed, 1.000 Durchläufe): Bootstrap der Trades (Gewinnwahrscheinlichkeit, Rendite- und Drawdown-Spanne, Fächer-Chart) und Vergleich mit Zufalls-Einstiegen gleicher Haltedauer (p-Wert). Unter 30 Trades Hinweis „statistisch nicht belastbar“. Ältere Läufe haben den Block nicht (neu starten).
 
 Gelaufene Auswertungen löschen: rotes × rechts neben dem Titel in der Verlaufsliste (mit Rückfrage, nur eigene Läufe, nur per POST).
+
+## Plausibilitäts-Ampel
+Jeder neue Lauf wird automatisch geprüft (`backtester/plausibility.py`, Anzeige oberhalb des Kurs-Charts): **Daten** (Menge, Lücken, Duplikate, ungültige Preise, Sprünge, Volumen), **Engine** (Drawdown, Buy & Hold, Gesamtrendite und Einzeltrades unabhängig nachgerechnet, Trade-Reihenfolge, Look-ahead-Test) und **Aussagekraft** (Trades, Zeitraum, bester Trade, Zeit im Markt, unrealistische Kennzahlen, Train gegen Test, Parameter am Rand). Ältere Läufe haben die Ampel nicht (neu starten). Ein Fehler in der Prüfung lässt den Lauf nie scheitern.

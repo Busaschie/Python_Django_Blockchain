@@ -8,11 +8,11 @@ from datetime import date, timedelta
 
 from django.db import connection
 
-from . import indicators, montecarlo
+from . import indicators, montecarlo, plausibility
 from .chains import CHAINS
 from .data import PERIODS_PER_YEAR, fetch_ohlcv
 from .engine import Risk, run_backtest
-from .strategies import STRATEGIES, fixed_params, params_from_inputs
+from .strategies import GRIDS, STRATEGIES, fixed_params, params_from_inputs
 from .validation import optimize, walk_forward
 
 _executor = ThreadPoolExecutor(max_workers=3, thread_name_prefix="backtest")
@@ -71,7 +71,26 @@ def compute(run) -> None:
     run.curves["mc"] = json_safe(montecarlo.analyze(run.curves, fee))   # Robustheits-Test (Trades)
     run.validation = json_safe(result.get("validation", {}))
     run.params = json_safe(run.params)
+    run.curves["plaus"] = json_safe(_plausibility(run, df, result, params, j, fee))
     run.status, run.error = "done", ""
+
+
+def _plausibility(run, df, result, params, j, fee) -> dict:
+    """Plausibilitaets-Ampel (siehe plausibility.py). Ein Fehler in der Pruefung darf den Lauf nie scheitern lassen."""
+    try:
+        func, defaults = STRATEGIES[j["strategy"]]
+        kind = (result.get("validation") or {}).get("kind", "single")
+        grid = GRIDS.get(j["strategy"])
+        grid = {grid["x"][0]: grid["x"][1], grid["y"][0]: grid["y"][1]} if grid else None
+        causal = plausibility.causality_test(df, func, params if isinstance(params, dict) else defaults)
+        checks = (plausibility.check_data(df, j["timeframe"])
+                  + plausibility.check_engine(result["curves"], result["metrics"], fee, kind, causal)
+                  + plausibility.check_meaning(result["curves"], result["metrics"], result.get("validation") or {},
+                                               params, grid, run.days or len(df)))
+        return plausibility.summarize(checks)
+    except Exception as exc:  # noqa: BLE001
+        return {"level": "warn", "checks": [{"group": "Engine", "level": "warn", "title": "Prüfung nicht möglich",
+                                             "detail": str(exc)[:200]}], "n_ok": 0, "n_warn": 1, "n_bad": 0}
 
 
 def _run(pk: int) -> None:

@@ -56,6 +56,13 @@
  .delform{position:absolute;top:.2rem;right:.2rem;margin:0}
  button.del{background:none;border:0;color:var(--bad);font:700 1.15rem/1 system-ui,sans-serif;padding:.1rem .35rem;margin:0;border-radius:4px}
  button.del:hover,button.del:focus-visible{background:var(--bad);color:#fff;outline:none}
+ .plaus h3{margin:0;display:flex;align-items:center;gap:.5rem}
+ .dot{display:inline-block;width:.8rem;height:.8rem;border-radius:50%;background:var(--muted);flex:none}
+ .dot.lv-ok{background:var(--good)} .dot.lv-warn{background:#f5c542} .dot.lv-bad{background:var(--bad)}
+ .plaus details{margin-top:.5rem} .plaus summary{cursor:pointer;color:var(--link);font-size:.88rem}
+ .plaus h4{margin:.7rem 0 .2rem;color:var(--ink2)} .plaus ul{list-style:none;margin:0;padding:0}
+ .plaus li{display:flex;gap:.5rem;align-items:baseline;padding:.2rem 0;border-bottom:1px solid var(--line);font-size:.88rem}
+ .plaus li .dot{width:.6rem;height:.6rem;position:relative;top:.05rem} .plaus li span.d{color:var(--muted)}
  .hist li.cur{background:var(--sel);border-left-color:var(--accent)}
  .hist li + li{border-top:1px solid var(--line)}
 

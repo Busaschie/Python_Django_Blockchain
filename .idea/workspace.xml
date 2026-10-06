@@ -4,53 +4,59 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d8010543-1eed-4775-a043-da519baf32cf" name="Changes" comment="Monte-Carlo-Test 2">
+    <list default="true" id="d8010543-1eed-4775-a043-da519baf32cf" name="Changes" comment="Loeschen">
+      <change afterPath="$PROJECT_DIR$/backtester/plausibility.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backtester/test_plausibility.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/accounts/tests.py" beforeDir="false" afterPath="$PROJECT_DIR$/accounts/tests.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtester/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/forms.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtester/jobs.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/jobs.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backtester/templates/backtester/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/templates/backtester/base.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backtester/templates/backtester/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/templates/backtester/dashboard.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtester/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtester/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtester/test_tooltips.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/test_tooltips.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="DjangoConsoleOptions" custom-start-script="import sys; print('Python %s on %s' % (sys.version, sys.platform))&#10;import django; print('Django %s' % django.get_version())&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;if 'setup' in dir(django): django.setup()&#10;import django_manage_shell; django_manage_shell.run(PROJECT_ROOT)">
+    <option name="myCustomStartScript" value="import sys; print('Python %s on %s' % (sys.version, sys.platform))&#10;import django; print('Django %s' % django.get_version())&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;if 'setup' in dir(django): django.setup()&#10;import django_manage_shell; django_manage_shell.run(PROJECT_ROOT)" />
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "Busaschie"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Busaschie&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/Busaschie/Python_Django_Blockchain.git",
-    "accountId": "5667b3cb-b0dc-4e03-825b-1f14ee9d9f2c"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Busaschie/Python_Django_Blockchain.git&quot;,
+    &quot;accountId&quot;: &quot;5667b3cb-b0dc-4e03-825b-1f14ee9d9f2c&quot;
   }
-}]]></component>
+}</component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0" />
-      <entry key="MS500" value="1.0" />
-      <entry key="S2" value="1.0" />
-      <entry key="S5" value="1.0" />
-      <entry key="S10" value="1.0" />
-      <entry key="S30" value="1.000000000000672" />
-      <entry key="S60" value="1.0000016387895927" />
-      <entry key="M2" value="1.0025722225170444" />
-      <entry key="M5" value="1.2307118178539795" />
-      <entry key="M10" value="2.2159648639460485" />
-      <entry key="M15" value="3.2921619532830277" />
-      <entry key="M30" value="5.829433916215044" />
-      <entry key="H1" value="9.131313502698514" />
-      <entry key="H2" value="13.17572285521977" />
-      <entry key="H4" value="17.112025950745277" />
-      <entry key="D1" value="22.546816813827377" />
-      <entry key="W1" value="23.78307536811887" />
+      <entry key="MS100" value="1.001129578304595" />
+      <entry key="MS500" value="1.2573850208584993" />
+      <entry key="S2" value="1.7122719096598153" />
+      <entry key="S5" value="1.8730886185274516" />
+      <entry key="S10" value="1.9343921122317953" />
+      <entry key="S30" value="1.9784102882166488" />
+      <entry key="S60" value="2.016612190146606" />
+      <entry key="M2" value="2.161698356522351" />
+      <entry key="M5" value="2.599118162963403" />
+      <entry key="M10" value="3.547894201226233" />
+      <entry key="M15" value="4.5922997999725546" />
+      <entry key="M30" value="7.173207336966553" />
+      <entry key="H1" value="10.602136100766563" />
+      <entry key="H2" value="14.788291771499907" />
+      <entry key="H4" value="18.858574875806973" />
+      <entry key="D1" value="24.490814925995327" />
+      <entry key="W1" value="25.774627504822817" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -72,54 +78,55 @@
       <entry key="W1" value="0.0" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.8827029962906549" />
-      <entry key="MS500" value="0.9753554615276419" />
-      <entry key="S2" value="0.9937810933225548" />
-      <entry key="S5" value="0.9975077808975293" />
-      <entry key="S10" value="0.9987531130852756" />
-      <entry key="S30" value="0.9995841981618905" />
-      <entry key="S60" value="0.9997937159890875" />
-      <entry key="M2" value="1.0024680427843673" />
-      <entry key="M5" value="1.2306475490104776" />
-      <entry key="M10" value="2.215653989964595" />
-      <entry key="M15" value="3.291513925209179" />
-      <entry key="M30" value="5.828315009131717" />
-      <entry key="H1" value="9.130127015445373" />
-      <entry key="H2" value="13.174767782279066" />
-      <entry key="H4" value="17.11139550492233" />
-      <entry key="D1" value="22.546681179631815" />
-      <entry key="W1" value="23.78305507864141" />
+      <entry key="MS100" value="0.9274382089248399" />
+      <entry key="MS500" value="1.228030179748622" />
+      <entry key="S2" value="1.6984173860020528" />
+      <entry key="S5" value="1.866616465909322" />
+      <entry key="S10" value="1.9309782584732258" />
+      <entry key="S30" value="1.977230168360726" />
+      <entry key="S60" value="2.0160111159244263" />
+      <entry key="M2" value="2.1613819696646335" />
+      <entry key="M5" value="2.598966831825163" />
+      <entry key="M10" value="3.547616873163851" />
+      <entry key="M15" value="4.591749360004909" />
+      <entry key="M30" value="7.17219429612174" />
+      <entry key="H1" value="10.601008337665604" />
+      <entry key="H2" value="14.787359769888992" />
+      <entry key="H4" value="18.857951263023587" />
+      <entry key="D1" value="24.49067921147209" />
+      <entry key="W1" value="25.774607162955395" />
     </decayedShown>
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 0,
-  "fromUser": false
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 0,
+  &quot;fromUser&quot;: false
+}</component>
   <component name="ProjectId" id="3KGQQrdYv83Q4teLs0VnyXFFtYN" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.OpenDjangoStructureViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "codeWithMe.voiceChat.enabledByDefault": "false",
-    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "main",
-    "junie.onboarding.icon.badge.shown": "true",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "python.packages.toolwindow.project.migrated.to.right.top.v2": "true",
-    "to.speed.mode.migration.done": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.OpenDjangoStructureViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;python.packages.toolwindow.project.migrated.to.right.top.v2&quot;: &quot;true&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager">
     <configuration name="Projekt_Live" type="Python.DjangoServer" factoryName="Django server">
       <module name="Projekt_Live" />
@@ -162,7 +169,10 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1791181412234</updated>
-      <workItem from="1791181413299" duration="10746000" />
+      <workItem from="1791181413299" duration="11369000" />
+      <workItem from="1791267449231" duration="1835000" />
+      <workItem from="1791271946884" duration="667000" />
+      <workItem from="1791272686745" duration="1232000" />
     </task>
     <task id="LOCAL-00001" summary="Backtest Manuell">
       <option name="closed" value="true" />
@@ -252,7 +262,15 @@
       <option name="project" value="LOCAL" />
       <updated>1791201323795</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="Loeschen">
+      <option name="closed" value="true" />
+      <created>1791201633855</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1791201633856</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -270,6 +288,7 @@
     <MESSAGE value="Design" />
     <MESSAGE value="Monte-Carlo-Test" />
     <MESSAGE value="Monte-Carlo-Test 2" />
-    <option name="LAST_COMMIT_MESSAGE" value="Monte-Carlo-Test 2" />
+    <MESSAGE value="Loeschen" />
+    <option name="LAST_COMMIT_MESSAGE" value="Loeschen" />
   </component>
 </project>

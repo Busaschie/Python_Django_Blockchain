@@ -93,6 +93,9 @@ UI_TIPS = {
     "montecarlo": "Robustheits-Test: Die Trades werden 1.000-mal zufällig neu gemischt bzw. gezogen. Statt einer einzelnen "
                   "Zahl siehst du, wie stark Rendite und Drawdown streuen, und ob die Strategie besser ist als "
                   "zufällige Einstiege mit gleicher Haltedauer.",
+    "plausibility": "Automatische Prüfungen je Lauf: sind die Kursdaten vollständig, rechnet die Simulation in sich stimmig "
+                    "(Gegenrechnung, kein Blick in die Zukunft) und reicht die Datenbasis für eine Aussage? Grün = in "
+                    "Ordnung, gelb = Hinweise beachten, rot = Ergebnis nicht verwertbar.",
     "compare_strategies": "Startet dieselben Einstellungen mit SMA-Crossover, RSI und Kombiniert auf der gewählten "
                           "Chain und zeigt die Ergebnisse nebeneinander. Im Einzellauf gelten Standardparameter.",
 }
