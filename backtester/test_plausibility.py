@@ -148,3 +148,30 @@ class RegimeAndCostTests(SimpleTestCase):
         rets = [r["total_return_pct"] for r in out["rows"]]
         self.assertEqual(rets, sorted(rets, reverse=True))        # mehr Kosten -> nie bessere Rendite
         self.assertEqual(out["rows"][1]["total_return_pct"], main["total_return_pct"])
+
+
+class EndToEndNoFalseAlarms(SimpleTestCase):
+    """Echte Laeufe in allen Modi duerfen in der Engine-Gruppe nie gelb/rot werden (Fehlalarme waeren schlimmer als keine Ampel)."""
+
+    def test_engine_checks_stay_green(self):
+        from unittest import mock
+
+        from . import jobs
+        from .strategies import default_inputs
+
+        class Run:       # minimaler Ersatz fuer das Modell (compute schreibt nur Attribute)
+            chain, days, created_at = "btc", 900, __import__("datetime").datetime(2026, 1, 1)
+            symbol = job = params = metrics = curves = validation = None
+
+        df = frame(900, seed=3)
+        cases = [("split", "sma_cross", dict(stop_loss=5)), ("walkforward", "combo", dict(trailing_stop=8)),
+                 ("single", "rsi", dict(stop_loss=3, size_mode="fixed", size_value=50)), ("split", "rsi", {})]
+        for mode, strat, extra in cases:
+            run = Run()
+            run.job = dict(chain="btc", timeframe="1d", execution="open", fee=0.001, slippage=0.0005, source="demo", mode=mode,
+                           strategy=strat, days=900, train_frac=70, wf_folds=5, wf_train_mult=3, **default_inputs(strat), **extra)
+            with mock.patch.object(jobs, "fetch_ohlcv", return_value=(df, {"symbol": "BTC/USDT", "note": ""})):
+                jobs.compute(run)
+            engine = [c for c in run.curves["plaus"]["checks"] if c["group"] == "Engine"]
+            self.assertTrue(engine)
+            self.assertEqual([(c["title"], c["detail"]) for c in engine if c["level"] != "ok"], [], (mode, strat, extra))

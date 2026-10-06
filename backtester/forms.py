@@ -101,6 +101,9 @@ UI_TIPS = {
                "nur in einer Marktlage funktioniert.",
     "costs": "Dasselbe Ergebnis mit 0-, 1-, 2-, 3- und 5-fachen Kosten (Gebühr + Slippage), Parameter unverändert. "
              "Zeigt, wie viel Spielraum die Strategie bei höheren Kosten oder schlechteren Ausführungskursen hat.",
+    "ai": "Erklärt das Ergebnis in Klartext und schlägt nächste Tests vor. Entsteht nur auf Knopfdruck, wird je Lauf einmal "
+          "gespeichert und zählt zum Tageslimit. Die KI bekommt nur Kennzahlen, rechnet nichts selbst und jede genannte "
+          "Zahl wird gegen die berechneten Werte geprüft. Keine Anlageberatung.",
     "compare_strategies": "Startet dieselben Einstellungen mit SMA-Crossover, RSI und Kombiniert auf der gewählten "
                           "Chain und zeigt die Ergebnisse nebeneinander. Im Einzellauf gelten Standardparameter.",
 }

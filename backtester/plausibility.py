@@ -57,12 +57,14 @@ def _contrib(t):  # Beitrag eines Trades zum Gesamtkapital
     return t["ret_pct"] / 100 * (t.get("size_pct") or 100.0) / 100
 
 
-def check_engine(curves: dict, metrics: dict, fee: float, kind: str, causal) -> list:
+def check_engine(curves: dict, metrics: dict, fee: float, kind: str, causal, split_at=None) -> list:
     g, out = "Engine", []
     strat = np.array(curves.get("strategy") or [], dtype=float)
     bh = np.array(curves.get("buyhold") or [], dtype=float)
     close = np.array([c if c is not None else np.nan for c in curves.get("close") or []], dtype=float)
     trades = curves.get("trades") or []
+    if kind == "split" and split_at in (curves.get("index") or []):   # Kennzahlen gelten nur fuer die Testphase
+        strat = strat[curves["index"].index(split_at):]
     if len(strat) > 1:
         dd = float((strat / np.maximum.accumulate(strat) - 1).min() * 100)
         diff = abs(dd - metrics["max_drawdown_pct"])
@@ -131,7 +133,7 @@ def check_meaning(curves: dict, metrics: dict, validation: dict, params: dict, g
     trades = curves.get("trades") or []
     n = metrics.get("trades", len(trades))
     out.append(_c(g, "bad" if n < 5 else "warn" if n < 30 else "ok", "Anzahl Trades",
-                  f"{n} Trades" + (" (unter 30: statistisch nicht belastbar)" if 5 <= n < 30 else
+                  f"{n} Trade{'s' if n != 1 else ''}" + (" (unter 30: statistisch nicht belastbar)" if 5 <= n < 30 else
                                    " (unter 5: keine Aussage möglich)" if n < 5 else "")))
     out.append(_c(g, "warn" if days < 180 else "ok", "Zeitraum",
                   f"{days} Tage" + (" (unter 180: nur eine Marktphase)" if days < 180 else "")))

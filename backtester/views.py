@@ -8,7 +8,7 @@ from django.views.decorators.http import require_POST
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
-from . import jobs
+from . import ai, jobs
 from .chains import CHAINS
 from .forms import PARAM_TIPS, SIZE_TIPS, UI_TIPS, BacktestForm
 from .models import BacktestRun, ExchangeBlock
@@ -153,6 +153,7 @@ def dashboard(request, pk=None, batch=None):
         "tip_data": {"params": PARAM_TIPS, "size": SIZE_TIPS}, "ui_tips": UI_TIPS,
         "pending_ids": ",".join(str(r.pk) for r in shown if r.is_pending),
         "chains": [{"key": k, **m} for k, m in CHAINS.items()],
+        "ai_left": ai.remaining_today(request.user), "ai_limit": ai.limits()[0],
     })
 
 
@@ -175,3 +176,12 @@ def delete_run(request, pk):
         if not here.startswith("/vergleich/") or BacktestRun.objects.filter(owner=request.user, batch=here.split("/")[2]).exists():
             return redirect(here)
     return redirect("index")
+
+
+@require_POST
+def ai_comment(request, pk):
+    """KI-Kommentar auf Knopfdruck (einmal je Lauf; ein regelbasierter Kommentar darf per KI erneuert werden)."""
+    run = get_object_or_404(BacktestRun, pk=pk, owner=request.user, status="done")
+    if not run.ai_source or run.ai_source == "regeln":
+        ai.generate(run, request.user)
+    return redirect("detail", pk=run.pk)

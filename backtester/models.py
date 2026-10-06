@@ -32,6 +32,10 @@ class BacktestRun(models.Model):
     error = models.TextField(blank=True, default="")
     batch = models.CharField(max_length=12, blank=True, default="", db_index=True)  # Chain-Vergleich
     created_at = models.DateTimeField(auto_now_add=True)
+    # KI-Kommentar (nur auf Knopfdruck, einmal je Lauf gespeichert)
+    ai_comment = models.JSONField(default=dict, blank=True)
+    ai_source = models.CharField(max_length=60, blank=True, default="")   # z. B. "groq:openai/gpt-oss-120b" oder "regeln"
+    ai_created = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         ordering = ["-created_at"]
@@ -139,3 +143,11 @@ class ExchangeBlock(models.Model):
     @property
     def exchange_label(self):
         return EXCHANGES.get(self.exchange, self.exchange)
+
+
+class AiCall(models.Model):
+    """Jeder Aufruf des KI-Anbieters (Tageslimits je Benutzer und gesamt). Bleibt auch nach dem Loeschen eines Laufs."""
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="ai_calls")
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    model = models.CharField(max_length=60, blank=True, default="")
+    ok = models.BooleanField(default=False)

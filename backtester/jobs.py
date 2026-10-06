@@ -98,7 +98,8 @@ def _plausibility(run, df, result, params, j, fee) -> dict:
         grid = {grid["x"][0]: grid["x"][1], grid["y"][0]: grid["y"][1]} if grid else None
         causal = plausibility.causality_test(df, func, params if isinstance(params, dict) else defaults)
         checks = (plausibility.check_data(df, j["timeframe"])
-                  + plausibility.check_engine(result["curves"], result["metrics"], fee, kind, causal)
+                  + plausibility.check_engine(result["curves"], result["metrics"], fee, kind, causal,
+                                                  (result.get("validation") or {}).get("split_at"))
                   + plausibility.check_meaning(result["curves"], result["metrics"], result.get("validation") or {},
                                                params, grid, run.days or len(df)))
         return plausibility.summarize(checks)

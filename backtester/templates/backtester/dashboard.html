@@ -159,6 +159,22 @@
  <!-- Spalte 2: Charts + Trades -->
  <section>
   {% if run_done %}
+  <div class="box" id="aibox">
+   <h3 class="lbl">Kommentar zur Auswertung <button type="button" class="tip" data-tip="{{ ui_tips.ai }}" aria-label="Erklärung: Kommentar">i</button></h3>
+   {% with ac=run.ai_comment %}{% if ac.zusammenfassung %}
+   <p>{{ ac.zusammenfassung }}</p>
+   {% if ac.staerken %}<h4>Stärken</h4><ul class="aiul">{% for x in ac.staerken %}<li>{{ x }}</li>{% endfor %}</ul>{% endif %}
+   {% if ac.schwaechen %}<h4>Schwächen und Einschränkungen</h4><ul class="aiul">{% for x in ac.schwaechen %}<li>{{ x }}</li>{% endfor %}</ul>{% endif %}
+   {% if ac.naechste_schritte %}<h4>Nächste Schritte zum Testen</h4><ul class="aiul">{% for x in ac.naechste_schritte %}<li>{{ x }}</li>{% endfor %}</ul>{% endif %}
+   <p class="small muted">{% if run.ai_source != "regeln" %}Erstellt mit {{ run.ai_source|cut:"groq:" }}{% else %}Regelbasiert erstellt{% endif %} · automatische Auswertungshilfe, keine Anlageberatung. Alle Aussagen beziehen sich auf vergangene Daten.{% if ac.note %} <span class="err">{{ ac.note }}</span>{% endif %}</p>
+   {% endif %}{% endwith %}
+   {% if not run.ai_comment.zusammenfassung or run.ai_source == "regeln" %}
+   <form method="post" action="{% url 'ai_comment' run.pk %}">{% csrf_token %}
+    <button type="submit" {% if ai_left <= 0 and run.ai_source == "regeln" %}disabled{% endif %}>{% if run.ai_source == "regeln" %}Mit KI neu erstellen{% else %}Auswertung kommentieren{% endif %}</button>
+    <span class="small muted">Heute noch {{ ai_left }} von {{ ai_limit }} KI-Kommentaren.</span>
+   </form>
+   {% endif %}
+  </div>
   {% with pl=run.curves.plaus %}{% if pl %}
   <div class="box plaus" id="plausbox">
    <h3><span class="dot lv-{{ pl.level }}"></span>Plausibilität: {% if pl.level == "ok" %}in Ordnung{% elif pl.level == "warn" %}mit Hinweisen{% else %}Probleme{% endif %}
@@ -342,6 +358,7 @@
    <div class="term"><dt>Buy &amp; Hold (B&amp;H)</dt><dd>Vergleichsstrategie: am Anfang kaufen, am Ende verkaufen. Eine Strategie lohnt sich nur, wenn sie B&amp;H schlägt, am besten bei geringerem Risiko.</dd></div>
    <div class="term"><dt>Marktphasen</dt><dd>Jede Kerze wird nach der Kursentwicklung der letzten ca. 90 Tage eingeordnet (nur Vergangenheit, kein Blick nach vorn): über +10 % Aufwärts, unter −10 % Abwärts, sonst Seitwärts. Die Tabelle zeigt je Phase Anteil an der Zeit, Rendite der Strategie und von Buy &amp; Hold, Zeit im Markt, Trades (nach Einstiegszeitpunkt) und Win-Rate. So siehst du, ob die Strategie nur in einer Marktlage funktioniert. Im Kurs-Chart sind Aufwärts- grün und Abwärtsphasen rot hinterlegt. Beim Train/Test-Split zählt nur die Testphase.</dd></div>
    <div class="term"><dt>Kosten-Sensitivität</dt><dd>Dasselbe Ergebnis mit 0-, 1-, 2-, 3- und 5-fachen Kosten (Gebühr + Slippage), die Parameter bleiben unverändert. „Kosten bis Gewinn null“ ist das Vielfache der angenommenen Kosten, bei dem die Rendite auf 0 fällt. Liegt es unter 2, ist die Strategie fragil: reale Gebühren, Spreads oder schlechtere Ausführung können den Vorteil aufzehren. Strategien mit vielen Trades reagieren besonders stark.</dd></div>
+   <div class="term"><dt>Kommentar zur Auswertung (KI)</dt><dd>Auf Knopfdruck erklärt eine KI (Groq) das Ergebnis in Klartext, nennt Stärken und Schwächen und schlägt nächste Tests vor. Sie bekommt nur die berechneten Kennzahlen (keine Kursreihen, keine Benutzerdaten), rechnet nichts selbst, und jede Zahl ihrer Antwort wird gegen die berechneten Werte geprüft. Bei Ausfall, Tageslimit oder unbrauchbarer Antwort erscheint ein regelbasierter Kommentar. Der Text wird je Lauf einmal gespeichert. Er ist eine Auswertungshilfe, keine Anlageberatung und keine Prognose.</dd></div>
    <div class="term"><dt>Plausibilitäts-Ampel</dt><dd>Automatische Prüfungen je Lauf. <em>Daten:</em> Menge, Lücken, doppelte Kerzen, ungültige Preise, extreme Sprünge, Volumen. <em>Engine:</em> Max Drawdown, Buy &amp; Hold, Gesamtrendite und einzelne Trades werden aus den Kurven bzw. Kursen unabhängig nachgerechnet; Trades dürfen sich nicht überschneiden; ein Look-ahead-Test prüft, dass Signale unverändert bleiben, wenn spätere Kerzen fehlen. <em>Aussagekraft:</em> Anzahl Trades, Zeitraum, Abhängigkeit vom besten Trade, Zeit im Markt, unrealistisch gute Kennzahlen, Train gegen Test, Parameter am Rand des Suchbereichs. Grün = in Ordnung, gelb = Hinweis beachten, rot = Ergebnis nicht verwertbar.</dd></div>
    <div class="term"><dt>Look-ahead (Blick in die Zukunft)</dt><dd>Fehler, bei dem ein Signal Informationen aus späteren Kerzen nutzt. Solche Backtests sehen großartig aus, sind aber in der Praxis nicht handelbar.</dd></div>
    <div class="term"><dt>Monte-Carlo / Robustheit</dt><dd>Die Trades eines Laufs werden 1.000-mal mit Zurücklegen neu gezogen. Das ergibt eine Verteilung statt einer einzelnen Zahl: „Wahrscheinlichkeit auf Gewinn“ ist der Anteil der Durchläufe mit positiver Rendite, „95-%-Fall“ beim Drawdown der Wert, der nur in 5 % der Durchläufe unterschritten wird (realistischer Worst Case). Der Chart zeigt den Fächer (Bänder 5–95 % und 25–75 %, Median) und die tatsächliche Reihenfolge gestrichelt.</dd></div>

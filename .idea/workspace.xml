@@ -4,20 +4,22 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d8010543-1eed-4775-a043-da519baf32cf" name="Changes" comment="Ampel">
-      <change afterPath="$PROJECT_DIR$/backtester/fmt.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backtester/regimes.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backtester/sensitivity.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/narwhals-2.26.0-py3-none-any.whl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/packaging-26.3-py3-none-any.whl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/plotly-7.1.0-py3-none-any.whl" afterDir="false" />
+    <list default="true" id="d8010543-1eed-4775-a043-da519baf32cf" name="Changes" comment="Kosten">
+      <change afterPath="$PROJECT_DIR$/backtester/ai.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backtester/migrations/0009_ai_comment.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backtester/test_ai.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backtester/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/forms.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backtester/jobs.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/jobs.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtester/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backtester/plausibility.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/plausibility.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtester/templates/backtester/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/templates/backtester/base.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backtester/templates/backtester/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/templates/backtester/dashboard.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backtester/test_plausibility.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/test_plausibility.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backtester/test_tooltips.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/test_tooltips.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtester/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtester/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -44,23 +46,23 @@
 }</component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.058172741903074" />
-      <entry key="MS500" value="2.1014615186027203" />
-      <entry key="S2" value="3.262343500807733" />
-      <entry key="S5" value="3.671445669991732" />
-      <entry key="S10" value="3.829440498539152" />
-      <entry key="S30" value="3.9424443656941976" />
-      <entry key="S60" value="3.9983328792050488" />
-      <entry key="M2" value="4.152085399431351" />
-      <entry key="M5" value="4.594714956608973" />
-      <entry key="M10" value="5.545090370843699" />
-      <entry key="M15" value="6.5899888850471084" />
-      <entry key="M30" value="9.171506188114439" />
-      <entry key="H1" value="12.600923046428845" />
-      <entry key="H2" value="16.787463985625415" />
-      <entry key="H4" value="20.858053416597542" />
-      <entry key="D1" value="26.490703208745714" />
-      <entry key="W1" value="27.774610737416122" />
+      <entry key="MS100" value="1.0124302575586706" />
+      <entry key="MS500" value="1.4158110491874532" />
+      <entry key="S2" value="1.8030156445100822" />
+      <entry key="S5" value="1.915987616907894" />
+      <entry key="S10" value="1.9570724198867575" />
+      <entry key="S30" value="1.9854810262521565" />
+      <entry key="S60" value="1.9927229100553647" />
+      <entry key="M2" value="2.0025589711922667" />
+      <entry key="M5" value="2.339064961785635" />
+      <entry key="M10" value="3.5088442101320174" />
+      <entry key="M15" value="4.767614678488872" />
+      <entry key="M30" value="7.943900967985597" />
+      <entry key="H1" value="12.14428627167483" />
+      <entry key="H2" value="17.062446393685565" />
+      <entry key="H4" value="21.757372784020585" />
+      <entry key="D1" value="28.252424477154108" />
+      <entry key="W1" value="29.73878282264145" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -82,23 +84,23 @@
       <entry key="W1" value="0.0" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.8607890704081043" />
-      <entry key="MS500" value="2.001449627263569" />
-      <entry key="S2" value="3.220880642344658" />
-      <entry key="S5" value="3.6525286613173567" />
-      <entry key="S10" value="3.8195308439856697" />
-      <entry key="S30" value="3.9390339033821102" />
-      <entry key="S60" value="3.9966082446226605" />
-      <entry key="M2" value="4.151205140831701" />
-      <entry key="M5" value="4.594337580874111" />
-      <entry key="M10" value="5.544700052501509" />
-      <entry key="M15" value="6.589363223043275" />
-      <entry key="M30" value="9.170455628726808" />
-      <entry key="H1" value="12.599776534856739" />
-      <entry key="H2" value="16.786522599101406" />
-      <entry key="H4" value="20.85742510312526" />
-      <entry key="D1" value="26.49056670861392" />
-      <entry key="W1" value="27.77459028324603" />
+      <entry key="MS100" value="0.9445507197968941" />
+      <entry key="MS500" value="1.395751053423273" />
+      <entry key="S2" value="1.79650039116062" />
+      <entry key="S5" value="1.9132065361681878" />
+      <entry key="S10" value="1.9556500597482778" />
+      <entry key="S30" value="1.9849995717957962" />
+      <entry key="S60" value="1.9924812452605032" />
+      <entry key="M2" value="2.002436589752213" />
+      <entry key="M5" value="2.3389885109061233" />
+      <entry key="M10" value="3.5087137005731326" />
+      <entry key="M15" value="4.767335702085256" />
+      <entry key="M30" value="7.9432120042932395" />
+      <entry key="H1" value="12.143359226248833" />
+      <entry key="H2" value="17.0615997155215" />
+      <entry key="H4" value="21.756776614943913" />
+      <entry key="D1" value="28.25228903631551" />
+      <entry key="W1" value="29.738762370788116" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -176,7 +178,7 @@
       <workItem from="1791181413299" duration="11369000" />
       <workItem from="1791267449231" duration="1835000" />
       <workItem from="1791271946884" duration="667000" />
-      <workItem from="1791272686745" duration="1905000" />
+      <workItem from="1791272686745" duration="3189000" />
     </task>
     <task id="LOCAL-00001" summary="Backtest Manuell">
       <option name="closed" value="true" />
@@ -282,7 +284,15 @@
       <option name="project" value="LOCAL" />
       <updated>1791274392609</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="Kosten">
+      <option name="closed" value="true" />
+      <created>1791275517443</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1791275517443</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -302,6 +312,7 @@
     <MESSAGE value="Monte-Carlo-Test 2" />
     <MESSAGE value="Loeschen" />
     <MESSAGE value="Ampel" />
-    <option name="LAST_COMMIT_MESSAGE" value="Ampel" />
+    <MESSAGE value="Kosten" />
+    <option name="LAST_COMMIT_MESSAGE" value="Kosten" />
   </component>
 </project>
