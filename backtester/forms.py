@@ -101,6 +101,12 @@ UI_TIPS = {
                "nur in einer Marktlage funktioniert.",
     "costs": "Dasselbe Ergebnis mit 0-, 1-, 2-, 3- und 5-fachen Kosten (Gebühr + Slippage), Parameter unverändert. "
              "Zeigt, wie viel Spielraum die Strategie bei höheren Kosten oder schlechteren Ausführungskursen hat.",
+    "stability": "Rechnet die Strategie mit leicht verschobenen Parametern (Raster um deinen Wert, ohne neue Optimierung). "
+                 "Liegt dein Wert auf einem Plateau guter Nachbarn, ist das Ergebnis robust; ist er eine einzelne Spitze, "
+                 "spricht das für Überanpassung. Beim Train/Test-Split zählt die Testphase.",
+    "signal": "Zeigt, was die Strategie mit den Parametern dieses Laufs auf den aktuellen Kursen anzeigt (long = investiert, "
+              "flat = nicht investiert). Optional eine Mail bei jedem Wechsel. Stops und Positionsgröße sind darin nicht "
+              "berücksichtigt. Keine Anlageberatung.",
     "ai": "Erklärt das Ergebnis in Klartext und schlägt nächste Tests vor. Entsteht nur auf Knopfdruck, wird je Lauf einmal "
           "gespeichert und zählt zum Tageslimit. Die KI bekommt nur Kennzahlen, rechnet nichts selbst und jede genannte "
           "Zahl wird gegen die berechneten Werte geprüft. Keine Anlageberatung.",

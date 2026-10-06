@@ -8,4 +8,5 @@ psycopg[binary]>=3.2
 dj-database-url>=2.2
 # Produktivserver (Render)
 gunicorn>=22
+reportlab>=4.0
 whitenoise>=6.7

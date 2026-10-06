@@ -2,13 +2,16 @@ import uuid
 from collections import Counter
 from datetime import timedelta
 
-from django.http import Http404, JsonResponse
+from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth.decorators import login_not_required
+from django.http import Http404, HttpResponse, JsonResponse
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
-from . import ai, jobs
+from . import ai, export, jobs, signals
 from .chains import CHAINS
 from .forms import PARAM_TIPS, SIZE_TIPS, UI_TIPS, BacktestForm
 from .models import BacktestRun, ExchangeBlock
@@ -154,6 +157,7 @@ def dashboard(request, pk=None, batch=None):
         "pending_ids": ",".join(str(r.pk) for r in shown if r.is_pending),
         "chains": [{"key": k, **m} for k, m in CHAINS.items()],
         "ai_left": ai.remaining_today(request.user), "ai_limit": ai.limits()[0],
+        "signals_enabled": signals.enabled(), "signal_max": settings.SIGNAL_MAX_PER_USER,
     })
 
 
@@ -185,3 +189,85 @@ def ai_comment(request, pk):
     if not run.ai_source or run.ai_source == "regeln":
         ai.generate(run, request.user)
     return redirect("detail", pk=run.pk)
+
+
+def _done_run(request, pk):
+    return get_object_or_404(BacktestRun, pk=pk, owner=request.user, status="done")
+
+
+def _download(data, ctype, name):
+    resp = HttpResponse(data, content_type=ctype)
+    resp["Content-Disposition"] = f'attachment; filename="{name}"'
+    return resp
+
+
+def _fname(run, ext):
+    return f"{run.chain}_{run.strategy}_{run.timeframe}_{run.pk}.{ext}"
+
+
+def export_trades(request, pk):
+    run = _done_run(request, pk)
+    return _download(export.trades_csv(run), "text/csv; charset=utf-8", "trades_" + _fname(run, "csv"))
+
+
+def export_pdf(request, pk):
+    run = _done_run(request, pk)
+    return _download(export.summary_pdf(run), "application/pdf", "auswertung_" + _fname(run, "pdf"))
+
+
+def _need_signals():
+    if not signals.enabled():
+        raise Http404
+
+
+@require_POST
+def signal_refresh(request, pk):
+    _need_signals()
+    run = _done_run(request, pk)
+    try:
+        st = signals.refresh(run)
+        if not st.get("ok", True):
+            messages.error(request, "Aktuelles Signal nicht berechenbar: " + st["reason"])
+    except Exception as exc:  # noqa: BLE001  (Börse nicht erreichbar, Sperre, ...)
+        messages.error(request, "Aktuelles Signal nicht berechenbar: " + str(exc)[:200])
+    return redirect("detail", pk=run.pk)
+
+
+@require_POST
+def signal_toggle(request, pk):
+    _need_signals()
+    run = _done_run(request, pk)
+    if run.signal_alert:
+        run.signal_alert = False
+        messages.success(request, "Signal-Mail ausgeschaltet.")
+    elif not request.user.email:
+        messages.error(request, "Für diesen Benutzer ist keine E-Mail-Adresse hinterlegt.")
+    elif run.source == "synthetic":
+        messages.error(request, "Bei synthetischen Daten gibt es kein aktuelles Signal.")
+    elif BacktestRun.objects.filter(owner=request.user, signal_alert=True).count() >= settings.SIGNAL_MAX_PER_USER:
+        messages.error(request, f"Höchstens {settings.SIGNAL_MAX_PER_USER} Läufe mit Signal-Mail gleichzeitig.")
+    else:
+        try:
+            run.signal_state = signals.current(run)   # Ausgangszustand: erst ein WECHSEL löst eine Mail aus
+            if not run.signal_state.get("ok"):
+                raise ValueError(run.signal_state.get("reason", "nicht berechenbar"))
+            run.signal_alert = True
+            messages.success(request, "Signal-Mail eingeschaltet: Du bekommst eine Mail, sobald sich das Signal ändert.")
+        except Exception as exc:  # noqa: BLE001
+            run.signal_state = {}
+            messages.error(request, "Konnte nicht eingeschaltet werden: " + str(exc)[:200])
+    run.save(update_fields=["signal_alert", "signal_state"])
+    return redirect("detail", pk=run.pk)
+
+
+@login_not_required
+def signal_check(request):
+    """Wird von einem externen Zeitplan aufgerufen (z. B. cron-job.org), geschützt durch SIGNAL_CRON_TOKEN."""
+    import hmac
+    token = settings.SIGNAL_CRON_TOKEN
+    if not signals.enabled() or not token:
+        raise Http404
+    given = request.headers.get("Authorization", "").removeprefix("Bearer ") or request.GET.get("token", "")
+    if not hmac.compare_digest(given.encode(), token.encode()):
+        return JsonResponse({"error": "unauthorized"}, status=403)
+    return JsonResponse(signals.check_all(f"{request.scheme}://{request.get_host()}"))

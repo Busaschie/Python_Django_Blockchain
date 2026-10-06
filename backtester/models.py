@@ -36,6 +36,9 @@ class BacktestRun(models.Model):
     ai_comment = models.JSONField(default=dict, blank=True)
     ai_source = models.CharField(max_length=60, blank=True, default="")   # z. B. "groq:openai/gpt-oss-120b" oder "regeln"
     ai_created = models.DateTimeField(null=True, blank=True)
+    # Aktuelles Signal: letzter Stand (position 1/0, seit, Kurs, geprueft) und Wunsch nach Mail bei Wechsel
+    signal_alert = models.BooleanField(default=False)
+    signal_state = models.JSONField(default=dict, blank=True)
 
     class Meta:
         ordering = ["-created_at"]

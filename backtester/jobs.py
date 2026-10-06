@@ -8,7 +8,7 @@ from datetime import date, timedelta
 
 from django.db import connection
 
-from . import indicators, montecarlo, plausibility, regimes, sensitivity
+from . import indicators, montecarlo, plausibility, regimes, sensitivity, stability
 from .chains import CHAINS
 from .data import PERIODS_PER_YEAR, fetch_ohlcv
 from .engine import Risk, run_backtest
@@ -77,6 +77,9 @@ def compute(run) -> None:
     run.curves["cost"] = json_safe(_safe(sensitivity.analyze, df, STRATEGIES[j["strategy"]][0], params,
                                          (result.get("validation") or {}).get("kind", "single"),
                                          result.get("validation") or {}, fee, ppy, ex, risk, result["metrics"]))
+    run.curves["stab"] = json_safe(_safe(stability.analyze, df, STRATEGIES[j["strategy"]][0], params, j["strategy"],
+                                         (result.get("validation") or {}).get("kind", "single"),
+                                         result.get("validation") or {}, fee, ppy, ex, risk))
     run.curves["plaus"] = json_safe(_plausibility(run, df, result, params, j, fee))
     run.status, run.error = "done", ""
 

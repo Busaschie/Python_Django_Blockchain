@@ -118,3 +118,8 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
+
+# Aktuelles Signal + Signal-Mails: per Umgebungsvariable ein-/ausschaltbar (Render: SIGNALS_ENABLED=1)
+SIGNALS_ENABLED = os.environ.get("SIGNALS_ENABLED", "0").strip().lower() in ("1", "true", "yes", "on")
+SIGNAL_CRON_TOKEN = os.environ.get("SIGNAL_CRON_TOKEN", "")          # schützt /signale/pruefen/ (externer Zeitplan)
+SIGNAL_MAX_PER_USER = int(os.environ.get("SIGNAL_MAX_PER_USER", "5"))   # Läufe mit Signal-Mail je Benutzer

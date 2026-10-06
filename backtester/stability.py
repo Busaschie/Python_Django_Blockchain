@@ -1,0 +1,85 @@
+"""Parameter-Stabilitaet: Wie stark aendert sich das Ergebnis, wenn die gewaehlten Parameter leicht verschoben werden?
+
+Um den gewaehlten Punkt wird ein 5x5-Raster aus benachbarten Parameterwerten gerechnet (ohne neue Optimierung,
+Kosten und Risiko wie im Lauf). Eine robuste Strategie liegt auf einem Plateau (Nachbarn aehnlich gut); eine einzelne
+Spitze, deren Nachbarn deutlich schlechter sind, spricht fuer Ueberanpassung. Beim Train/Test-Split gilt wie
+ueberall die Testphase; bei Walk-Forward wechseln die Parameter je Fold, dort ist die Pruefung nicht sinnvoll."""
+from statistics import median
+
+from .fmt import de
+from .sensitivity import _metrics_at
+
+FACTORS = (0.6, 0.8, 1.0, 1.25, 1.5)
+
+
+def _scaled(v: int, lo: int = 2) -> list:
+    return sorted({max(lo, round(v * f)) for f in FACTORS})
+
+
+def _axes(strategy: str, params: dict):
+    """(Name x, Werte x, Name y, Werte y, Funktion (x, y) -> Parameter oder None)."""
+    if strategy in ("sma_cross", "combo"):
+        def build(f, s):
+            return {**params, "fast": f, "slow": s} if f < s else None
+        return "fast", _scaled(int(params["fast"])), "slow", _scaled(int(params["slow"])), build
+    if strategy == "rsi":
+        low = int(params["low"])
+        lows = sorted({min(45, max(5, low + d)) for d in (-10, -5, 0, 5, 10)})
+
+        def build(p, lo):
+            return {**params, "period": p, "low": lo} if lo < params["high"] else None
+        return "period", _scaled(int(params["period"]), 3), "low", lows, build
+    return None
+
+
+def analyze(df, func, params, strategy, kind, validation, fee, ppy, execution, risk) -> dict:
+    if kind == "walkforward":
+        return {"ok": False, "reason": "bei Walk-Forward wechseln die Parameter je Fold; die Stabilität zeigt dort die Parameter-Tabelle der Folds"}
+    ax = _axes(strategy, params)
+    if ax is None:
+        return {"ok": False, "reason": "für diese Strategie nicht vorgesehen"}
+    xn, xs, yn, ys, build = ax
+    cx, cy = int(params[xn]), int(params[yn])
+    ret, shp = [], []
+    for y in ys:
+        rr, ss = [], []
+        for x in xs:
+            p = build(x, y)
+            if p is None:
+                rr.append(None); ss.append(None)
+                continue
+            m = _metrics_at(df, func, p, kind, validation, fee, ppy, execution, risk)
+            rr.append(m["total_return_pct"]); ss.append(m["sharpe"])
+        ret.append(rr); shp.append(ss)
+    if cx not in xs or cy not in ys or ret[ys.index(cy)][xs.index(cx)] is None:
+        return {"ok": False, "reason": "gewählter Parameterpunkt liegt nicht im Raster"}
+    ix, iy = xs.index(cx), ys.index(cy)
+    center = ret[iy][ix]
+    nb = [ret[j][i] for j in range(len(ys)) for i in range(len(xs))
+          if (i, j) != (ix, iy) and abs(i - ix) <= 1 and abs(j - iy) <= 1 and ret[j][i] is not None]
+    cells = [v for row in ret for v in row if v is not None]
+    if not nb:
+        return {"ok": False, "reason": "keine gültigen Nachbarwerte im Raster"}
+    pos_nb = sum(v > 0 for v in nb) / len(nb)
+    nb_med = median(nb)
+    level, verdict = _verdict(center, nb, pos_nb, nb_med)
+    return {"ok": True, "x_name": xn, "y_name": yn, "x": xs, "y": ys, "ret": ret, "sharpe": shp,
+            "center": {"x": cx, "y": cy, "ret": center}, "n_cells": len(cells),
+            "share_positive_pct": round(sum(v > 0 for v in cells) / len(cells) * 100, 1),
+            "neighbors": len(nb), "neighbors_positive_pct": round(pos_nb * 100, 1),
+            "neighbors_median": round(nb_med, 2), "level": level, "verdict": verdict,
+            "on_test": kind == "split"}
+
+
+def _verdict(center, nb, pos_nb, nb_med):
+    if center <= 0:
+        return "warn", (f"Schon der gewählte Punkt ist nicht profitabel ({de(center)} %); "
+                        f"{de(pos_nb * 100, 0)} % der Nachbarn sind im Plus.")
+    if pos_nb >= 0.75 and nb_med >= 0.5 * center:
+        return "ok", (f"Stabil: {de(pos_nb * 100, 0)} % der Nachbar-Parameter sind im Plus, der Median der Nachbarn "
+                      f"liegt bei {de(nb_med)} % (gewählt: {de(center)} %). Das Ergebnis hängt nicht an einem Einzelwert.")
+    if pos_nb < 0.5 or nb_med < 0.25 * center:
+        return "bad", (f"Spitze statt Plateau: Nur {de(pos_nb * 100, 0)} % der Nachbar-Parameter sind im Plus, der Median der "
+                       f"Nachbarn liegt bei {de(nb_med)} % (gewählt: {de(center)} %). Das spricht für Überanpassung an genau diesen Wert.")
+    return "warn", (f"Gemischt: {de(pos_nb * 100, 0)} % der Nachbar-Parameter sind im Plus, der Median der Nachbarn liegt bei "
+                    f"{de(nb_med)} % (gewählt: {de(center)} %). Das Ergebnis reagiert spürbar auf kleine Änderungen.")

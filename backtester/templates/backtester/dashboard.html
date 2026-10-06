@@ -39,6 +39,7 @@
   {% if run_done %}
   <div class="box">
    <h2>{{ run.get_chain_display }} · {{ run.strategy_label }} · {{ run.timeframe }}</h2>
+   <p class="small" style="margin:.2rem 0 .5rem">Export: <a href="{% url 'export_trades' run.pk %}">Trades (CSV)</a> · <a href="{% url 'export_pdf' run.pk %}">Zusammenfassung (PDF)</a></p>
    <p class="small">{{ run.mode_label }} · {{ run.period_label }} · {% if run.source == "ccxt" %}Börse {{ run.exchange_label }} ({{ run.symbol }}) · {% endif %}Gebühr {{ run.fee }} · Slippage {{ run.slippage }} · Ausführung: {{ run.execution_label }} · Quelle: {{ run.source }}<br>
     Parameter{% if run.validation.kind %} (zuletzt gewählt){% endif %}: {{ run.params }}
     {% if run.risk_label %}<br>Risiko: {{ run.risk_label }}{% endif %}
@@ -242,6 +243,36 @@
    {% else %}<p class="small muted">Nicht verfügbar: {{ ct.reason }}.</p>{% endif %}
   </div>
   {% endif %}{% endwith %}
+  {% with st=run.curves.stab %}{% if st %}
+  <div class="box" id="stabbox">
+   <h3 class="lbl">{% if st.ok %}<span class="dot lv-{{ st.level }}"></span>{% endif %}Parameter-Stabilität <button type="button" class="tip" data-tip="{{ ui_tips.stability }}" aria-label="Erklärung: Parameter-Stabilität">i</button></h3>
+   {% if st.ok %}
+   <p class="small"><strong>{{ st.verdict }}</strong></p>
+   <div id="stabchart" style="height:300px"></div>
+   <p class="small muted">Rendite in % je Parameterkombination{% if st.on_test %} (Testphase){% endif %}, Raster um den gewählten Wert (Rahmen). Ohne neue Optimierung, Kosten und Risiko wie im Lauf; leere Felder sind ungültige Kombinationen.</p>
+   {% else %}<p class="small muted">Nicht verfügbar: {{ st.reason }}.</p>{% endif %}
+  </div>
+  {% endif %}{% endwith %}
+  {% if signals_enabled %}
+  <div class="box" id="sigbox">
+   <h3 class="lbl">Aktuelles Signal <button type="button" class="tip" data-tip="{{ ui_tips.signal }}" aria-label="Erklärung: Aktuelles Signal">i</button></h3>
+   {% for m in messages %}<p class="small {% if m.tags == 'error' %}err{% else %}good{% endif %}">{{ m }}</p>{% endfor %}
+   {% with sg=run.signal_state %}
+   {% if run.source == "synthetic" %}<p class="small muted">Bei synthetischen Daten gibt es kein aktuelles Signal.</p>
+   {% else %}
+   {% if sg.ok %}
+   <p><strong class="{% if sg.position == 1 %}good{% endif %}">{% if sg.position == 1 %}LONG (investiert){% else %}FLAT (nicht investiert){% endif %}</strong>
+    <span class="small">{% if sg.since %}seit {{ sg.since|slice:":10" }} {{ sg.since|slice:"11:16" }} UTC{% else %}seit Beginn der geladenen Daten{% endif %} · Schlusskurs {{ sg.price }} · Kerze {{ sg.candle|slice:":10" }} {{ sg.candle|slice:"11:16" }} UTC</span></p>
+   <p class="small muted">Geprüft {{ sg.checked|slice:":10" }} {{ sg.checked|slice:"11:16" }} UTC. Zustand der Strategie mit den Parametern dieses Laufs auf den zuletzt abgeschlossenen Kerzen; Stop-Loss, Take-Profit, Trailing-Stop und Positionsgröße sind nicht berücksichtigt. Keine Anlageberatung.</p>
+   {% else %}<p class="small muted">Noch nicht geprüft.</p>{% endif %}
+   <form method="post" action="{% url 'signal_refresh' run.pk %}" style="display:inline">{% csrf_token %}<button class="secondary" type="submit">Jetzt prüfen</button></form>
+   <form method="post" action="{% url 'signal_toggle' run.pk %}" style="display:inline">{% csrf_token %}
+    <button class="secondary" type="submit">{% if run.signal_alert %}Signal-Mail ausschalten{% else %}Mail bei Signal-Wechsel einschalten{% endif %}</button></form>
+   <p class="small muted">{% if run.signal_alert %}Aktiv: Bei einem Wechsel geht eine Mail an {{ user.email }}. {% endif %}Höchstens {{ signal_max }} Läufe gleichzeitig. Mails entstehen nur, wenn die automatische Prüfung eingerichtet ist (Betreiber).</p>
+   {% endif %}
+   {% endwith %}
+  </div>
+  {% endif %}
   {% if run.validation.kind == "split" %}<div class="box"><div id="heatmap" style="height:340px"></div></div>{% endif %}
   {% if run.curves.trades %}
   <div class="box">
@@ -358,6 +389,9 @@
    <div class="term"><dt>Buy &amp; Hold (B&amp;H)</dt><dd>Vergleichsstrategie: am Anfang kaufen, am Ende verkaufen. Eine Strategie lohnt sich nur, wenn sie B&amp;H schlägt, am besten bei geringerem Risiko.</dd></div>
    <div class="term"><dt>Marktphasen</dt><dd>Jede Kerze wird nach der Kursentwicklung der letzten ca. 90 Tage eingeordnet (nur Vergangenheit, kein Blick nach vorn): über +10 % Aufwärts, unter −10 % Abwärts, sonst Seitwärts. Die Tabelle zeigt je Phase Anteil an der Zeit, Rendite der Strategie und von Buy &amp; Hold, Zeit im Markt, Trades (nach Einstiegszeitpunkt) und Win-Rate. So siehst du, ob die Strategie nur in einer Marktlage funktioniert. Im Kurs-Chart sind Aufwärts- grün und Abwärtsphasen rot hinterlegt. Beim Train/Test-Split zählt nur die Testphase.</dd></div>
    <div class="term"><dt>Kosten-Sensitivität</dt><dd>Dasselbe Ergebnis mit 0-, 1-, 2-, 3- und 5-fachen Kosten (Gebühr + Slippage), die Parameter bleiben unverändert. „Kosten bis Gewinn null“ ist das Vielfache der angenommenen Kosten, bei dem die Rendite auf 0 fällt. Liegt es unter 2, ist die Strategie fragil: reale Gebühren, Spreads oder schlechtere Ausführung können den Vorteil aufzehren. Strategien mit vielen Trades reagieren besonders stark.</dd></div>
+   <div class="term"><dt>Parameter-Stabilität</dt><dd>Rechnet die Strategie mit leicht verschobenen Parametern (5 × 5 Raster um deinen Wert, z. B. fast 12 bis 30 und slow 30 bis 75), ohne neue Optimierung. Ein <em>Plateau</em> (Nachbarn ähnlich gut) spricht für Robustheit, eine einzelne <em>Spitze</em> (Nachbarn deutlich schlechter oder im Minus) für Überanpassung. Beim Train/Test-Split zählt die Testphase; bei Walk-Forward gibt es die Prüfung nicht, dort zeigt die Folds-Tabelle die Parameter-Schwankung.</dd></div>
+   <div class="term"><dt>Export (CSV, PDF)</dt><dd>Über dem Kennzahlen-Block eines Laufs: die Trades als CSV-Datei (Semikolon, Dezimalkomma, öffnet in deutschem Excel direkt) und eine PDF-Zusammenfassung mit Einstellungen, Kennzahlen, Equity-Diagramm, Plausibilität, Robustheit, Marktphasen, Kosten, Parameter-Stabilität und KI-Kommentar.</dd></div>
+   {% if signals_enabled %}<div class="term"><dt>Aktuelles Signal, Signal-Mail</dt><dd>Zeigt, ob die Strategie mit den Parametern des Laufs auf den zuletzt abgeschlossenen Kerzen long (investiert) oder flat (nicht investiert) ist und seit wann. Optional kommt bei jedem Wechsel eine Mail. Stops und Positionsgröße sind nicht berücksichtigt; keine Anlageberatung.</dd></div>{% endif %}
    <div class="term"><dt>Kommentar zur Auswertung (KI)</dt><dd>Auf Knopfdruck erklärt eine KI (Groq) das Ergebnis in Klartext, nennt Stärken und Schwächen und schlägt nächste Tests vor. Sie bekommt nur die berechneten Kennzahlen (keine Kursreihen, keine Benutzerdaten), rechnet nichts selbst, und jede Zahl ihrer Antwort wird gegen die berechneten Werte geprüft. Bei Ausfall, Tageslimit oder unbrauchbarer Antwort erscheint ein regelbasierter Kommentar. Der Text wird je Lauf einmal gespeichert. Er ist eine Auswertungshilfe, keine Anlageberatung und keine Prognose.</dd></div>
    <div class="term"><dt>Plausibilitäts-Ampel</dt><dd>Automatische Prüfungen je Lauf. <em>Daten:</em> Menge, Lücken, doppelte Kerzen, ungültige Preise, extreme Sprünge, Volumen. <em>Engine:</em> Max Drawdown, Buy &amp; Hold, Gesamtrendite und einzelne Trades werden aus den Kurven bzw. Kursen unabhängig nachgerechnet; Trades dürfen sich nicht überschneiden; ein Look-ahead-Test prüft, dass Signale unverändert bleiben, wenn spätere Kerzen fehlen. <em>Aussagekraft:</em> Anzahl Trades, Zeitraum, Abhängigkeit vom besten Trade, Zeit im Markt, unrealistisch gute Kennzahlen, Train gegen Test, Parameter am Rand des Suchbereichs. Grün = in Ordnung, gelb = Hinweis beachten, rot = Ergebnis nicht verwertbar.</dd></div>
    <div class="term"><dt>Look-ahead (Blick in die Zukunft)</dt><dd>Fehler, bei dem ein Signal Informationen aus späteren Kerzen nutzt. Solche Backtests sehen großartig aus, sind aber in der Praxis nicht handelbar.</dd></div>
@@ -559,6 +593,18 @@
      {x:xs, y:CT.rows.map(() => 0), name:"Null-Linie", mode:"lines", line:{color:"#f5dd5d", width:1}, hoverinfo:"skip"}],
      {...base, shapes:[], title:"Rendite bei steigenden Kosten in %", xaxis:{title:"Vielfaches der angenommenen Kosten", type:"category"},
       yaxis:{title:"%"}, margin:{t:40, l:55, r:10, b:70}, legend:{orientation:"h", y:-0.35}}, cfg);
+ }
+ const ST = (c.stab && c.stab.ok) ? c.stab : null;
+ if (ST && document.getElementById("stabchart")) {
+   const xs = ST.x.map(String), ys = ST.y.map(String);
+   Plotly.newPlot("stabchart", [
+     {type:"heatmap", x:xs, y:ys, z:ST.ret, colorscale:"RdYlGn", zmid:0, colorbar:{title:"%"},
+      text:ST.sharpe.map(r => r.map(v => v === null ? "" : "Sharpe " + v)),
+      hovertemplate:ST.x_name + " %{x}, " + ST.y_name + " %{y}<br>Rendite %{z} %<br>%{text}<extra></extra>"},
+     {type:"scatter", mode:"markers", x:[String(ST.center.x)], y:[String(ST.center.y)], hoverinfo:"skip", showlegend:false,
+      marker:{symbol:"square-open", size:34, line:{color:"#ffffff", width:3}}}],
+     {...base, shapes:[], title:"Rendite bei verschobenen Parametern in %", xaxis:{title:ST.x_name, type:"category"},
+      yaxis:{title:ST.y_name, type:"category"}, margin:{t:40, l:60, r:10, b:50}}, cfg);
  }
  const H = JSON.parse(document.getElementById("heat").textContent);
  if (H && H.z && document.getElementById("heatmap")) {
