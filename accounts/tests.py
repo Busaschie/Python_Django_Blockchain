@@ -267,3 +267,56 @@ class AccountManageTests(TestCase):
     def test_delete_and_email_need_post(self):
         self.assertEqual(self.client.get(reverse("account_delete")).status_code, 405)
         self.assertEqual(self.client.get(reverse("email_change")).status_code, 405)
+
+
+class ThrottleAndLegalTests(TestCase):
+    def test_login_locks_after_5_failures_even_with_right_password(self):
+        User.objects.create_user("a@b.de", "a@b.de", "Sehr-gutes-Pw-17")
+        for _ in range(5):
+            self.assertEqual(self.client.post(reverse("login"), {"username": "a@b.de", "password": "falsch"}).status_code, 200)
+        r = self.client.post(reverse("login"), {"username": "a@b.de", "password": "Sehr-gutes-Pw-17"})
+        self.assertEqual(r.status_code, 429)
+        self.assertContains(r, "Zu viele Fehlversuche", status_code=429)
+        self.assertEqual(self.client.get("/").status_code, 302)   # nicht angemeldet
+        self.assertEqual(self.client.post(reverse("login"), {"username": "x@y.de", "password": "x"}).status_code, 200)  # anderes Konto frei
+
+    def test_login_success_resets_counter(self):
+        User.objects.create_user("a@b.de", "a@b.de", "Sehr-gutes-Pw-17")
+        for _ in range(4):
+            self.client.post(reverse("login"), {"username": "a@b.de", "password": "falsch"})
+        self.assertEqual(self.client.post(reverse("login"), {"username": "a@b.de", "password": "Sehr-gutes-Pw-17"}).status_code, 302)
+        self.client.post(reverse("logout"))
+        for _ in range(4):
+            self.client.post(reverse("login"), {"username": "a@b.de", "password": "falsch"})
+        self.assertEqual(self.client.post(reverse("login"), {"username": "a@b.de", "password": "Sehr-gutes-Pw-17"}).status_code, 302)
+
+    def test_register_and_forgot_limited_per_email(self):
+        for name in ("register", "forgot"):
+            for _ in range(3):
+                self.assertEqual(self.client.post(reverse(name), {"email": "n@b.de"}).status_code, 302)
+            self.assertEqual(self.client.post(reverse(name), {"email": "n@b.de"}).status_code, 429)
+        self.assertEqual(len(mail.outbox), 3)   # forgot: unbekannte Adresse sendet nichts; register: 3 Mails, die 4. blockiert
+
+    def test_old_attempts_expire(self):
+        from datetime import timedelta
+        from django.utils import timezone
+        from .models import Attempt
+        User.objects.create_user("a@b.de", "a@b.de", "Sehr-gutes-Pw-17")
+        for _ in range(5):
+            self.client.post(reverse("login"), {"username": "a@b.de", "password": "falsch"})
+        Attempt.objects.update(created=timezone.now() - timedelta(minutes=16))
+        self.assertEqual(self.client.post(reverse("login"), {"username": "a@b.de", "password": "Sehr-gutes-Pw-17"}).status_code, 302)
+
+    def test_legal_pages_public_with_footer(self):
+        import os
+        from unittest import mock
+        for n in ("impressum", "datenschutz"):
+            r = self.client.get(reverse(n))
+            self.assertEqual(r.status_code, 200)
+            self.assertContains(r, "LEGAL_NAME")   # Warnung, solange nicht gesetzt
+        with mock.patch.dict(os.environ, {"LEGAL_NAME": "Max Muster", "LEGAL_STREET": "Weg 1", "LEGAL_CITY": "80331 München", "LEGAL_EMAIL": "m@x.de"}):
+            r = self.client.get(reverse("impressum"))
+            self.assertContains(r, "Max Muster")
+            self.assertNotContains(r, "LEGAL_NAME")
+        self.assertContains(self.client.get(reverse("login")), reverse("datenschutz"))
+        self.assertContains(self.client.get(reverse("register")), reverse("datenschutz"))

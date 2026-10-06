@@ -1,6 +1,8 @@
 import logging
+import os
 
 from django.contrib import messages
+from django.contrib.auth import views as auth_views
 from django.contrib.auth import get_user_model, login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_not_required
 from django.contrib.auth.forms import PasswordChangeForm
@@ -11,6 +13,7 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 from django.views.decorators.http import require_POST
 
+from . import throttle
 from .forms import DeleteAccountForm, EmailChangeForm, EmailForm, PasswordSetForm
 
 User = get_user_model()
@@ -38,6 +41,10 @@ def register(request):
     form = EmailForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         email = form.cleaned_data["email"]
+        if throttle.blocked(request, "register", email):
+            form.add_error(None, throttle.MESSAGE["register"])
+            return render(request, "accounts/register.html", {"form": form}, status=429)
+        throttle.record(request, "register", email)
         # Gleiche Antwort in beiden Fällen (keine Konten erratbar); die Mail unterscheidet sich.
         if User.objects.filter(username__iexact=email).exists():
             subject, body = "Du hast bereits ein Konto", render_to_string(
@@ -141,3 +148,43 @@ def account_delete(request):
     logout(request)
     messages.success(request, "Dein Konto und alle Auswertungen wurden gelöscht.")
     return redirect("login")
+
+
+class ThrottledLoginView(auth_views.LoginView):
+    """Sperrt nach zu vielen Fehlversuchen (pro Konto und pro IP), ohne das Passwort noch zu prüfen."""
+
+    def post(self, request, *a, **kw):
+        ident = request.POST.get("username", "").strip().lower()
+        if throttle.blocked(request, "login", ident):
+            form = self.get_form_class()(request=request)   # ungebunden: keine Passwortprüfung
+            form.cleaned_data = {}
+            form.add_error(None, throttle.MESSAGE["login"])
+            return self.render_to_response(self.get_context_data(form=form), status=429)
+        return super().post(request, *a, **kw)
+
+    def form_invalid(self, form):
+        throttle.record(self.request, "login", self.request.POST.get("username", "").strip().lower())
+        return super().form_invalid(form)
+
+    def form_valid(self, form):
+        throttle.clear("login", form.cleaned_data["username"])
+        return super().form_valid(form)
+
+
+class ThrottledPasswordResetView(auth_views.PasswordResetView):
+    def form_valid(self, form):
+        email = form.cleaned_data["email"].strip().lower()
+        if throttle.blocked(self.request, "forgot", email):
+            form.add_error(None, throttle.MESSAGE["forgot"])
+            return self.render_to_response(self.get_context_data(form=form), status=429)
+        throttle.record(self.request, "forgot", email)
+        return super().form_valid(form)
+
+
+@login_not_required
+def legal(request, page):
+    """Impressum / Datenschutzerklärung. Angaben des Betreibers kommen aus Umgebungsvariablen (LEGAL_*)."""
+    keys = ("NAME", "STREET", "CITY", "EMAIL", "PHONE")
+    info = {k.lower(): os.environ.get(f"LEGAL_{k}", "").strip() for k in keys}
+    info["missing"] = [k for k in ("NAME", "STREET", "CITY", "EMAIL") if not info[k.lower()]]
+    return render(request, f"accounts/{page}.html", {"l": info})

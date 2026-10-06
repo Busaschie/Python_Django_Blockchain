@@ -102,3 +102,8 @@ Jeder neue Lauf wird automatisch geprüft (`backtester/plausibility.py`, Anzeige
 
 ## KI-Kommentar (Groq)
 Knopf „Auswertung kommentieren“ (nur auf Knopfdruck, einmal je Lauf gespeichert, `backtester/ai.py`). Umgebungsvariablen auf Render: `GROQ_API_KEY` (Pflicht für die KI), optional `GROQ_MODEL` (Standard `openai/gpt-oss-120b`), `GROQ_FALLBACK_MODEL` (`openai/gpt-oss-20b`), `AI_USER_DAILY_LIMIT` (20), `AI_GLOBAL_DAILY_LIMIT` (150, schützt das Gratis-Kontingent). Die KI bekommt nur das Kennzahlen-Datenblatt, rechnet nichts selbst; jede Zahl der Antwort wird gegen das Datenblatt geprüft (sonst eine Korrekturrunde, dann Ausweichmodell, dann regelbasierter Kommentar). Ohne Schlüssel oder bei Ausfall/Limit erscheint der regelbasierte Kommentar, der später per Knopf durch einen KI-Kommentar ersetzt werden kann.
+
+## Anmelde-Bremse, Impressum, Datenschutz
+
+- **Bremse** (`accounts/throttle.py`, Tabelle `accounts_attempt`, Migration 0001): Anmeldung 5 Fehlversuche pro Konto / 20 pro IP in 15 min; Registrierung und Passwort-Reset 3 Anfragen pro E-Mail / 10 pro IP pro Stunde. Gesperrt = HTTP 429 mit Hinweis, das Passwort wird dann nicht mehr geprüft. Ein erfolgreicher Login setzt den Zähler zurück; Einträge älter als 24 h werden gelöscht. Nicht abgedeckt: der Django-Admin-Login (`/admin/`).
+- **Impressum / Datenschutz:** `/impressum/` und `/datenschutz/` (ohne Login, Links im Footer, Hinweis auf der Registrierung). Betreiberangaben aus Umgebungsvariablen: `LEGAL_NAME`, `LEGAL_STREET`, `LEGAL_CITY`, `LEGAL_EMAIL`, optional `LEGAL_PHONE`. Fehlen Pflichtangaben, zeigt die Seite eine Warnung. Der Datenschutztext ist eine Vorlage, keine Rechtsberatung; bei Änderungen an Dienstleistern (Mail, KI, Hosting) anpassen.

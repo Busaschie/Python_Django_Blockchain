@@ -1,0 +1,36 @@
+{% extends "accounts/legal_base.html" %}
+{% block legal %}<h2>Datenschutzerklärung</h2>
+<h3>Verantwortlicher</h3>
+<p>{{ l.name|default:"[Name fehlt]" }}, {{ l.street|default:"[Straße fehlt]" }}, {{ l.city|default:"[PLZ Ort fehlt]" }}<br>E-Mail: {% if l.email %}<a href="mailto:{{ l.email }}">{{ l.email }}</a>{% else %}[fehlt]{% endif %}</p>
+
+<h3>Welche Daten verarbeitet werden</h3>
+<ul>
+<li><b>Konto:</b> E-Mail-Adresse (zugleich Benutzername) und das Passwort in verschlüsselt gespeicherter Form (Hash). Das Passwort selbst ist für uns nicht lesbar.</li>
+<li><b>Nutzung:</b> deine Auswertungen (Einstellungen, Ergebnisse, Kennzahlen) und, falls du die Funktion nutzt, der KI-Kommentar samt Zähler der täglichen Aufrufe.</li>
+<li><b>Sicherheit:</b> Zähler fehlgeschlagener Anmeldungen und Mail-Anfragen (E-Mail-Adresse bzw. IP-Adresse, Zeitpunkt), die nach spätestens 24 Stunden gelöscht werden.</li>
+<li><b>Server-Logdaten:</b> beim Aufruf fallen beim Hoster technisch bedingt IP-Adresse, Zeitpunkt und aufgerufene Seite an.</li>
+</ul>
+
+<h3>Zwecke und Rechtsgrundlagen</h3>
+<p>Bereitstellung des Kontos und der Funktionen (Art. 6 Abs. 1 lit. b DSGVO); Sicherheit und Missbrauchsschutz, z. B. Sperre nach Fehlversuchen (Art. 6 Abs. 1 lit. f DSGVO).</p>
+
+<h3>Cookies</h3>
+<p>Es werden nur technisch notwendige Cookies gesetzt: ein Sitzungs-Cookie (Anmeldung) und ein CSRF-Cookie (Schutz vor gefälschten Anfragen). Es gibt kein Tracking und keine Werbung; eine Einwilligung ist dafür nicht erforderlich.</p>
+
+<h3>Empfänger und Dienstleister</h3>
+<ul>
+<li><b>Hosting:</b> Render Services, Inc. (Anwendung).</li>
+<li><b>Datenbank:</b> Neon, Inc. (Konten und Auswertungen).</li>
+<li><b>E-Mail-Versand:</b> Brevo (Sendinblue SAS, Frankreich) oder Resend, je nach Konfiguration. Sie erhalten deine E-Mail-Adresse und den Mailinhalt, um Bestätigungs- und Reset-Mails zu senden.</li>
+<li><b>KI-Kommentar (nur auf Knopfdruck):</b> Groq, Inc. (USA). Übermittelt werden ausschließlich Kennzahlen der jeweiligen Auswertung, keine E-Mail-Adresse und keine Kontodaten.</li>
+<li><b>Diagramme:</b> Die Diagrammbibliothek Plotly wird von <code>cdn.plot.ly</code> geladen; dabei erhält der Anbieter technisch bedingt deine IP-Adresse.</li>
+<li><b>Marktdaten:</b> Kurse werden serverseitig von Börsen-Schnittstellen (z. B. Kraken, Binance) abgerufen; dabei werden keine Daten von dir übermittelt.</li>
+</ul>
+<p>Einige Dienstleister sitzen in den USA; die Übermittlung stützt sich auf deren Angemessenheitsbeschluss bzw. Standardvertragsklauseln.</p>
+
+<h3>Speicherdauer</h3>
+<p>Konto und Auswertungen bleiben bis zur Löschung des Kontos gespeichert. Du kannst dein Konto jederzeit selbst unter <a href="{% url 'account' %}">Konto</a> endgültig löschen; dabei werden auch alle Auswertungen entfernt. Mails können beim Versanddienstleister kurzzeitig in dessen Protokollen verbleiben.</p>
+
+<h3>Deine Rechte</h3>
+<p>Du hast das Recht auf Auskunft, Berichtigung (die E-Mail-Adresse kannst du im Konto selbst ändern), Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch. Wende dich dazu an die oben genannte Adresse. Außerdem kannst du dich bei einer Datenschutz-Aufsichtsbehörde beschweren.</p>
+{% endblock %}

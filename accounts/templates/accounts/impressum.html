@@ -1,0 +1,9 @@
+{% extends "accounts/legal_base.html" %}
+{% block legal %}<h2>Impressum</h2>
+<h3>Angaben gemäß § 5 DDG</h3>
+<p>{{ l.name|default:"[Name fehlt]" }}<br>{{ l.street|default:"[Straße fehlt]" }}<br>{{ l.city|default:"[PLZ Ort fehlt]" }}</p>
+<h3>Kontakt</h3>
+<p>E-Mail: {% if l.email %}<a href="mailto:{{ l.email }}">{{ l.email }}</a>{% else %}[fehlt]{% endif %}{% if l.phone %}<br>Telefon: {{ l.phone }}{% endif %}</p>
+<h3>Hinweis</h3>
+<p>Diese Anwendung berechnet Rückrechnungen (Backtests) auf historischen Marktdaten. Sie ist keine Anlageberatung und keine Aufforderung zum Kauf oder Verkauf von Finanzprodukten. Ergebnisse der Vergangenheit sind keine Garantie für zukünftige Ergebnisse. Die KI-Kommentare werden automatisch erzeugt und können Fehler enthalten.</p>
+{% endblock %}
