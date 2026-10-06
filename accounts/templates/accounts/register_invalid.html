@@ -1,0 +1,4 @@
+{% extends "accounts/base.html" %}
+{% block auth %}<h2>Link ungültig</h2>
+<div class="msg">{% if used %}Dieser Link wurde bereits verwendet - das Konto existiert. Bitte anmelden.{% elif expired %}Der Link ist abgelaufen. Bitte die Registrierung erneut starten.{% else %}Der Link ist ungültig.{% endif %}</div>
+<p class="alt"><a href="{% url 'register' %}">Neu registrieren</a> · <a href="{% url 'login' %}">Zur Anmeldung</a></p>{% endblock %}

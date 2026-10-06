@@ -1,0 +1,4 @@
+{% extends "accounts/base.html" %}
+{% block auth %}<h2>Passwort festlegen</h2>
+<p class="alt" style="text-align:left">E-Mail bestätigt: <b>{{ email }}</b>. Lege jetzt dein Passwort fest.</p>
+<form method="post">{% csrf_token %}{% for f in form %}<div class="field"><label for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}{{ f.errors }}</div>{% endfor %}{{ form.non_field_errors }}<button>Konto aktivieren</button></form>{% endblock %}

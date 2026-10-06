@@ -18,21 +18,58 @@ class AuthTests(TestCase):
             self.assertEqual(self.client.get(reverse(n)).status_code, 200)
         self.assertIn(reverse("register"), self.client.get(reverse("login")).content.decode())
 
+    def _register(self, email="A@b.de", pw="Sehr-gutes-Pw-17"):
+        import re
+        r = self.client.post(reverse("register"), {"email": email})
+        self.assertRedirects(r, reverse("register_sent"))
+        self.assertEqual(User.objects.count(), 0)   # noch kein Konto
+        self.assertEqual(len(mail.outbox), 1)
+        link = re.search(r"https?://[^/]+(/registrieren/bestaetigen/\S+)", mail.outbox[0].body).group(1)
+        self.assertEqual(self.client.get(link).status_code, 200)
+        self.assertEqual(User.objects.count(), 0)   # Link-Klick allein legt nichts an
+        return link
+
     def test_register_login_logout(self):
-        r = self.client.post(reverse("register"), {"email": "A@b.de", "password1": "Sehr-gutes-Pw-17", "password2": "Sehr-gutes-Pw-17"})
+        link = self._register()
+        r = self.client.post(link, {"password1": "Sehr-gutes-Pw-17", "password2": "Sehr-gutes-Pw-17"})
         self.assertRedirects(r, "/", fetch_redirect_response=False)
-        self.assertTrue(User.objects.filter(username="a@b.de", email="a@b.de").exists())
+        self.assertTrue(User.objects.filter(username="a@b.de", email="a@b.de", is_active=True).exists())
         self.assertEqual(self.client.get("/").status_code, 200)
         self.client.post(reverse("logout"))
         self.assertEqual(self.client.get("/").status_code, 302)
         r = self.client.post(reverse("login"), {"username": "A@B.de", "password": "Sehr-gutes-Pw-17"})
         self.assertRedirects(r, "/", fetch_redirect_response=False)
+        # Link ist einmalig
+        self.client.post(reverse("logout"))
+        self.assertEqual(self.client.get(link).status_code, 400)
 
-    def test_register_rejects_duplicate_and_weak(self):
+    def test_register_weak_password_and_mismatch(self):
+        link = self._register()
+        self.assertEqual(self.client.post(link, {"password1": "12345678", "password2": "12345678"}).status_code, 200)
+        self.assertEqual(self.client.post(link, {"password1": "Sehr-gutes-Pw-17", "password2": "anders-17-Pw-x"}).status_code, 200)
+        self.assertEqual(User.objects.count(), 0)
+
+    def test_register_bad_or_expired_link(self):
+        from django.core import signing
+        self.assertEqual(self.client.get("/registrieren/bestaetigen/muell/").status_code, 400)
+        tok = signing.dumps("x@y.de", salt="accounts.register")
+        with self.settings():
+            from unittest import mock
+            with mock.patch("accounts.views.MAX_AGE", -1):
+                self.assertEqual(self.client.get(reverse("register_confirm", args=[tok])).status_code, 400)
+        # Token mit anderem Salt wird abgelehnt
+        self.assertEqual(self.client.get(reverse("register_confirm", args=[signing.dumps("x@y.de", salt="anderes")])).status_code, 400)
+
+    def test_register_existing_email_sends_nothing(self):
         User.objects.create_user("a@b.de", "a@b.de", "x")
-        r = self.client.post(reverse("register"), {"email": "a@b.de", "password1": "12345678", "password2": "12345678"})
-        self.assertEqual(r.status_code, 200)
+        r = self.client.post(reverse("register"), {"email": "A@b.de"})
+        self.assertRedirects(r, reverse("register_sent"))
+        self.assertEqual(len(mail.outbox), 0)
         self.assertEqual(User.objects.count(), 1)
+
+    def test_register_invalid_email(self):
+        self.assertEqual(self.client.post(reverse("register"), {"email": "keine-mail"}).status_code, 200)
+        self.assertEqual(len(mail.outbox), 0)
 
     def test_reset_link_flow(self):
         import re

@@ -81,7 +81,7 @@ Stop-Loss, Take-Profit, Trailing-Stop und Positionsgröße (voll / fest / Volati
 - Long-only, kein Hebel
 
 ## Anmeldung
-Alle Seiten außer Anmelden/Registrieren/Passwort vergessen erfordern eine Sitzung (Benutzername = E-Mail, Django-Auth, Konten in der Neon-DB). Seiten: `/anmelden/`, `/registrieren/`, `/passwort-vergessen/` (Reset-Link per E-Mail, einmal nutzbar), `/konto/` (Passwort ändern).
+Alle Seiten außer Anmelden/Registrieren/Passwort vergessen erfordern eine Sitzung (Benutzername = E-Mail, Django-Auth, Konten in der Neon-DB). Seiten: `/anmelden/`, `/registrieren/` (E-Mail eingeben → Bestätigungslink 24 h gültig, einmalig → Passwort festlegen → erst dann wird das Konto angelegt), `/passwort-vergessen/` (Reset-Link per E-Mail, einmal nutzbar), `/konto/` (Passwort ändern).
 **E-Mail-Versand** auf Render über Umgebungsvariablen: `EMAIL_HOST`, `EMAIL_PORT` (587), `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`, optional `EMAIL_USE_TLS` (1), `DEFAULT_FROM_EMAIL`. Ohne `EMAIL_HOST` wird die Mail nur ins Log geschrieben (Entwicklung).
 Jeder Benutzer sieht nur seine eigenen Auswertungen (Verlauf, Detail, Vergleich, Status). Früher angelegte Läufe ohne Besitzer sind nicht mehr sichtbar.
 **Render sperrt ausgehendes SMTP** (Ports 25/465/587) bei kostenlosen Diensten. Deshalb E-Mail per HTTPS-API: `EMAIL_API_KEY` (und `EMAIL_API=brevo` oder `resend`) setzen, dazu `DEFAULT_FROM_EMAIL` mit beim Anbieter verifizierter Absenderadresse. Hat `EMAIL_API_KEY` Vorrang vor `EMAIL_HOST`.

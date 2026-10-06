@@ -12,16 +12,22 @@ class LoginForm(AuthenticationForm):
         return self.cleaned_data["username"].strip().lower()
 
 
-class RegisterForm(forms.Form):
+class EmailForm(forms.Form):
+    """Schritt 1: nur die E-Mail-Adresse."""
     email = forms.EmailField(label="E-Mail (= Benutzername)")
-    password1 = forms.CharField(label="Passwort", widget=forms.PasswordInput(attrs={"autocomplete": "new-password"}))
-    password2 = forms.CharField(label="Passwort wiederholen", widget=forms.PasswordInput(attrs={"autocomplete": "new-password"}))
 
     def clean_email(self):
-        email = self.cleaned_data["email"].strip().lower()
-        if User.objects.filter(username__iexact=email).exists():
-            raise forms.ValidationError("Zu dieser E-Mail existiert bereits ein Konto.")
-        return email
+        return self.cleaned_data["email"].strip().lower()
+
+
+class PasswordSetForm(forms.Form):
+    """Schritt 2 (nach Bestätigung): Passwort festlegen."""
+    password1 = forms.CharField(label="Passwort", widget=forms.PasswordInput(attrs={"autocomplete": "new-password", "autofocus": True}))
+    password2 = forms.CharField(label="Passwort wiederholen", widget=forms.PasswordInput(attrs={"autocomplete": "new-password"}))
+
+    def __init__(self, *a, email="", **kw):
+        super().__init__(*a, **kw)
+        self.email = email
 
     def clean(self):
         data = super().clean()
@@ -31,11 +37,7 @@ class RegisterForm(forms.Form):
                 self.add_error("password2", "Die Passwörter stimmen nicht überein.")
             else:
                 try:
-                    password_validation.validate_password(p1, User(username=data.get("email", "")))
+                    password_validation.validate_password(p1, User(username=self.email, email=self.email))
                 except forms.ValidationError as e:
                     self.add_error("password1", e)
         return data
-
-    def save(self):
-        e = self.cleaned_data["email"]
-        return User.objects.create_user(username=e, email=e, password=self.cleaned_data["password1"])

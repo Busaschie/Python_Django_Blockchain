@@ -1,0 +1,9 @@
+{% autoescape off %}Hallo,
+
+bitte bestätige deine E-Mail-Adresse und lege dein Passwort fest:
+
+{{ link }}
+
+Der Link ist 24 Stunden gültig. Erst danach ist dein Konto aktiv.
+Wenn du dich nicht registriert hast, ignoriere diese Nachricht.
+{% endautoescape %}

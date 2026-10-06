@@ -1,0 +1,4 @@
+{% extends "accounts/base.html" %}
+{% block auth %}<h2>Bitte E-Mail bestätigen</h2>
+<div class="msg">Falls die Adresse{% if email %} <b>{{ email }}</b>{% endif %} noch nicht registriert ist, wurde ein Bestätigungslink gesendet (24 Stunden gültig). Das Konto wird erst nach dem Klick auf den Link und dem Festlegen des Passworts angelegt.</div>
+<p class="alt"><a href="{% url 'register' %}">Andere Adresse verwenden</a> · <a href="{% url 'login' %}">Zur Anmeldung</a></p>{% endblock %}

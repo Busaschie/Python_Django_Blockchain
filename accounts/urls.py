@@ -12,6 +12,8 @@ urlpatterns = [
         template_name="accounts/login.html", authentication_form=LoginForm, redirect_authenticated_user=True)), name="login"),
     path("abmelden/", auth_views.LogoutView.as_view(), name="logout"),
     path("registrieren/", views.register, name="register"),
+    path("registrieren/gesendet/", views.register_sent, name="register_sent"),
+    path("registrieren/bestaetigen/<token>/", views.register_confirm, name="register_confirm"),
     path("passwort-vergessen/", ln(auth_views.PasswordResetView.as_view(
         template_name="accounts/forgot.html", email_template_name="accounts/reset_email.txt",
         subject_template_name="accounts/reset_subject.txt", success_url=reverse_lazy("forgot_done"))), name="forgot"),
