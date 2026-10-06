@@ -41,3 +41,35 @@ class PasswordSetForm(forms.Form):
                 except forms.ValidationError as e:
                     self.add_error("password1", e)
         return data
+
+
+class _PasswordConfirm(forms.Form):
+    current_password = forms.CharField(label="Aktuelles Passwort", widget=forms.PasswordInput(attrs={"autocomplete": "current-password"}))
+
+    def __init__(self, user, *a, **kw):
+        super().__init__(*a, **kw)
+        self.user = user
+
+    def clean_current_password(self):
+        pw = self.cleaned_data["current_password"]
+        if not self.user.check_password(pw):
+            raise forms.ValidationError("Passwort ist falsch.")
+        return pw
+
+
+class EmailChangeForm(_PasswordConfirm):
+    new_email = forms.EmailField(label="Neue E-Mail")
+    field_order = ["new_email", "current_password"]
+
+    def clean_new_email(self):
+        e = self.cleaned_data["new_email"].strip().lower()
+        if e == self.user.username.lower():
+            raise forms.ValidationError("Das ist bereits deine E-Mail-Adresse.")
+        if User.objects.filter(username__iexact=e).exists():
+            raise forms.ValidationError("Diese E-Mail-Adresse ist bereits vergeben.")
+        return e
+
+
+class DeleteAccountForm(_PasswordConfirm):
+    confirm = forms.BooleanField(label="Ich weiß, dass mein Konto und alle meine Auswertungen endgültig gelöscht werden.",
+                                 error_messages={"required": "Bitte bestätigen."})

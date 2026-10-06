@@ -1,0 +1,9 @@
+{% autoescape off %}Hallo,
+
+für diese E-Mail-Adresse existiert bereits ein Konto, deshalb wurde kein neues angelegt.
+
+Anmelden: {{ login }}
+Passwort vergessen: {{ forgot }}
+
+Wenn du dich nicht registrieren wolltest, ignoriere diese Nachricht.
+{% endautoescape %}

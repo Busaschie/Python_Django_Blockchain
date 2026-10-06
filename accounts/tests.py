@@ -60,12 +60,21 @@ class AuthTests(TestCase):
         # Token mit anderem Salt wird abgelehnt
         self.assertEqual(self.client.get(reverse("register_confirm", args=[signing.dumps("x@y.de", salt="anderes")])).status_code, 400)
 
-    def test_register_existing_email_sends_nothing(self):
+    def test_register_existing_email_sends_hint_mail(self):
         User.objects.create_user("a@b.de", "a@b.de", "x")
         r = self.client.post(reverse("register"), {"email": "A@b.de"})
         self.assertRedirects(r, reverse("register_sent"))
-        self.assertEqual(len(mail.outbox), 0)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn("bereits ein Konto", mail.outbox[0].body)
+        self.assertIn(reverse("forgot"), mail.outbox[0].body)
+        self.assertNotIn("bestaetigen", mail.outbox[0].body)
         self.assertEqual(User.objects.count(), 1)
+
+    def test_register_after_user_deleted(self):
+        u = User.objects.create_user("a@b.de", "a@b.de", "x")
+        u.delete()
+        self.client.post(reverse("register"), {"email": "a@b.de"})
+        self.assertIn("bestaetigen", mail.outbox[0].body)
 
     def test_register_invalid_email(self):
         self.assertEqual(self.client.post(reverse("register"), {"email": "keine-mail"}).status_code, 200)
@@ -178,3 +187,83 @@ class DeleteRunTests(TestCase):
         r = self.client.post(f"/loeschen/{rc.pk}/", {"next": "https://evil.example/"})   # kein Open Redirect
         self.assertRedirects(r, "/", fetch_redirect_response=False)
         self.assertFalse(BacktestRun.objects.filter(owner=a).exists())
+
+
+class AccountManageTests(TestCase):
+    PW = "Sehr-gutes-Pw-17"
+
+    def setUp(self):
+        self.u = User.objects.create_user("a@b.de", "a@b.de", self.PW)
+        self.client.force_login(self.u)
+
+    def _link(self, n=0):
+        import re
+        return re.search(r"https?://[^/]+(/konto/email/bestaetigen/\S+)", mail.outbox[n].body).group(1)
+
+    def test_page_has_all_forms(self):
+        c = self.client.get(reverse("account")).content.decode()
+        for url in ("email_change", "account_delete", "account"):
+            self.assertIn(reverse(url), c)
+
+    def test_email_change_flow(self):
+        r = self.client.post(reverse("email_change"), {"new_email": "N@b.de", "current_password": self.PW})
+        self.assertRedirects(r, reverse("account"))
+        self.assertEqual(mail.outbox[0].to, ["n@b.de"])
+        self.u.refresh_from_db()
+        self.assertEqual(self.u.username, "a@b.de")        # noch unverändert
+        self.assertRedirects(self.client.get(self._link()), reverse("account"))
+        self.u.refresh_from_db()
+        self.assertEqual((self.u.username, self.u.email), ("n@b.de", "n@b.de"))
+        self.client.post(reverse("logout"))
+        r = self.client.post(reverse("login"), {"username": "n@b.de", "password": self.PW})
+        self.assertRedirects(r, "/", fetch_redirect_response=False)
+
+    def test_email_change_validation(self):
+        User.objects.create_user("x@b.de", "x@b.de", "y")
+        for data in ({"new_email": "n@b.de", "current_password": "falsch"},
+                     {"new_email": "X@b.de", "current_password": self.PW},
+                     {"new_email": "a@b.de", "current_password": self.PW},
+                     {"new_email": "kaputt", "current_password": self.PW}):
+            self.assertEqual(self.client.post(reverse("email_change"), data).status_code, 200)
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_email_change_link_other_user_or_taken_or_bad(self):
+        self.client.post(reverse("email_change"), {"new_email": "n@b.de", "current_password": self.PW})
+        link = self._link()
+        other = User.objects.create_user("o@b.de", "o@b.de", "pw-1234-xyz")
+        self.client.force_login(other)
+        self.client.get(link)
+        other.refresh_from_db()
+        self.assertEqual(other.username, "o@b.de")          # fremder Link wirkt nicht
+        self.client.force_login(self.u)
+        User.objects.create_user("n@b.de", "n@b.de", "pw-1234-xyz")   # inzwischen vergeben
+        self.client.get(link)
+        self.u.refresh_from_db()
+        self.assertEqual(self.u.username, "a@b.de")
+        self.client.get("/konto/email/bestaetigen/muell/")
+        self.u.refresh_from_db()
+        self.assertEqual(self.u.username, "a@b.de")
+
+    def test_email_change_link_requires_login(self):
+        self.client.post(reverse("email_change"), {"new_email": "n@b.de", "current_password": self.PW})
+        link = self._link()
+        self.client.post(reverse("logout"))
+        self.assertEqual(self.client.get(link).status_code, 302)
+        self.assertTrue(self.client.get(link)["Location"].startswith(reverse("login")))
+
+    def test_delete_account(self):
+        from backtester.models import BacktestRun
+        BacktestRun.objects.create(owner=self.u, chain="btc", symbol="BTC/USDT", timeframe="1d", strategy="rsi", days=10, status="done")
+        # falsches Passwort / keine Bestätigung -> nichts passiert
+        self.assertEqual(self.client.post(reverse("account_delete"), {"current_password": "x", "confirm": "on"}).status_code, 200)
+        self.assertEqual(self.client.post(reverse("account_delete"), {"current_password": self.PW}).status_code, 200)
+        self.assertTrue(User.objects.filter(pk=self.u.pk).exists())
+        r = self.client.post(reverse("account_delete"), {"current_password": self.PW, "confirm": "on"})
+        self.assertRedirects(r, reverse("login"))
+        self.assertFalse(User.objects.filter(pk=self.u.pk).exists())
+        self.assertEqual(BacktestRun.objects.count(), 0)
+        self.assertEqual(self.client.get("/").status_code, 302)   # ausgeloggt
+
+    def test_delete_and_email_need_post(self):
+        self.assertEqual(self.client.get(reverse("account_delete")).status_code, 405)
+        self.assertEqual(self.client.get(reverse("email_change")).status_code, 405)

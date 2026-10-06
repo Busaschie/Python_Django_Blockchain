@@ -1,0 +1,9 @@
+{% autoescape off %}Hallo,
+
+bitte bestätige diese neue E-Mail-Adresse für dein Konto (du musst dafür angemeldet sein):
+
+{{ link }}
+
+Der Link ist 24 Stunden gültig. Danach meldest du dich mit der neuen Adresse an.
+Wenn du das nicht warst, ignoriere diese Nachricht - nichts ändert sich.
+{% endautoescape %}

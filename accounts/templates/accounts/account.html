@@ -1,5 +1,9 @@
 {% extends "accounts/base.html" %}
 {% block auth %}<h2>Konto</h2><p class="muted">{{ user.username }}</p>
 <h3>Passwort ändern</h3>
-<form method="post">{% csrf_token %}{% for f in form %}<div class="field"><label for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}{{ f.errors }}</div>{% endfor %}{{ form.non_field_errors }}<button>Passwort ändern</button></form>
+<form method="post" action="{% url 'account' %}">{% csrf_token %}{% for f in form %}<div class="field"><label for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}{{ f.errors }}</div>{% endfor %}{{ form.non_field_errors }}<button>Passwort ändern</button></form>
+<h3 style="margin-top:1.6rem">E-Mail ändern</h3>
+<form method="post" action="{% url 'email_change' %}">{% csrf_token %}{% for f in email_form %}<div class="field"><label for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}{{ f.errors }}</div>{% endfor %}{{ email_form.non_field_errors }}<button>Bestätigungslink senden</button></form>
+<h3 style="margin-top:1.6rem;color:var(--bad,#f66)">Konto löschen</h3>
+<form method="post" action="{% url 'account_delete' %}">{% csrf_token %}{% for f in delete_form %}<div class="field"><label for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}{{ f.errors }}</div>{% endfor %}{{ delete_form.non_field_errors }}<button style="background:#7a1f1f">Konto endgültig löschen</button></form>
 <p class="alt"><a href="{% url 'index' %}">← Zur App</a></p>{% endblock %}

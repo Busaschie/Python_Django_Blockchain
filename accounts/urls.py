@@ -24,4 +24,7 @@ urlpatterns = [
     path("passwort-zuruecksetzen/fertig/", ln(auth_views.PasswordResetCompleteView.as_view(
         template_name="accounts/reset_done.html")), name="reset_done"),
     path("konto/", views.account, name="account"),
+    path("konto/email/", views.email_change, name="email_change"),
+    path("konto/email/bestaetigen/<token>/", views.email_change_confirm, name="email_change_confirm"),
+    path("konto/loeschen/", views.account_delete, name="account_delete"),
 ]
