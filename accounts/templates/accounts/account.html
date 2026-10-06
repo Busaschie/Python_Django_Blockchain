@@ -1,9 +1,31 @@
-{% extends "accounts/base.html" %}
-{% block auth %}<h2>Konto</h2><p class="muted">{{ user.username }}</p>
-<h3>Passwort ändern</h3>
-<form method="post" action="{% url 'account' %}">{% csrf_token %}{% for f in form %}<div class="field"><label for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}{{ f.errors }}</div>{% endfor %}{{ form.non_field_errors }}<button>Passwort ändern</button></form>
-<h3 style="margin-top:1.6rem">E-Mail ändern</h3>
-<form method="post" action="{% url 'email_change' %}">{% csrf_token %}{% for f in email_form %}<div class="field"><label for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}{{ f.errors }}</div>{% endfor %}{{ email_form.non_field_errors }}<button>Bestätigungslink senden</button></form>
-<h3 style="margin-top:1.6rem;color:var(--bad,#f66)">Konto löschen</h3>
-<form method="post" action="{% url 'account_delete' %}">{% csrf_token %}{% for f in delete_form %}<div class="field"><label for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}{{ f.errors }}</div>{% endfor %}{{ delete_form.non_field_errors }}<button style="background:#7a1f1f">Konto endgültig löschen</button></form>
-<p class="alt"><a href="{% url 'index' %}">← Zur App</a></p>{% endblock %}
+{% extends "backtester/base.html" %}
+{% block content %}
+<style>
+.acc{max-width:1200px;margin:1.5rem auto;padding:0 1rem}
+.acc .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem;align-items:start}
+@media(max-width:900px){.acc .grid{grid-template-columns:1fr}}
+.acc .box{margin-bottom:0;padding:1.1rem 1.2rem}
+.acc h3{margin:0 0 .9rem}
+.acc .field{margin:.9rem 0}
+.acc .field label{margin-bottom:.4rem}
+.acc .field input[type=checkbox]{width:auto;margin-right:.4rem}
+.acc .field:has(input[type=checkbox]) label{display:flex;gap:.3rem;align-items:flex-start;line-height:1.35}
+.acc button{margin-top:.4rem}
+.acc .danger h3{color:var(--bad,#f66)}
+.acc .msg{padding:.5rem .7rem;border-radius:6px;background:#17301f;color:var(--good);margin-bottom:1rem}
+.acc .back{margin:1rem 0 0;font-size:.9rem}
+</style>
+<div class="acc">
+ <h2 style="margin:0 0 .2rem">Konto</h2><p class="muted" style="margin:0 0 1rem">{{ user.username }}</p>
+ {% for m in messages %}<div class="msg">{{ m }}</div>{% endfor %}
+ <div class="grid">
+  <div class="box"><h3>Passwort ändern</h3>
+   <form method="post" action="{% url 'account' %}">{% csrf_token %}{% for f in form %}<div class="field"><label for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}{{ f.errors }}</div>{% endfor %}{{ form.non_field_errors }}<button>Passwort ändern</button></form></div>
+  <div class="box"><h3>E-Mail ändern</h3>
+   <form method="post" action="{% url 'email_change' %}">{% csrf_token %}{% for f in email_form %}<div class="field"><label for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}{{ f.errors }}</div>{% endfor %}{{ email_form.non_field_errors }}<button>Bestätigungslink senden</button></form></div>
+  <div class="box danger"><h3>Konto löschen</h3>
+   <form method="post" action="{% url 'account_delete' %}">{% csrf_token %}{% for f in delete_form %}<div class="field"><label for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}{{ f.errors }}</div>{% endfor %}{{ delete_form.non_field_errors }}<button style="background:#7a1f1f">Konto endgültig löschen</button></form></div>
+ </div>
+ <p class="back"><a href="{% url 'index' %}">← Zur App</a></p>
+</div>
+{% endblock %}
