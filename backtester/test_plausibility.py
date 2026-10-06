@@ -94,3 +94,57 @@ class MeaningChecks(SimpleTestCase):
         s = pl.summarize([{"level": "ok"}, {"level": "warn"}, {"level": "bad"}])
         self.assertEqual((s["level"], s["n_ok"], s["n_warn"], s["n_bad"]), ("bad", 1, 1, 1))
         self.assertEqual(pl.summarize([{"level": "ok"}])["level"], "ok")
+
+
+class RegimeAndCostTests(SimpleTestCase):
+    def _curves(self, drift_up=0.01, n=300):
+        """Erst 150 Kerzen Aufwaertstrend, dann 150 Kerzen Abwaertstrend."""
+        rets = np.r_[np.full(n // 2, drift_up), np.full(n // 2, -drift_up)]
+        close = 100 * np.cumprod(1 + rets)
+        idx = [f"t{i:03d}" for i in range(n)]
+        pos = np.r_[np.ones(n // 2 - 1), np.zeros(n - n // 2 + 1)]   # nur im Aufwaertstrend investiert
+        strat = 10000 * np.cumprod(1 + np.r_[0.0, rets[1:] * pos[1:]])
+        return {"index": idx, "close": close.tolist(), "strategy": strat.tolist(), "buyhold": close.tolist(),
+                "trades": [{"entry_ts": idx[0], "exit_ts": idx[n // 2 - 1], "ret_pct": 5.0, "size_pct": 100.0}]}
+
+    def test_regimes_split_up_and_down(self):
+        from . import regimes
+        out = regimes.analyze(self._curves(), "1d")
+        self.assertTrue(out["ok"])
+        rows = {r["key"]: r for r in out["rows"]}
+        self.assertGreater(rows["up"]["strategy_pct"], 0)
+        self.assertLess(rows["down"]["buyhold_pct"], 0)
+        self.assertAlmostEqual(rows["down"]["strategy_pct"], 0.0, places=1)   # in der Abwaertsphase nicht investiert
+        self.assertAlmostEqual(sum(r["share_pct"] for r in out["rows"]), 100, delta=0.2)
+        self.assertEqual(rows["up"]["trades"], 0)    # Einstieg in Kerze 0 liegt vor Ende der Anlaufphase (unklassifiziert)
+        self.assertIn("Abwärts", out["hint"])
+        self.assertTrue(all(s["key"] in ("up", "down", "side") for s in out["segments"]))
+
+    def test_regimes_too_little_data(self):
+        from . import regimes
+        self.assertFalse(regimes.analyze({"index": ["a"] * 10, "close": [1.0] * 10, "strategy": [1.0] * 10}, "1d")["ok"])
+
+    def test_break_even_and_verdict(self):
+        from . import sensitivity as se
+        rows = [{"mult": m, "total_return_pct": r} for m, r in [(0, 20.0), (1, 10.0), (2, 0.0), (3, -10.0), (5, -30.0)]]
+        self.assertEqual(se._break_even(rows), 2.0)
+        rows[2]["total_return_pct"] = 5.0
+        self.assertAlmostEqual(se._break_even(rows), 2.33, places=2)
+        self.assertIsNone(se._break_even([{"mult": m, "total_return_pct": 5.0} for m in se.MULTS]))
+        self.assertEqual(se._break_even([{"mult": 0, "total_return_pct": -1.0}] + rows[1:]), 0.0)
+        self.assertIn("Fragil", se._verdict(rows, 1.5, 0.001))
+        self.assertIn("nicht profitabel", se._verdict(rows, 0.0, 0.001))
+        self.assertIn("Kostenrobust", se._verdict(rows, None, 0.001))
+
+    def test_cost_sensitivity_replays_exactly_and_costs_hurt(self):
+        from . import sensitivity as se
+        from .engine import run_backtest
+        from .strategies import STRATEGIES
+        df = frame(500, seed=7)
+        func, params = STRATEGIES["sma_cross"]
+        main = run_backtest(df, func(df, **params), 0.002, periods_per_year=365)["metrics"]
+        out = se.analyze(df, func, params, "single", {}, 0.002, 365, "close", None, main)
+        self.assertEqual(out["replay_diff"], 0.0)
+        rets = [r["total_return_pct"] for r in out["rows"]]
+        self.assertEqual(rets, sorted(rets, reverse=True))        # mehr Kosten -> nie bessere Rendite
+        self.assertEqual(out["rows"][1]["total_return_pct"], main["total_return_pct"])

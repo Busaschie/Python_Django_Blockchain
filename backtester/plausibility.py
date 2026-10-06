@@ -7,6 +7,8 @@ Jede Pruefung liefert "ok", "warn" oder "bad"; die Gesamtampel ist die schlechte
 import numpy as np
 import pandas as pd
 
+from .fmt import de
+
 LEVELS = {"ok": 0, "warn": 1, "bad": 2}
 TF_MINUTES = {"15m": 15, "1h": 60, "4h": 240, "1d": 1440}
 
@@ -31,7 +33,7 @@ def check_data(df: pd.DataFrame, timeframe: str) -> list:
         missing = int(((pd.Series(idx[1:] - idx[:-1]) / step) - 1).clip(lower=0)[gaps].round().sum())
         share = missing / (n + missing) * 100
         out.append(_c(g, "bad" if share > 5 else "warn" if share > 1 else "ok", "Lücken in den Kursdaten",
-                      f"{missing} fehlende Kerzen ({share:.1f} %)" if missing else "keine fehlenden Kerzen"))
+                      f"{missing} fehlende Kerzen ({de(share, 1)} %)" if missing else "keine fehlenden Kerzen"))
     bad_px = int(df[["open", "high", "low", "close"]].isna().any(axis=1).sum()
                  + (df[["open", "high", "low", "close"]] <= 0).any(axis=1).sum())
     incons = int(((df["high"] < df["low"]) | (df["close"] > df["high"] * 1.0001) | (df["close"] < df["low"] * 0.9999)).sum())
@@ -46,7 +48,7 @@ def check_data(df: pd.DataFrame, timeframe: str) -> list:
     if "volume" in df and n:
         zero = float((df["volume"] <= 0).mean() * 100)
         out.append(_c(g, "warn" if zero > 5 else "ok", "Handelsvolumen",
-                      f"{zero:.1f} % der Kerzen ohne Volumen" if zero > 5 else "Volumen vorhanden"))
+                      f"{de(zero, 1)} % der Kerzen ohne Volumen" if zero > 5 else "Volumen vorhanden"))
     return out
 
 
@@ -65,12 +67,12 @@ def check_engine(curves: dict, metrics: dict, fee: float, kind: str, causal) -> 
         dd = float((strat / np.maximum.accumulate(strat) - 1).min() * 100)
         diff = abs(dd - metrics["max_drawdown_pct"])
         out.append(_c(g, "bad" if diff > 0.5 else "ok", "Max Drawdown nachgerechnet",
-                      f"Kurve {dd:.2f} % vs. Kennzahl {metrics['max_drawdown_pct']} %"))
+                      f"Kurve {de(dd)} % vs. Kennzahl {de(metrics['max_drawdown_pct'])} %"))
     if len(bh) > 1 and len(close) == len(bh) and kind == "single":
         calc = (close[-1] / close[0] - 1) * 100
         diff = abs(calc - metrics["buyhold_return_pct"])
         out.append(_c(g, "warn" if diff > 1.0 else "ok", "Buy & Hold nachgerechnet",
-                      f"aus Kursen {calc:.2f} % vs. Kennzahl {metrics['buyhold_return_pct']} %"))
+                      f"aus Kursen {de(calc)} % vs. Kennzahl {de(metrics['buyhold_return_pct'])} %"))
     if trades:
         # Gesamtrendite aus den Einzeltrades (nur Einzellauf: Kurve = Gesamtzeitraum)
         if kind == "single":
@@ -79,7 +81,7 @@ def check_engine(curves: dict, metrics: dict, fee: float, kind: str, causal) -> 
             diff = abs(comp - eq)
             tol = max(1.0, abs(eq) * 0.02)
             out.append(_c(g, "bad" if diff > 3 * tol else "warn" if diff > tol else "ok", "Rendite aus Trades nachgerechnet",
-                          f"Trades ergeben {comp:.2f} % vs. Kennzahl {eq} %"))
+                          f"Trades ergeben {de(comp)} % vs. Kennzahl {de(eq)} %"))
         # Einzeltrade neu berechnet: Kauf/Verkauf-Kurs + Kosten gegen gemeldete Rendite
         errs = []
         for t in trades:
@@ -89,7 +91,7 @@ def check_engine(curves: dict, metrics: dict, fee: float, kind: str, causal) -> 
         if errs:
             med = float(np.median(errs))
             out.append(_c(g, "warn" if med > 0.1 else "ok", "Trade-Renditen nachgerechnet",
-                          f"Abweichung (Median) {med:.3f} Prozentpunkte über {len(errs)} Signal-Trades"))
+                          f"Abweichung (Median) {de(med, 3)} Prozentpunkte über {len(errs)} Signal-Trades"))
         ordered, overlap = True, False
         prev_exit = None
         for t in trades:
@@ -102,7 +104,12 @@ def check_engine(curves: dict, metrics: dict, fee: float, kind: str, causal) -> 
                       "Trades überlappen oder enden vor dem Einstieg" if not ordered or overlap
                       else "Trades zeitlich geordnet, keine Überschneidung (Long-only)"))
     out.append(_c(g, "ok" if fee >= 0 else "bad", "Kosten berücksichtigt",
-                  f"{fee * 100:.3f} % je Seite (Gebühr + Slippage) in jeder Position"))
+                  f"{de(fee * 100, 3)} % je Seite (Gebühr + Slippage) in jeder Position"))
+    cost = curves.get("cost") or {}
+    if cost.get("ok"):
+        d = cost["replay_diff"]
+        out.append(_c(g, "warn" if d > 0.05 else "ok", "Kosten-Neuberechnung stimmt",
+                      f"gleiche Parameter neu simuliert: Abweichung {d} Prozentpunkte"))
     if causal is not None:
         out.append(_c(g, "ok" if causal else "bad", "Kein Blick in die Zukunft",
                       "Signale ändern sich nicht, wenn spätere Kerzen fehlen" if causal
@@ -134,16 +141,20 @@ def check_meaning(curves: dict, metrics: dict, validation: dict, params: dict, g
         without_best = float(np.prod(1 + np.delete(c, int(np.argmax(c)))) - 1)
         fragile = total > 0 and without_best <= 0
         out.append(_c(g, "warn" if fragile else "ok", "Abhängigkeit vom besten Trade",
-                      f"Ohne den besten Trade: {without_best * 100:.1f} % statt {total * 100:.1f} %" +
+                      f"Ohne den besten Trade: {de(without_best * 100, 1)} % statt {de(total * 100, 1)} %" +
                       (" – der Gewinn hängt an einem einzigen Trade" if fragile else "")))
     tim = metrics.get("time_in_market_pct")
     if tim is not None:
         out.append(_c(g, "warn" if tim < 5 else "ok", "Zeit im Markt",
-                      f"{tim} %" + (" (sehr selten investiert, wenig Datenbasis)" if tim < 5 else "")))
+                      f"{de(tim, 1)} %" + (" (sehr selten investiert, wenig Datenbasis)" if tim < 5 else "")))
     sharpe, cagr = metrics.get("sharpe") or 0, metrics.get("cagr_pct") or 0
     odd = sharpe > 3 or cagr > 500
     out.append(_c(g, "warn" if odd else "ok", "Realistische Größenordnung",
-                  f"Sharpe {sharpe}, CAGR {cagr} %" + (" – außergewöhnlich gut, zuerst auf Fehler prüfen" if odd else "")))
+                  f"Sharpe {de(sharpe)}, CAGR {de(cagr)} %" + (" – außergewöhnlich gut, zuerst auf Fehler prüfen" if odd else "")))
+    cost = curves.get("cost") or {}
+    if cost.get("ok") and metrics.get("total_return_pct", 0) > 0:
+        be = cost["break_even_mult"]
+        out.append(_c(g, "warn" if be is not None and be < 2 else "ok", "Kosten-Robustheit", cost["verdict"]))
     if validation.get("kind") == "split":
         out.append(_c(g, "warn" if validation.get("overfit_warning") else "ok", "Train gegen Test",
                       "Testphase deutlich schlechter als Training: Verdacht auf Überanpassung" if validation.get("overfit_warning")

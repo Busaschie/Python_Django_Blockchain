@@ -194,6 +194,38 @@
    {% endif %}
   </div>
   {% endif %}{% endwith %}
+  {% with rg=run.curves.regimes %}{% if rg %}
+  <div class="box" id="regbox">
+   <h3 class="lbl">Marktphasen <button type="button" class="tip" data-tip="{{ ui_tips.regimes }}" aria-label="Erklärung: Marktphasen">i</button></h3>
+   {% if rg.ok %}
+   <div class="scroll"><table>
+    <tr><th>Phase</th><th>Anteil</th><th>Strategie</th><th>Buy &amp; Hold</th><th>Zeit im Markt</th><th>Trades</th><th>Win-Rate</th></tr>
+    {% for r in rg.rows %}<tr><td><strong>{{ r.label }}</strong></td><td>{{ r.share_pct }} %</td>
+     <td class="{% if r.strategy_pct is not None and r.strategy_pct < 0 %}err{% elif r.strategy_pct %}good{% endif %}">{{ r.strategy_pct|default_if_none:"–" }} %</td>
+     <td>{{ r.buyhold_pct|default_if_none:"–" }} %</td><td>{{ r.time_in_market_pct|default_if_none:"–" }} %</td>
+     <td>{{ r.trades }}</td><td>{% if r.win_rate_pct is not None %}{{ r.win_rate_pct }} %{% else %}–{% endif %}</td></tr>{% endfor %}
+   </table></div>
+   <p class="small">{{ rg.hint }}</p>
+   <div id="regchart" style="height:260px"></div>
+   <p class="small muted">Phase = Kursentwicklung der letzten {{ rg.window_days }} Tage: über +{{ rg.threshold_pct }} % Aufwärts, unter −{{ rg.threshold_pct }} % Abwärts, dazwischen Seitwärts. Im Kurs-Chart sind die Phasen grün (aufwärts) bzw. rot (abwärts) hinterlegt.</p>
+   {% else %}<p class="small muted">Nicht verfügbar: {{ rg.reason }}.</p>{% endif %}
+  </div>
+  {% endif %}{% endwith %}
+  {% with ct=run.curves.cost %}{% if ct %}
+  <div class="box" id="costbox">
+   <h3 class="lbl">Kosten-Sensitivität <button type="button" class="tip" data-tip="{{ ui_tips.costs }}" aria-label="Erklärung: Kosten-Sensitivität">i</button></h3>
+   {% if ct.ok %}
+   <p class="small"><strong>{{ ct.verdict }}</strong></p>
+   <div class="scroll"><table>
+    <tr><th>Kosten</th><th>je Seite</th><th>Rendite</th><th>Max Drawdown</th><th>Sharpe</th></tr>
+    {% for r in ct.rows %}<tr {% if r.mult == 1 %}style="font-weight:600"{% endif %}><td>{{ r.mult }}×{% if r.mult == 1 %} (Annahme){% endif %}</td><td>{{ r.cost_pct }} %</td>
+     <td class="{% if r.total_return_pct < 0 %}err{% endif %}">{{ r.total_return_pct }} %</td><td>{{ r.max_drawdown_pct }} %</td><td>{{ r.sharpe }}</td></tr>{% endfor %}
+   </table></div>
+   <div id="costchart" style="height:260px"></div>
+   <p class="small muted">Zum Vergleich: Buy &amp; Hold {{ ct.buyhold_return_pct }} %. Gleiche Parameter, nur die Kosten (Gebühr + Slippage) werden vervielfacht. Beim Train/Test-Split gilt die Testphase, bei Walk-Forward gelten die je Fold gewählten Parameter.</p>
+   {% else %}<p class="small muted">Nicht verfügbar: {{ ct.reason }}.</p>{% endif %}
+  </div>
+  {% endif %}{% endwith %}
   {% if run.validation.kind == "split" %}<div class="box"><div id="heatmap" style="height:340px"></div></div>{% endif %}
   {% if run.curves.trades %}
   <div class="box">
@@ -308,6 +340,8 @@
   <dl>
    <div class="term"><dt>Rendite Strategie</dt><dd>Gesamtveränderung des Kapitals im Zeitraum nach Gebühren, ausgehend von 10.000 Startkapital.</dd></div>
    <div class="term"><dt>Buy &amp; Hold (B&amp;H)</dt><dd>Vergleichsstrategie: am Anfang kaufen, am Ende verkaufen. Eine Strategie lohnt sich nur, wenn sie B&amp;H schlägt, am besten bei geringerem Risiko.</dd></div>
+   <div class="term"><dt>Marktphasen</dt><dd>Jede Kerze wird nach der Kursentwicklung der letzten ca. 90 Tage eingeordnet (nur Vergangenheit, kein Blick nach vorn): über +10 % Aufwärts, unter −10 % Abwärts, sonst Seitwärts. Die Tabelle zeigt je Phase Anteil an der Zeit, Rendite der Strategie und von Buy &amp; Hold, Zeit im Markt, Trades (nach Einstiegszeitpunkt) und Win-Rate. So siehst du, ob die Strategie nur in einer Marktlage funktioniert. Im Kurs-Chart sind Aufwärts- grün und Abwärtsphasen rot hinterlegt. Beim Train/Test-Split zählt nur die Testphase.</dd></div>
+   <div class="term"><dt>Kosten-Sensitivität</dt><dd>Dasselbe Ergebnis mit 0-, 1-, 2-, 3- und 5-fachen Kosten (Gebühr + Slippage), die Parameter bleiben unverändert. „Kosten bis Gewinn null“ ist das Vielfache der angenommenen Kosten, bei dem die Rendite auf 0 fällt. Liegt es unter 2, ist die Strategie fragil: reale Gebühren, Spreads oder schlechtere Ausführung können den Vorteil aufzehren. Strategien mit vielen Trades reagieren besonders stark.</dd></div>
    <div class="term"><dt>Plausibilitäts-Ampel</dt><dd>Automatische Prüfungen je Lauf. <em>Daten:</em> Menge, Lücken, doppelte Kerzen, ungültige Preise, extreme Sprünge, Volumen. <em>Engine:</em> Max Drawdown, Buy &amp; Hold, Gesamtrendite und einzelne Trades werden aus den Kurven bzw. Kursen unabhängig nachgerechnet; Trades dürfen sich nicht überschneiden; ein Look-ahead-Test prüft, dass Signale unverändert bleiben, wenn spätere Kerzen fehlen. <em>Aussagekraft:</em> Anzahl Trades, Zeitraum, Abhängigkeit vom besten Trade, Zeit im Markt, unrealistisch gute Kennzahlen, Train gegen Test, Parameter am Rand des Suchbereichs. Grün = in Ordnung, gelb = Hinweis beachten, rot = Ergebnis nicht verwertbar.</dd></div>
    <div class="term"><dt>Look-ahead (Blick in die Zukunft)</dt><dd>Fehler, bei dem ein Signal Informationen aus späteren Kerzen nutzt. Solche Backtests sehen großartig aus, sind aber in der Praxis nicht handelbar.</dd></div>
    <div class="term"><dt>Monte-Carlo / Robustheit</dt><dd>Die Trades eines Laufs werden 1.000-mal mit Zurücklegen neu gezogen. Das ergibt eine Verteilung statt einer einzelnen Zahl: „Wahrscheinlichkeit auf Gewinn“ ist der Anteil der Durchläufe mit positiver Rendite, „95-%-Fall“ beim Drawdown der Wert, der nur in 5 % der Durchläufe unterschritten wird (realistischer Worst Case). Der Chart zeigt den Fächer (Bänder 5–95 % und 25–75 %, Median) und die tatsächliche Reihenfolge gestrichelt.</dd></div>
@@ -455,6 +489,10 @@
    const orig = Plotly.newPlot;
    Plotly.newPlot = (id, data, layout, cfg) => orig.call(Plotly, id, data, merge(dark, layout || {}), cfg);
  })();
+ const RG = (c.regimes && c.regimes.ok) ? c.regimes : null;
+ const regimeShapes = RG ? RG.segments.filter(g => g.key !== "side").map(g => ({
+   type:"rect", xref:"x", yref:"paper", x0:g.x0, x1:g.x1, y0:0, y1:1, line:{width:0}, layer:"below",
+   fillcolor: g.key === "up" ? "rgba(111,207,138,0.12)" : "rgba(255,122,122,0.12)"})) : [];
  const base = {margin:{t:40, l:55, r:10, b:40}, legend:{orientation:"h", y:-0.18}, shapes};
  const cfg = {responsive:true};
 
@@ -468,7 +506,7 @@
      {x:closed.map(t => t.exit_ts), y:closed.map(t => t.exit_px), name:"Verkauf", mode:"markers",
       marker:{symbol:"triangle-down", size:11, color:"red"},
       text:closed.map(t => "Trade: " + t.ret_pct + " % · " + (t.reason || "Signal")), hovertemplate:"Verkauf %{y}<br>%{text}<extra></extra>"},
-   ], {...base, title:"Kurs mit Trades"}, cfg);
+   ], {...base, shapes:[...(base.shapes || []), ...regimeShapes], title:"Kurs mit Trades"}, cfg);
  }
  Plotly.newPlot("chart", [
    {x:c.index, y:c.strategy, name:"Strategie"},
@@ -487,6 +525,23 @@
      {x:x, y:MC.actual, name:"Tatsächliche Reihenfolge", line:{color:"#f5dd5d", width:2, dash:"dot"}}],
      {...base, shapes:[], title:"Monte-Carlo: Rendite in % nach Trade Nr.", margin:{t:40, l:55, r:10, b:70},
       legend:{orientation:"h", y:-0.3}, xaxis:{title:"Trade Nr.", type:"linear", rangemode:"tozero"}, yaxis:{title:"%"}}, cfg);
+ }
+ if (RG && document.getElementById("regchart")) {
+   const lbl = RG.rows.map(r => r.label);
+   Plotly.newPlot("regchart", [
+     {type:"bar", x:lbl, y:RG.rows.map(r => r.strategy_pct), name:"Strategie", marker:{color:"#81d4fa"}},
+     {type:"bar", x:lbl, y:RG.rows.map(r => r.buyhold_pct), name:"Buy & Hold", marker:{color:"#868e96"}}],
+     {...base, shapes:[], barmode:"group", title:"Rendite je Marktphase in %", xaxis:{type:"category"}, yaxis:{title:"%"}}, cfg);
+ }
+ const CT = (c.cost && c.cost.ok) ? c.cost : null;
+ if (CT && document.getElementById("costchart")) {
+   const xs = CT.rows.map(r => r.mult + "×");
+   Plotly.newPlot("costchart", [
+     {x:xs, y:CT.rows.map(r => r.total_return_pct), name:"Strategie", mode:"lines+markers", line:{color:"#81d4fa", width:2},
+      text:CT.rows.map(r => "Kosten je Seite " + r.cost_pct + " %"), hovertemplate:"%{x}: %{y} %<br>%{text}<extra></extra>"},
+     {x:xs, y:CT.rows.map(() => 0), name:"Null-Linie", mode:"lines", line:{color:"#f5dd5d", width:1}, hoverinfo:"skip"}],
+     {...base, shapes:[], title:"Rendite bei steigenden Kosten in %", xaxis:{title:"Vielfaches der angenommenen Kosten", type:"category"},
+      yaxis:{title:"%"}, margin:{t:40, l:55, r:10, b:70}, legend:{orientation:"h", y:-0.35}}, cfg);
  }
  const H = JSON.parse(document.getElementById("heat").textContent);
  if (H && H.z && document.getElementById("heatmap")) {

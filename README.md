@@ -96,3 +96,6 @@ Gelaufene Auswertungen löschen: rotes × rechts neben dem Titel in der Verlaufs
 
 ## Plausibilitäts-Ampel
 Jeder neue Lauf wird automatisch geprüft (`backtester/plausibility.py`, Anzeige oberhalb des Kurs-Charts): **Daten** (Menge, Lücken, Duplikate, ungültige Preise, Sprünge, Volumen), **Engine** (Drawdown, Buy & Hold, Gesamtrendite und Einzeltrades unabhängig nachgerechnet, Trade-Reihenfolge, Look-ahead-Test) und **Aussagekraft** (Trades, Zeitraum, bester Trade, Zeit im Markt, unrealistische Kennzahlen, Train gegen Test, Parameter am Rand). Ältere Läufe haben die Ampel nicht (neu starten). Ein Fehler in der Prüfung lässt den Lauf nie scheitern.
+
+## Marktphasen und Kosten-Sensitivität
+`backtester/regimes.py`: Jede Kerze wird nach der Kursentwicklung der letzten ca. 90 Tage als Aufwärts/Seitwärts/Abwärts eingeordnet (nur Vergangenheit); Tabelle und Chart zeigen Strategie gegen Buy & Hold je Phase, im Kurs-Chart sind die Phasen hinterlegt. `backtester/sensitivity.py`: dasselbe Ergebnis mit 0-, 1-, 2-, 3-, 5-fachen Kosten (Parameter fest), inkl. „Kosten bis Gewinn null“. Die 1×-Neuberechnung wird als Selbsttest gegen das Hauptergebnis geprüft (Plausibilitäts-Ampel). Ältere Läufe haben beide Blöcke nicht (neu starten).

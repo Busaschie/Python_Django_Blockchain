@@ -8,7 +8,7 @@ from datetime import date, timedelta
 
 from django.db import connection
 
-from . import indicators, montecarlo, plausibility
+from . import indicators, montecarlo, plausibility, regimes, sensitivity
 from .chains import CHAINS
 from .data import PERIODS_PER_YEAR, fetch_ohlcv
 from .engine import Risk, run_backtest
@@ -71,8 +71,22 @@ def compute(run) -> None:
     run.curves["mc"] = json_safe(montecarlo.analyze(run.curves, fee))   # Robustheits-Test (Trades)
     run.validation = json_safe(result.get("validation", {}))
     run.params = json_safe(run.params)
+    run.curves["regimes"] = json_safe(_safe(regimes.analyze, run.curves, j["timeframe"],
+                                            (result.get("validation") or {}).get("kind", "single"),
+                                            (result.get("validation") or {}).get("split_at")))
+    run.curves["cost"] = json_safe(_safe(sensitivity.analyze, df, STRATEGIES[j["strategy"]][0], params,
+                                         (result.get("validation") or {}).get("kind", "single"),
+                                         result.get("validation") or {}, fee, ppy, ex, risk, result["metrics"]))
     run.curves["plaus"] = json_safe(_plausibility(run, df, result, params, j, fee))
     run.status, run.error = "done", ""
+
+
+def _safe(func, *args):
+    """Zusatzauswertungen duerfen den Lauf nie scheitern lassen."""
+    try:
+        return func(*args)
+    except Exception as exc:  # noqa: BLE001
+        return {"ok": False, "reason": f"nicht berechenbar: {str(exc)[:150]}"}
 
 
 def _plausibility(run, df, result, params, j, fee) -> dict:

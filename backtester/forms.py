@@ -96,6 +96,11 @@ UI_TIPS = {
     "plausibility": "Automatische Prüfungen je Lauf: sind die Kursdaten vollständig, rechnet die Simulation in sich stimmig "
                     "(Gegenrechnung, kein Blick in die Zukunft) und reicht die Datenbasis für eine Aussage? Grün = in "
                     "Ordnung, gelb = Hinweise beachten, rot = Ergebnis nicht verwertbar.",
+    "regimes": "Zeigt, wie die Strategie im Aufwärts-, Seitwärts- und Abwärtstrend abschneidet, verglichen mit dem Markt. "
+               "Die Phase ergibt sich aus der Kursentwicklung der letzten ca. 90 Tage. So erkennst du, ob die Strategie "
+               "nur in einer Marktlage funktioniert.",
+    "costs": "Dasselbe Ergebnis mit 0-, 1-, 2-, 3- und 5-fachen Kosten (Gebühr + Slippage), Parameter unverändert. "
+             "Zeigt, wie viel Spielraum die Strategie bei höheren Kosten oder schlechteren Ausführungskursen hat.",
     "compare_strategies": "Startet dieselben Einstellungen mit SMA-Crossover, RSI und Kombiniert auf der gewählten "
                           "Chain und zeigt die Ergebnisse nebeneinander. Im Einzellauf gelten Standardparameter.",
 }
