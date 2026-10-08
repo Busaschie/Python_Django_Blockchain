@@ -54,7 +54,7 @@ def paper_start(request, pk):
     except Exception as exc:  # noqa: BLE001
         messages.error(request, "Paper-Konto konnte nicht gestartet werden: " + str(exc)[:200], extra_tags="signal")
         return redirect("detail", pk=run.pk)
-    messages.success(request, "Paper-Konto gestartet.")
+    messages.success(request, "Paper-Konto gestartet.", extra_tags="signal")
     return redirect("paper_detail", pk=acc.pk)
 
 

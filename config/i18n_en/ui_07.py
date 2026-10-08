@@ -39,4 +39,8 @@ CATALOG = {
  'Indikatoren: TA-Lib': 'Indicators: TA-Lib',
  'Noch keine Vorlagen. Stelle eine Konfiguration ein und speichere sie hier.': 'No templates yet. Set up a configuration and save it here.',
  'Kennzahlen, Train/Test-Vergleich und Walk-Forward-Folds der Auswertung': 'Metrics, train/test comparison and walk-forward folds of the run',
+ 'Wo steht die Strategie dieses Laufs jetzt: investiert oder nicht?': 'Where does this run\'s strategy stand right now: invested or not?',
+ 'Ein virtuelles Konto folgt diesem Signal, ohne echtes Geld. So siehst du, wie die Strategie läuft, nachdem du sie ausgewählt hast.': 'A virtual account follows this signal, without real money. This shows how the strategy performs after you have picked it.',
+ 'Mail an: {}. Du bekommst sie, sobald die Strategie zwischen LONG und FLAT wechselt (nur wenn der Betreiber die automatische Prüfung eingerichtet hat).': 'Mail to: {}. You get it as soon as the strategy switches between LONG and FLAT (only if the operator has set up the automatic check).',
+ 'Mail aus: Du bekommst eine Nachricht, sobald die Strategie zwischen LONG und FLAT wechselt. Höchstens {#} Läufe gleichzeitig.': 'Mail off: you get a message as soon as the strategy switches between LONG and FLAT. At most {} runs at the same time.',
 }

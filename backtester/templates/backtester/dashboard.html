@@ -338,8 +338,9 @@
   <div class="tabpanel" role="tabpanel" id="tab-live" aria-labelledby="tb-live" hidden>
   {% if signals_enabled %}
   <div class="box" id="sigbox">
-   <h3 class="lbl">Aktuelles Signal <button type="button" class="tip" data-tip="{{ ui_tips.signal }}" aria-label="Erklärung: Aktuelles Signal">i</button></h3>
-   {% for m in messages %}<p class="small {% if m.level_tag == 'error' %}err{% else %}good{% endif %}">{{ m }}</p>{% endfor %}
+   <h3 class="lbl">Signal <button type="button" class="tip" data-tip="{{ ui_tips.signal }}" aria-label="Erklärung: Signal">i</button></h3>
+   <p class="small muted">Wo steht die Strategie dieses Laufs jetzt: investiert oder nicht?</p>
+   {% for m in messages %}{% if "signal" in m.extra_tags %}<p class="small {% if m.level_tag == 'error' %}err{% else %}good{% endif %}">{{ m }}</p>{% endif %}{% endfor %}
    {% with sg=run.signal_state %}
    {% if run.source == "synthetic" %}<p class="small muted">Bei synthetischen Daten gibt es kein aktuelles Signal.</p>
    {% else %}
@@ -348,19 +349,28 @@
     <span class="small">{% if sg.since %}seit {{ sg.since|slice:":10" }} {{ sg.since|slice:"11:16" }} UTC{% else %}seit Beginn der geladenen Daten{% endif %} · Schlusskurs {{ sg.price }} · Kerze {{ sg.candle|slice:":10" }} {{ sg.candle|slice:"11:16" }} UTC</span></p>
    <p class="small muted">Geprüft {{ sg.checked|slice:":10" }} {{ sg.checked|slice:"11:16" }} UTC. Zustand der Strategie mit den Parametern dieses Laufs auf den zuletzt abgeschlossenen Kerzen; Stop-Loss, Take-Profit, Trailing-Stop und Positionsgröße sind nicht berücksichtigt. Keine Anlageberatung.</p>
    {% else %}<p class="small muted">Noch nicht geprüft.</p>{% endif %}
-   <form method="post" action="{% url 'signal_refresh' run.pk %}" style="display:inline">{% csrf_token %}<button class="secondary" type="submit">Jetzt prüfen</button></form>
-   <form method="post" action="{% url 'signal_toggle' run.pk %}" style="display:inline">{% csrf_token %}
-    <button class="secondary" type="submit">{% if run.signal_alert %}Signal-Mail ausschalten{% else %}Mail bei Signal-Wechsel einschalten{% endif %}</button></form>
-   {% for pa in run.paper_accounts.all %}{% if pa.owner_id == user.pk %}<p class="small">Paper-Konto: <a href="{% url 'paper_detail' pa.pk %}">{{ pa.name }}</a> ({{ pa.return_pct }} %)</p>{% endif %}{% endfor %}
-   <form method="post" action="{% url 'paper_start' run.pk %}" style="display:inline" id="paperstart">{% csrf_token %}
-    <input type="number" name="capital" value="10000" min="100" max="1000000" step="100" aria-label="Startkapital" style="width:6.5rem">
-    <button class="secondary" type="submit">Paper-Trading starten</button>
-    <button type="button" class="tip" data-tip="{{ ui_tips.paper }}" aria-label="Erklärung: Paper-Trading">i</button></form>
-   <a class="small" href="{% url 'paper_list' %}">Alle Paper-Konten</a>
-   <p class="small muted">{% if run.signal_alert %}Aktiv: Bei einem Wechsel geht eine Mail an {{ user.email }}. {% endif %}Höchstens {{ signal_max }} Läufe gleichzeitig. Mails entstehen nur, wenn die automatische Prüfung eingerichtet ist (Betreiber).</p>
+   <div class="actions">
+    <form method="post" action="{% url 'signal_refresh' run.pk %}">{% csrf_token %}<button class="secondary" type="submit">Jetzt prüfen</button></form>
+    <form method="post" action="{% url 'signal_toggle' run.pk %}">{% csrf_token %}
+     <button class="secondary" type="submit">{% if run.signal_alert %}Signal-Mail ausschalten{% else %}Mail bei Signal-Wechsel einschalten{% endif %}</button></form>
+   </div>
+   <p class="small muted">{% if run.signal_alert %}Mail an: {{ user.email }}. Du bekommst sie, sobald die Strategie zwischen LONG und FLAT wechselt (nur wenn der Betreiber die automatische Prüfung eingerichtet hat).{% else %}Mail aus: Du bekommst eine Nachricht, sobald die Strategie zwischen LONG und FLAT wechselt. Höchstens {{ signal_max }} Läufe gleichzeitig.{% endif %}</p>
    {% endif %}
    {% endwith %}
   </div>
+
+  {% if run.source != "synthetic" %}
+  <div class="box" id="paperbox">
+   <h3 class="lbl">Paper-Trading <button type="button" class="tip" data-tip="{{ ui_tips.paper }}" aria-label="Erklärung: Paper-Trading">i</button></h3>
+   <p class="small muted">Ein virtuelles Konto folgt diesem Signal, ohne echtes Geld. So siehst du, wie die Strategie läuft, nachdem du sie ausgewählt hast.</p>
+   {% for pa in run.paper_accounts.all %}{% if pa.owner_id == user.pk %}<p class="small">Paper-Konto: <a href="{% url 'paper_detail' pa.pk %}">{{ pa.name }}</a> ({{ pa.return_pct }} %)</p>{% endif %}{% endfor %}
+   <form method="post" action="{% url 'paper_start' run.pk %}" id="paperstart" class="actions">{% csrf_token %}
+    <input type="number" name="capital" value="10000" min="100" max="1000000" step="100" aria-label="Startkapital">
+    <button class="secondary" type="submit">Paper-Trading starten</button>
+   </form>
+   <p class="small"><a href="{% url 'paper_list' %}">Alle Paper-Konten</a></p>
+  </div>
+  {% endif %}
   {% endif %}
   </div>
   <div class="tabpanel" role="tabpanel" id="tab-ki" aria-labelledby="tb-ki" hidden>
