@@ -178,7 +178,9 @@ class RunInBrowserTests(BrowserCase):
         self.assertTrue(p.locator("#aibox").is_visible())
         p.click("#tb-ov")
         self.assertTrue(p.locator("#price").is_visible())
+        p.click("#tb-kpi")
         self.assertIn("Sharpe", p.inner_text("body"))
+        p.click("#tb-ov")
         run = BacktestRun.objects.get(owner=self.user)
         self.assertEqual((run.status, run.source), ("done", "synthetic"))
         self.assertEqual(self.js_errors, [])
@@ -208,6 +210,7 @@ class RunInBrowserTests(BrowserCase):
     def test_csv_and_pdf_export_download(self):
         self.login()
         self.run_synthetic()
+        self.page.click("#tb-kpi")
         for link, ext in (("trades.csv", ".csv"), ("auswertung.pdf", ".pdf")):
             with self.page.expect_download() as dl:
                 self.page.click(f"a[href$='{link}']")
@@ -257,9 +260,12 @@ class ShareAndOrganizeTests(BrowserCase):
         self.login()
         self.run_synthetic()
         p = self.page
+        p.click("#tb-kpi")
         # Favorit und Tags
         p.click(".runmeta button.star")
-        p.wait_for_selector(".runmeta button.star.on")
+        p.wait_for_selector(".runmeta button.star.on", state="attached")
+        p.wait_for_load_state("load")
+        p.click("#tb-kpi")                      # nach dem Neuladen startet wieder der Reiter Übersicht
         p.fill(".tagform input[name=tags]", "btc, Test")
         p.click(".tagform button:text('Tags speichern')")
         p.wait_for_selector(".hist a.tag:text('Test')")

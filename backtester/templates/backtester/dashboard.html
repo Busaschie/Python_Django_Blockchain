@@ -19,9 +19,34 @@
 
 <div class="cols{% if shared %} shared{% endif %}">
 
- <!-- Spalte 1: Einstellungen + Kennzahlen -->
- <section>
-  {% if not shared %}
+ <!-- Spalte 1: Strategie in Worten, Vorlagen, Einstellungen -->
+ {% if not shared %}<section>
+  <div class="box" id="nlbox">
+   <h3 class="lbl">Strategie in Worten <button type="button" class="tip" data-tip="{{ ui_tips.nl }}" aria-label="Erklärung: Strategie in Worten">i</button></h3>
+   {% for m in messages %}{% if "nl" in m.extra_tags %}<p class="small {% if m.level_tag == 'error' %}err{% else %}good{% endif %}" role="status">{{ m }}</p>{% endif %}{% endfor %}
+   <form method="post" action="{% url 'nl_strategy' %}">{% csrf_token %}
+    <textarea name="text" rows="2" maxlength="{{ nl_max }}" required aria-label="Regel in einem Satz" placeholder="z. B. {{ nl_examples.0 }}" style="width:100%;box-sizing:border-box"></textarea>
+    <button class="secondary" type="submit">In Einstellungen übersetzen</button>
+    <span class="small muted">Nur Einstellungen, kein Chat.</span>
+   </form>
+  </div>
+
+  <div class="box" id="tplbox">
+   <h3 class="lbl">Vorlagen <button type="button" class="tip" data-tip="{{ ui_tips.templates }}" aria-label="Erklärung: Vorlagen">i</button></h3>
+   {% if templates %}
+   <ul class="tpl">{% for t in templates %}
+    <li><a href="{% url 'index' %}?vorlage={{ t.pk }}">{{ t.name }}</a> <span class="small muted">{{ t.summary }}</span>
+     <form method="post" action="{% url 'template_delete' t.pk %}" onsubmit="return confirm('Diese Vorlage wirklich löschen?')">{% csrf_token %}
+      <button type="submit" class="del" title="Vorlage löschen" aria-label="Vorlage {{ t.name }} löschen">×</button></form></li>
+   {% endfor %}</ul>
+   {% else %}<p class="small muted">Noch keine Vorlagen. Stelle eine Konfiguration ein und speichere sie hier.</p>{% endif %}
+   <div class="tplsave">
+    <input type="text" id="template_name" name="template_name" form="bt-form" maxlength="60" placeholder="Name der Vorlage" aria-label="Name der Vorlage">
+    <button type="submit" name="save_template" value="1" form="bt-form" class="secondary" id="save_template">Einstellungen speichern</button>
+   </div>
+   <p class="small muted">Gespeichert werden alle Werte des Formulars; der Zeitraum als Länge in Tagen (bis heute). Gleicher Name überschreibt, höchstens {{ template_max }} Vorlagen.</p>
+  </div>
+
   <div class="box">
    <h2>Einstellungen</h2>
    {% for b in blocks %}
@@ -43,34 +68,108 @@
    </form>
   </div>
 
-  <div class="box" id="nlbox">
-   <h3 class="lbl">Strategie in Worten <button type="button" class="tip" data-tip="{{ ui_tips.nl }}" aria-label="Erklärung: Strategie in Worten">i</button></h3>
-   {% for m in messages %}{% if "nl" in m.extra_tags %}<p class="small {% if m.level_tag == 'error' %}err{% else %}good{% endif %}" role="status">{{ m }}</p>{% endif %}{% endfor %}
-   <form method="post" action="{% url 'nl_strategy' %}">{% csrf_token %}
-    <textarea name="text" rows="2" maxlength="{{ nl_max }}" required aria-label="Regel in einem Satz" placeholder="z. B. {{ nl_examples.0 }}" style="width:100%;box-sizing:border-box"></textarea>
-    <button class="secondary" type="submit">In Einstellungen übersetzen</button>
-    <span class="small muted">Nur Einstellungen, kein Chat.</span>
-   </form>
-  </div>
+  {% if run_done %}
 
-  <div class="box" id="tplbox">
-   <h3 class="lbl">Vorlagen <button type="button" class="tip" data-tip="{{ ui_tips.templates }}" aria-label="Erklärung: Vorlagen">i</button></h3>
-   {% if templates %}
-   <ul class="tpl">{% for t in templates %}
-    <li><a href="{% url 'index' %}?vorlage={{ t.pk }}">{{ t.name }}</a> <span class="small muted">{{ t.summary }}</span>
-     <form method="post" action="{% url 'template_delete' t.pk %}" onsubmit="return confirm('Diese Vorlage wirklich löschen?')">{% csrf_token %}
-      <button type="submit" class="del" title="Vorlage löschen" aria-label="Vorlage {{ t.name }} löschen">×</button></form></li>
-   {% endfor %}</ul>
-   {% else %}<p class="small muted">Noch keine Vorlagen. Stelle oben eine Konfiguration ein und speichere sie hier.</p>{% endif %}
-   <div class="tplsave">
-    <input type="text" id="template_name" name="template_name" form="bt-form" maxlength="60" placeholder="Name der Vorlage" aria-label="Name der Vorlage">
-    <button type="submit" name="save_template" value="1" form="bt-form" class="secondary" id="save_template">Einstellungen speichern</button>
-   </div>
-   <p class="small muted">Gespeichert werden alle Werte des Formulars; der Zeitraum als Länge in Tagen (bis heute). Gleicher Name überschreibt, höchstens {{ template_max }} Vorlagen.</p>
+  {% if not shared %}
+  <div class="box" id="sharebox">
+   <h3 class="lbl">Teilen <button type="button" class="tip" data-tip="{{ ui_tips.share }}" aria-label="Erklärung: Teilen">i</button></h3>
+   {% if run.share_token %}
+   <p class="small">Jeder mit diesem Link kann die Auswertung lesen, ohne Anmeldung:</p>
+   <input type="text" id="shareurl" class="shareurl" readonly value="{{ share_url }}" aria-label="Öffentlicher Link" onfocus="this.select()">
+   <button type="button" class="secondary" id="sharecopy">Link kopieren</button>
+   <form method="post" action="{% url 'share_toggle' run.pk %}" style="display:inline">{% csrf_token %}
+    <button type="submit" name="action" value="off" class="secondary">Freigabe beenden</button>
+    <button type="submit" name="action" value="renew" class="secondary" title="Der alte Link funktioniert danach nicht mehr">Neuen Link erzeugen</button></form>
+   {% else %}
+   <p class="small muted">Nicht geteilt. Mit einem Link kann jemand die Auswertung nur ansehen (Kennzahlen, Diagramme, Trades, PDF). Dein Name und deine E-Mail sind nicht sichtbar, die Freigabe lässt sich jederzeit beenden.</p>
+   <form method="post" action="{% url 'share_toggle' run.pk %}">{% csrf_token %}<button type="submit" name="action" value="on">Öffentlichen Link erzeugen</button></form>
+   {% endif %}
+  </div>
+  {% endif %}
+  {% endif %}
+
+  {% if run and not run_done %}
+  <div class="box">
+   {% if run.status == "error" %}
+   <h3 class="err">Berechnung fehlgeschlagen</h3>
+   <p class="err">{{ run.error }}</p>
+   <p class="small">Einstellungen oben anpassen und erneut starten, z. B. andere Börse, anderes Zeitfenster oder kürzerer Zeitraum.</p>
+   {% else %}
+   <h3>Berechnung {{ run.status_label }} …</h3>
+   <p class="small">Der Backtest läuft im Hintergrund ({{ run.get_chain_display }} · {{ run.strategy_label }} · {{ run.timeframe }}). Diese Seite aktualisiert sich automatisch.</p>
+   {% endif %}
   </div>
   {% endif %}
 
+  {% if batch_runs %}
+  <div class="box">
+   {% if compare_kind == "strategy" %}
+   <h2>Strategie-Vergleich</h2>
+   <p class="small">{{ batch_runs.0.get_chain_display }} <small>{{ batch_runs.0.symbol }}</small> · {{ batch_runs.0.timeframe }} · {{ batch_runs.0.mode_label }} · {{ batch_runs.0.period_label }} · Ausführung: {{ batch_runs.0.execution_label }}
+    {% if batch_runs.0.source == "ccxt" %} · Börse {{ batch_runs.0.exchange_label }}{% endif %}<br>
+    {% if batch_runs.0.mode == "single" %}Einzellauf: Standardparameter je Strategie (SMA 20/50, RSI 14/30/70, Kombiniert mit SMA 20/50 und den RSI-Feldern des Formulars).
+    {% else %}Parameter wählt je Strategie die Grid-Search auf den Trainingsdaten; verglichen wird nur auf ungesehenen Daten (Testphase bzw. Out-of-Sample).{% endif %}
+    Kennzahlen: {% if batch_runs.0.mode == "single" %}Gesamtzeitraum{% else %}Testphase / Out-of-Sample{% endif %}.</p>
+   {% else %}
+   <h2>Chain-Vergleich</h2>
+   <p class="small">{{ batch_runs.0.strategy_label }} · {{ batch_runs.0.timeframe }} · {{ batch_runs.0.mode_label }} · {{ batch_runs.0.period_label }} · Ausführung: {{ batch_runs.0.execution_label }}
+    {% if batch_runs.0.source == "ccxt" %} · Börse {{ batch_runs.0.exchange_label }}{% endif %}<br>
+    Kennzahlen: Gesamtzeitraum bzw. Testphase / Out-of-Sample, je nach Modus.</p>
+   {% endif %}
+   <p class="small"><a href="{% url 'export_report' %}?batch={{ batch_runs.0.batch }}">Bericht aller Läufe (PDF)</a></p>
+   <div class="scroll"><table>
+    <tr><th>{% if compare_kind == "strategy" %}Strategie{% else %}Chain{% endif %}</th><th>Rendite %</th><th>B&amp;H %</th><th>Max DD %</th><th>Sharpe</th><th>Trades</th><th>CAGR %</th><th>Zeit im Markt %</th></tr>
+    {% for r in batch_runs %}
+    <tr><td><a href="{% url 'detail' r.pk %}">{% if compare_kind == "strategy" %}{{ r.strategy_label }}{% else %}{{ r.get_chain_display }}{% endif %}</a>
+     {% if compare_kind == "strategy" %}{% if r.status == "done" %}<br><small>{{ r.params }}</small>{% endif %}{% else %}<small>{{ r.symbol }}</small>{% endif %}
+     {% if r.validation.overfit_warning %}<br><small class="err" title="Test-Sharpe unter der Hälfte des Train-Sharpe oder negative Test-Rendite">⚠ Overfitting-Warnung</small>{% endif %}</td>
+    {% if r.status == "done" %}
+     <td>{{ r.metrics.total_return_pct }}</td><td>{{ r.metrics.buyhold_return_pct }}</td>
+     <td>{{ r.metrics.max_drawdown_pct }}</td><td>{{ r.metrics.sharpe }}</td><td>{{ r.metrics.trades }}</td>
+     <td>{{ r.metrics.cagr_pct }}</td><td>{{ r.metrics.time_in_market_pct }}</td>
+    {% else %}
+     <td colspan="7" class="{% if r.status == 'error' %}err{% else %}muted{% endif %}">{{ r.status_label }}{% if r.error %}: {{ r.error }}{% endif %}</td>
+    {% endif %}</tr>
+    {% endfor %}
+   </table></div>
+   {% if compare_kind == "strategy" %}<p class="small">Wenige Trades sagen statistisch wenig aus, auch wenn die Kurve gut aussieht. Je mehr Strategien und Parameter getestet werden, desto wahrscheinlicher ist ein Scheinerfolg.</p>{% endif %}
+  </div>
+  {% endif %}
+ </section>{% endif %}
+
+ <!-- Spalte 2: Charts + Trades -->
+ <section>
   {% if run_done %}
+  <div class="tabs" role="tablist" aria-label="Ergebnisbereiche" id="restabs">
+   <button type="button" role="tab" id="tb-ov" aria-controls="tab-ov" aria-selected="true" title="Kurs, Equity-Kurve, Trades und Vergleich mit Buy &amp; Hold">Übersicht</button>
+   <button type="button" role="tab" id="tb-kpi" aria-controls="tab-kpi" aria-selected="false" title="Kennzahlen, Train/Test-Vergleich und Walk-Forward-Folds der Auswertung">Kennzahlen</button>
+   <button type="button" role="tab" id="tb-rob" aria-controls="tab-rob" aria-selected="false" title="Plausibilität, Monte-Carlo, Marktphasen, Kosten und Parameter-Stabilität: hält das Ergebnis einer Prüfung stand?">Robustheit{% with pl=run.curves.plaus %}{% if pl %} <span class="dot lv-{{ pl.level }}"></span>{% endif %}{% endwith %}</button>
+   {% if signals_enabled %}<button type="button" role="tab" id="tb-live" aria-controls="tab-live" aria-selected="false" title="Aktuelles Signal, Signal-Mail und Paper-Trading">Live</button>{% endif %}
+   <button type="button" role="tab" id="tb-ki" aria-controls="tab-ki" aria-selected="false" title="Kommentar zur Auswertung, nächste Variante und feste Fragen zum Ergebnis">KI &amp; Fragen</button>
+  </div>
+  <span id="tabhint" hidden data-tab="{% for m in messages %}{% if 'signal' in m.extra_tags %}live{% endif %}{% endfor %}"></span>
+  <div class="tabpanel" role="tabpanel" id="tab-ov" aria-labelledby="tb-ov">
+  <div class="box"><div id="price" style="height:380px"></div></div>
+  <div class="box"><div id="chart" style="height:330px"></div></div>
+  {% if run.validation.kind == "split" %}<div class="box"><div id="heatmap" style="height:340px"></div></div>{% endif %}
+  {% if run.curves.trades %}
+  <div class="box">
+   <h3>Trades ({{ run.curves.trades|length }})</h3>
+   {% if run.risk_label and exit_reasons %}<p class="small">Ausstiege: {% for r, n in exit_reasons %}{{ r }} {{ n }}{% if not forloop.last %} · {% endif %}{% endfor %}</p>{% endif %}
+   <div class="scroll" style="max-height:320px;overflow-y:auto"><table>
+    <tr><th>Kauf</th><th>Preis</th><th>Verkauf</th><th>Preis</th><th>Netto %</th><th>Grund</th>{% if run.risk_label %}<th>Größe %</th>{% endif %}</tr>
+    {% for t in run.curves.trades %}
+    <tr><td>{{ t.entry_ts|slice:":10" }}</td><td>{{ t.entry_px }}</td>
+     <td>{% if t.exit_ts %}{{ t.exit_ts|slice:":10" }}{% else %}offen{% endif %}</td>
+     <td>{{ t.exit_px|default_if_none:"–" }}</td>
+     <td class="{% if t.ret_pct >= 0 %}good{% else %}err{% endif %}">{{ t.ret_pct }}</td>
+     <td>{{ t.reason|default:"–" }}</td>{% if run.risk_label %}<td>{{ t.size_pct|default:"–" }}</td>{% endif %}</tr>
+    {% endfor %}
+   </table></div>
+  </div>
+  {% endif %}
+  </div>
+  <div class="tabpanel" role="tabpanel" id="tab-kpi" aria-labelledby="tb-kpi" hidden>
   <div class="box">
    <h2>{{ run.get_chain_display }} · {{ run.strategy_label }} · {{ run.timeframe }}</h2>
    {% if shared %}
@@ -151,104 +250,6 @@
     {% endfor %}
    </table></div>
    <p class="small">Stark schwankende Parameter über die Folds deuten auf eine instabile Strategie hin.</p>
-  </div>
-  {% endif %}
-
-  {% if not shared %}
-  <div class="box" id="sharebox">
-   <h3 class="lbl">Teilen <button type="button" class="tip" data-tip="{{ ui_tips.share }}" aria-label="Erklärung: Teilen">i</button></h3>
-   {% if run.share_token %}
-   <p class="small">Jeder mit diesem Link kann die Auswertung lesen, ohne Anmeldung:</p>
-   <input type="text" id="shareurl" class="shareurl" readonly value="{{ share_url }}" aria-label="Öffentlicher Link" onfocus="this.select()">
-   <button type="button" class="secondary" id="sharecopy">Link kopieren</button>
-   <form method="post" action="{% url 'share_toggle' run.pk %}" style="display:inline">{% csrf_token %}
-    <button type="submit" name="action" value="off" class="secondary">Freigabe beenden</button>
-    <button type="submit" name="action" value="renew" class="secondary" title="Der alte Link funktioniert danach nicht mehr">Neuen Link erzeugen</button></form>
-   {% else %}
-   <p class="small muted">Nicht geteilt. Mit einem Link kann jemand die Auswertung nur ansehen (Kennzahlen, Diagramme, Trades, PDF). Dein Name und deine E-Mail sind nicht sichtbar, die Freigabe lässt sich jederzeit beenden.</p>
-   <form method="post" action="{% url 'share_toggle' run.pk %}">{% csrf_token %}<button type="submit" name="action" value="on">Öffentlichen Link erzeugen</button></form>
-   {% endif %}
-  </div>
-  {% endif %}
-  {% endif %}
-
-  {% if run and not run_done %}
-  <div class="box">
-   {% if run.status == "error" %}
-   <h3 class="err">Berechnung fehlgeschlagen</h3>
-   <p class="err">{{ run.error }}</p>
-   <p class="small">Einstellungen oben anpassen und erneut starten, z. B. andere Börse, anderes Zeitfenster oder kürzerer Zeitraum.</p>
-   {% else %}
-   <h3>Berechnung {{ run.status_label }} …</h3>
-   <p class="small">Der Backtest läuft im Hintergrund ({{ run.get_chain_display }} · {{ run.strategy_label }} · {{ run.timeframe }}). Diese Seite aktualisiert sich automatisch.</p>
-   {% endif %}
-  </div>
-  {% endif %}
-
-  {% if batch_runs %}
-  <div class="box">
-   {% if compare_kind == "strategy" %}
-   <h2>Strategie-Vergleich</h2>
-   <p class="small">{{ batch_runs.0.get_chain_display }} <small>{{ batch_runs.0.symbol }}</small> · {{ batch_runs.0.timeframe }} · {{ batch_runs.0.mode_label }} · {{ batch_runs.0.period_label }} · Ausführung: {{ batch_runs.0.execution_label }}
-    {% if batch_runs.0.source == "ccxt" %} · Börse {{ batch_runs.0.exchange_label }}{% endif %}<br>
-    {% if batch_runs.0.mode == "single" %}Einzellauf: Standardparameter je Strategie (SMA 20/50, RSI 14/30/70, Kombiniert mit SMA 20/50 und den RSI-Feldern des Formulars).
-    {% else %}Parameter wählt je Strategie die Grid-Search auf den Trainingsdaten; verglichen wird nur auf ungesehenen Daten (Testphase bzw. Out-of-Sample).{% endif %}
-    Kennzahlen: {% if batch_runs.0.mode == "single" %}Gesamtzeitraum{% else %}Testphase / Out-of-Sample{% endif %}.</p>
-   {% else %}
-   <h2>Chain-Vergleich</h2>
-   <p class="small">{{ batch_runs.0.strategy_label }} · {{ batch_runs.0.timeframe }} · {{ batch_runs.0.mode_label }} · {{ batch_runs.0.period_label }} · Ausführung: {{ batch_runs.0.execution_label }}
-    {% if batch_runs.0.source == "ccxt" %} · Börse {{ batch_runs.0.exchange_label }}{% endif %}<br>
-    Kennzahlen: Gesamtzeitraum bzw. Testphase / Out-of-Sample, je nach Modus.</p>
-   {% endif %}
-   <p class="small"><a href="{% url 'export_report' %}?batch={{ batch_runs.0.batch }}">Bericht aller Läufe (PDF)</a></p>
-   <div class="scroll"><table>
-    <tr><th>{% if compare_kind == "strategy" %}Strategie{% else %}Chain{% endif %}</th><th>Rendite %</th><th>B&amp;H %</th><th>Max DD %</th><th>Sharpe</th><th>Trades</th><th>CAGR %</th><th>Zeit im Markt %</th></tr>
-    {% for r in batch_runs %}
-    <tr><td><a href="{% url 'detail' r.pk %}">{% if compare_kind == "strategy" %}{{ r.strategy_label }}{% else %}{{ r.get_chain_display }}{% endif %}</a>
-     {% if compare_kind == "strategy" %}{% if r.status == "done" %}<br><small>{{ r.params }}</small>{% endif %}{% else %}<small>{{ r.symbol }}</small>{% endif %}
-     {% if r.validation.overfit_warning %}<br><small class="err" title="Test-Sharpe unter der Hälfte des Train-Sharpe oder negative Test-Rendite">⚠ Overfitting-Warnung</small>{% endif %}</td>
-    {% if r.status == "done" %}
-     <td>{{ r.metrics.total_return_pct }}</td><td>{{ r.metrics.buyhold_return_pct }}</td>
-     <td>{{ r.metrics.max_drawdown_pct }}</td><td>{{ r.metrics.sharpe }}</td><td>{{ r.metrics.trades }}</td>
-     <td>{{ r.metrics.cagr_pct }}</td><td>{{ r.metrics.time_in_market_pct }}</td>
-    {% else %}
-     <td colspan="7" class="{% if r.status == 'error' %}err{% else %}muted{% endif %}">{{ r.status_label }}{% if r.error %}: {{ r.error }}{% endif %}</td>
-    {% endif %}</tr>
-    {% endfor %}
-   </table></div>
-   {% if compare_kind == "strategy" %}<p class="small">Wenige Trades sagen statistisch wenig aus, auch wenn die Kurve gut aussieht. Je mehr Strategien und Parameter getestet werden, desto wahrscheinlicher ist ein Scheinerfolg.</p>{% endif %}
-  </div>
-  {% endif %}
- </section>
-
- <!-- Spalte 2: Charts + Trades -->
- <section>
-  {% if run_done %}
-  <div class="tabs" role="tablist" aria-label="Ergebnisbereiche" id="restabs">
-   <button type="button" role="tab" id="tb-ov" aria-controls="tab-ov" aria-selected="true" title="Kurs, Equity-Kurve, Trades und Vergleich mit Buy &amp; Hold">Übersicht</button>
-   <button type="button" role="tab" id="tb-rob" aria-controls="tab-rob" aria-selected="false" title="Plausibilität, Monte-Carlo, Marktphasen, Kosten und Parameter-Stabilität: hält das Ergebnis einer Prüfung stand?">Robustheit{% with pl=run.curves.plaus %}{% if pl %} <span class="dot lv-{{ pl.level }}"></span>{% endif %}{% endwith %}</button>
-   {% if signals_enabled %}<button type="button" role="tab" id="tb-live" aria-controls="tab-live" aria-selected="false" title="Aktuelles Signal, Signal-Mail und Paper-Trading">Live</button>{% endif %}
-   <button type="button" role="tab" id="tb-ki" aria-controls="tab-ki" aria-selected="false" title="Kommentar zur Auswertung, nächste Variante und feste Fragen zum Ergebnis">KI &amp; Fragen</button>
-  </div>
-  <span id="tabhint" hidden data-tab="{% for m in messages %}{% if 'signal' in m.extra_tags %}live{% endif %}{% endfor %}"></span>
-  <div class="tabpanel" role="tabpanel" id="tab-ov" aria-labelledby="tb-ov">
-  <div class="box"><div id="price" style="height:380px"></div></div>
-  <div class="box"><div id="chart" style="height:330px"></div></div>
-  {% if run.validation.kind == "split" %}<div class="box"><div id="heatmap" style="height:340px"></div></div>{% endif %}
-  {% if run.curves.trades %}
-  <div class="box">
-   <h3>Trades ({{ run.curves.trades|length }})</h3>
-   {% if run.risk_label and exit_reasons %}<p class="small">Ausstiege: {% for r, n in exit_reasons %}{{ r }} {{ n }}{% if not forloop.last %} · {% endif %}{% endfor %}</p>{% endif %}
-   <div class="scroll" style="max-height:320px;overflow-y:auto"><table>
-    <tr><th>Kauf</th><th>Preis</th><th>Verkauf</th><th>Preis</th><th>Netto %</th><th>Grund</th>{% if run.risk_label %}<th>Größe %</th>{% endif %}</tr>
-    {% for t in run.curves.trades %}
-    <tr><td>{{ t.entry_ts|slice:":10" }}</td><td>{{ t.entry_px }}</td>
-     <td>{% if t.exit_ts %}{{ t.exit_ts|slice:":10" }}{% else %}offen{% endif %}</td>
-     <td>{{ t.exit_px|default_if_none:"–" }}</td>
-     <td class="{% if t.ret_pct >= 0 %}good{% else %}err{% endif %}">{{ t.ret_pct }}</td>
-     <td>{{ t.reason|default:"–" }}</td>{% if run.risk_label %}<td>{{ t.size_pct|default:"–" }}</td>{% endif %}</tr>
-    {% endfor %}
-   </table></div>
   </div>
   {% endif %}
   </div>
@@ -474,7 +475,8 @@
 
 <!-- Legende -->
 <section id="legende" class="box">
- <h2>Legende: Abkürzungen und Fachbegriffe</h2>
+ <details>
+ <summary><h2>Legende: Abkürzungen und Fachbegriffe</h2></summary>
  <div class="legend">
 
   <h3>Märkte und Daten</h3>
@@ -586,6 +588,7 @@
     <h3>Hinweis</h3>
   <dl><div class="term"><dd>Ein Backtest bildet nur die Vergangenheit ab und garantiert keine künftigen Ergebnisse. Das Projekt dient Lern- und Analysezwecken und ist keine Anlageberatung.</dd></div></dl>
  </div>
+ </details>
 </section>
 
 {{ tip_data|json_script:"tipdata" }}

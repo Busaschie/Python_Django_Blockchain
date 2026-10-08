@@ -4,8 +4,11 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d8010543-1eed-4775-a043-da519baf32cf" name="Changes" comment="EN New Design">
+    <list default="true" id="d8010543-1eed-4775-a043-da519baf32cf" name="Changes" comment="EN New Design - Fix">
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backtester/templates/backtester/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/templates/backtester/base.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtester/templates/backtester/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/templates/backtester/dashboard.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtester/test_browser.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/test_browser.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/config/i18n_en/ui_07.py" beforeDir="false" afterPath="$PROJECT_DIR$/config/i18n_en/ui_07.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -33,23 +36,23 @@
 }</component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.4269659354191355" />
-      <entry key="MS500" value="3.5831398126845264" />
-      <entry key="S2" value="6.647572703647283" />
-      <entry key="S5" value="7.919007314776052" />
-      <entry key="S10" value="8.432515119616308" />
-      <entry key="S30" value="8.804453320458293" />
-      <entry key="S60" value="8.90378790338751" />
-      <entry key="M2" value="9.096988981734079" />
-      <entry key="M5" value="10.715922425752654" />
-      <entry key="M10" value="13.044543344492297" />
-      <entry key="M15" value="14.658038112227818" />
-      <entry key="M30" value="18.766574222174317" />
-      <entry key="H1" value="25.99088956248695" />
-      <entry key="H2" value="36.81670902383659" />
-      <entry key="H4" value="50.24513793157033" />
-      <entry key="D1" value="75.61146275598415" />
-      <entry key="W1" value="82.70110119407974" />
+      <entry key="MS100" value="1.0" />
+      <entry key="MS500" value="1.0" />
+      <entry key="S2" value="1.0" />
+      <entry key="S5" value="1.0" />
+      <entry key="S10" value="1.0" />
+      <entry key="S30" value="1.000002598961623" />
+      <entry key="S60" value="1.0048375285577835" />
+      <entry key="M2" value="1.2120420706302022" />
+      <entry key="M5" value="3.3825351037679354" />
+      <entry key="M10" value="7.150830422491208" />
+      <entry key="M15" value="9.879989023357677" />
+      <entry key="M30" value="15.606739767673854" />
+      <entry key="H1" value="23.930065193023303" />
+      <entry key="H2" value="35.58095939541215" />
+      <entry key="H4" value="49.69564012287361" />
+      <entry key="D1" value="76.21774557306595" />
+      <entry key="W1" value="83.63944436156125" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -71,23 +74,23 @@
       <entry key="W1" value="0.0" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.381125127097325" />
-      <entry key="MS500" value="3.4800247610108865" />
-      <entry key="S2" value="6.579987243921229" />
-      <entry key="S5" value="7.885517054011137" />
-      <entry key="S10" value="8.41449670749641" />
-      <entry key="S30" value="8.798142921392257" />
-      <entry key="S60" value="8.900592082335626" />
-      <entry key="M2" value="9.09534513184401" />
-      <entry key="M5" value="10.715093475754882" />
-      <entry key="M10" value="13.043859413364906" />
-      <entry key="M15" value="14.657282109158574" />
-      <entry key="M30" value="18.76562076104899" />
-      <entry key="H1" value="25.989799057683825" />
-      <entry key="H2" value="36.815645870693096" />
-      <entry key="H4" value="50.24425923517164" />
-      <entry key="D1" value="75.61120149765779" />
-      <entry key="W1" value="82.70105922341806" />
+      <entry key="MS100" value="0.8408964152537145" />
+      <entry key="MS500" value="0.9659363289248456" />
+      <entry key="S2" value="0.9913730874626621" />
+      <entry key="S5" value="0.9965402628278678" />
+      <entry key="S10" value="0.9982686325973925" />
+      <entry key="S30" value="0.999425141240255" />
+      <entry key="S60" value="1.0045470226088442" />
+      <entry key="M2" value="1.211859358832443" />
+      <entry key="M5" value="3.3822930377617726" />
+      <entry key="M10" value="7.150479051039642" />
+      <entry key="M15" value="9.879511775082921" />
+      <entry key="M30" value="15.605988025553069" />
+      <entry key="H1" value="23.929098298312432" />
+      <entry key="H2" value="35.5799583970726" />
+      <entry key="H4" value="49.694787321003496" />
+      <entry key="D1" value="76.21748547457696" />
+      <entry key="W1" value="83.63940239353838" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -176,7 +179,7 @@
       <workItem from="1791272686745" duration="8564000" />
       <workItem from="1791352737110" duration="2085000" />
       <workItem from="1791427922834" duration="4718000" />
-      <workItem from="1791440637382" duration="3311000" />
+      <workItem from="1791440637382" duration="4076000" />
     </task>
     <task id="LOCAL-00001" summary="Backtest Manuell">
       <option name="closed" value="true" />
@@ -378,7 +381,15 @@
       <option name="project" value="LOCAL" />
       <updated>1791447117945</updated>
     </task>
-    <option name="localTasksCounter" value="26" />
+    <task id="LOCAL-00026" summary="EN New Design - Fix">
+      <option name="closed" value="true" />
+      <created>1791448471103</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1791448471103</updated>
+    </task>
+    <option name="localTasksCounter" value="27" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -420,6 +431,7 @@
     <MESSAGE value="New Test" />
     <MESSAGE value="Paper Test and KI" />
     <MESSAGE value="EN New Design" />
-    <option name="LAST_COMMIT_MESSAGE" value="EN New Design" />
+    <MESSAGE value="EN New Design - Fix" />
+    <option name="LAST_COMMIT_MESSAGE" value="EN New Design - Fix" />
   </component>
 </project>

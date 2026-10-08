@@ -37,4 +37,6 @@ CATALOG = {
  'Bestätige deine E-Mail-Adresse': 'Confirm your email address',
  'Neue E-Mail-Adresse bestätigen': 'Confirm new email address',
  'Indikatoren: TA-Lib': 'Indicators: TA-Lib',
+ 'Noch keine Vorlagen. Stelle eine Konfiguration ein und speichere sie hier.': 'No templates yet. Set up a configuration and save it here.',
+ 'Kennzahlen, Train/Test-Vergleich und Walk-Forward-Folds der Auswertung': 'Metrics, train/test comparison and walk-forward folds of the run',
 }
