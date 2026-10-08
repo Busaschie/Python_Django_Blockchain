@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="de"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Trading Backtester</title>
+<title>Trading Backtester - by LittleWebMan</title>
 <script>try{if(localStorage.getItem('tb_theme')==='light')document.documentElement.setAttribute('data-theme','light')}catch(e){}</script>
 <style>
  :root{color-scheme:dark;--plotink:#e8e8e8;--plotgrid:#333;--plotzero:#444;--c1:#81d4fa;--c2:#f5dd5d;--c3:#ffffff;--c4:#868e96;--okbg:#17301f;--bg:#121212;--card:#1c1c1c;--line:#333;--ink:#e8e8e8;--ink2:#c4c4c4;--muted:#9a9a9a;--accent:#417690;--link:#81d4fa;--head:#205067;--title:#f5dd5d;--field:#121212;--sel:#1b2f3b;--bad:#ff7a7a;--good:#6fcf8a;--warnbg:#2b2411;--warnline:#6b5a1f;--warnink:#f0d78a}
@@ -119,7 +119,7 @@
 </style></head><body>
 <div class="wrap">
 <div class="topbar">
-<h1><a href="{% url 'index' %}">Trading Backtester</a></h1>
+<h1><a href="{% url 'index' %}">Trading Backtester <span style="font-size: x-small">by LittleWebMan</span></a></h1>
 <div class="tools">
 <form method="post" action="{% url 'set_language' %}" class="lang" aria-label="Sprache"><input type="hidden" name="next" value="{{ request.get_full_path }}">
 <button name="lang" value="de" lang="de" class="{% if request.lang != 'en' %}on{% endif %}" title="Deutsch" aria-pressed="{% if request.lang != 'en' %}true{% else %}false{% endif %}">DE</button>
