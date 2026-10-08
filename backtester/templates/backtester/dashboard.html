@@ -444,7 +444,8 @@
 
  <!-- Spalte 3: gelaufene Auswertungen je Chain -->
  {% if not shared %}
- <aside class="box hist">
+ <aside class="hist">
+  <div class="box histhead">
   <h2>Gelaufene Auswertungen</h2>
   <form method="get" action="{{ request.path }}" class="histfilter">
    <select name="tag" aria-label="Nach Tag filtern"><option value="">Alle Tags</option>{% for t in all_tags %}<option value="{{ t }}" {% if t == tag_filter %}selected{% endif %}>{{ t }}</option>{% endfor %}</select>
@@ -456,10 +457,11 @@
    <button type="submit" class="secondary" data-tip="{{ ui_tips.report }}">Bericht aus Auswahl (PDF)</button>
    <button type="submit" class="secondary" formaction="{% url 'ai_compare' %}" data-tip="{{ ui_tips.ai_compare }}">Zwei Läufe erklären</button>
   </form>
+  </div>
   {% for g in groups %}
-  <div class="grp">
+  <div class="grp box">
    <h4>{{ g.name }} <small>{{ g.symbol }} · {{ g.total }} Läufe</small></h4>
-   <ul>
+   <ul class="histlist">
     {% for r in g.runs %}
     <li {% if r.pk == run.pk or r.batch and r.batch == batch_runs.0.batch %}class="cur"{% endif %}>
      {% if r.status == "done" %}<input type="checkbox" class="rsel" name="run" value="{{ r.pk }}" form="reportform" aria-label="Für Bericht auswählen">{% endif %}

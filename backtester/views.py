@@ -29,7 +29,7 @@ def _history(user, tag="", fav=False):
         if tag:
             q = q.filter(tags__icontains=f"|{tag}|")
         return q.filter(favorite=True) if fav else q
-    return [{"key": k, "name": m["name"], "symbol": m["symbol"], "total": qs(k).count(), "runs": qs(k)[:20]}
+    return [{"key": k, "name": m["name"], "symbol": m["symbol"], "total": qs(k).count(), "runs": qs(k)[:50]}
             for k, m in CHAINS.items()]
 
 
