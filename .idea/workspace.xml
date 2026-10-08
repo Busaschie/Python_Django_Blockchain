@@ -4,9 +4,7 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d8010543-1eed-4775-a043-da519baf32cf" name="Changes" comment="Design 3 - Rechte Spalte">
-      <change beforePath="$PROJECT_DIR$/backtester/templates/backtester/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/templates/backtester/base.html" afterDir="false" />
-    </list>
+    <list default="true" id="d8010543-1eed-4775-a043-da519baf32cf" name="Changes" comment="LitteWebMan" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -32,61 +30,61 @@
 }</component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="0.0" />
-      <entry key="MS500" value="1.1726638161364753E-142" />
-      <entry key="S2" value="3.313936897586991E-36" />
-      <entry key="S5" value="7.953187243809797E-15" />
-      <entry key="S10" value="1.477956546689263E-7" />
-      <entry key="S30" value="0.016758312721309624" />
-      <entry key="S60" value="0.4144371987739839" />
-      <entry key="M2" value="2.288917624966239" />
-      <entry key="M5" value="7.332812554343964" />
-      <entry key="M10" value="11.847132019880819" />
-      <entry key="M15" value="14.219238625335542" />
-      <entry key="M30" value="17.78428655866351" />
-      <entry key="H1" value="22.743603877760894" />
-      <entry key="H2" value="33.591099309239254" />
-      <entry key="H4" value="51.65245654239545" />
-      <entry key="D1" value="94.71439926973106" />
-      <entry key="W1" value="108.41881545043833" />
-    </decayedCancelled>
-    <decayedSelected>
       <entry key="MS100" value="1.0" />
       <entry key="MS500" value="1.0" />
       <entry key="S2" value="1.0" />
-      <entry key="S5" value="1.0000000000001201" />
-      <entry key="S10" value="1.000000475097475" />
-      <entry key="S30" value="1.0122964706225797" />
-      <entry key="S60" value="1.1566765052566121" />
-      <entry key="M2" value="1.559649903418876" />
-      <entry key="M5" value="2.2016014394124794" />
-      <entry key="M10" value="2.5502123612698013" />
-      <entry key="M15" value="2.6876014963443096" />
-      <entry key="M30" value="2.8371706632945175" />
-      <entry key="H1" value="2.916856655050882" />
-      <entry key="H2" value="2.957986929720625" />
-      <entry key="H4" value="2.9788819402656683" />
-      <entry key="D1" value="2.9964647330895176" />
-      <entry key="W1" value="2.999494578746123" />
+      <entry key="S5" value="1.0000000000000069" />
+      <entry key="S10" value="1.0000001179444125" />
+      <entry key="S30" value="1.0077842179964827" />
+      <entry key="S60" value="1.124777558079679" />
+      <entry key="M2" value="1.5075930078985835" />
+      <entry key="M5" value="2.913390421519794" />
+      <entry key="M10" value="6.342281033823561" />
+      <entry key="M15" value="9.35640895931297" />
+      <entry key="M30" value="15.025741729424013" />
+      <entry key="H1" value="21.74888452341854" />
+      <entry key="H2" value="33.526475946592434" />
+      <entry key="H4" value="52.25376990964469" />
+      <entry key="D1" value="96.97018329374477" />
+      <entry key="W1" value="111.29678727708131" />
+    </decayedCancelled>
+    <decayedSelected>
+      <entry key="MS100" value="0.0" />
+      <entry key="MS500" value="0.0" />
+      <entry key="S2" value="5.863890011970208E-148" />
+      <entry key="S5" value="1.2801896929526147E-59" />
+      <entry key="S10" value="3.577975558025141E-30" />
+      <entry key="S30" value="1.5482940460904366E-10" />
+      <entry key="S60" value="1.4304898304147753E-5" />
+      <entry key="M2" value="0.005484834819106844" />
+      <entry key="M5" value="0.22971707227806665" />
+      <entry key="M10" value="0.8237655629374696" />
+      <entry key="M15" value="1.2652695747340759" />
+      <entry key="M30" value="1.94667995019181" />
+      <entry key="H1" value="2.416126309811791" />
+      <entry key="H2" value="2.6921454776649973" />
+      <entry key="H4" value="2.841871445924832" />
+      <entry key="D1" value="2.9730418787060113" />
+      <entry key="W1" value="2.9961337976122113" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="3.45642578468902E-10" />
-      <entry key="MS500" value="0.012815201737448849" />
-      <entry key="S2" value="0.33645838951826995" />
-      <entry key="S5" value="0.64680377317008" />
-      <entry key="S10" value="0.8042415171732478" />
-      <entry key="S30" value="0.9564769965665546" />
-      <entry key="S60" value="1.5174250035740668" />
-      <entry key="M2" value="3.795722891420975" />
-      <entry key="M5" value="9.495343952394347" />
-      <entry key="M10" value="14.372678746510225" />
-      <entry key="M15" value="16.88901689601828" />
-      <entry key="M30" value="20.611775847677123" />
-      <entry key="H1" value="25.655324839683594" />
-      <entry key="H2" value="36.54620263894933" />
-      <entry key="H4" value="54.62956393134262" />
-      <entry key="D1" value="97.71040913646792" />
-      <entry key="W1" value="111.41823727838806" />
+      <entry key="MS100" value="0.6506709277209668" />
+      <entry key="MS500" value="0.9176398823113651" />
+      <entry key="S2" value="0.9787416503974358" />
+      <entry key="S5" value="0.9914418065903108" />
+      <entry key="S10" value="0.9957118263239312" />
+      <entry key="S30" value="1.0063484395666655" />
+      <entry key="S60" value="1.1240406754007475" />
+      <entry key="M2" value="1.5124647565203115" />
+      <entry key="M5" value="3.138824000773181" />
+      <entry key="M10" value="7.157965510992004" />
+      <entry key="M15" value="10.61320924187399" />
+      <entry key="M30" value="16.96573823229659" />
+      <entry key="H1" value="24.160736011685856" />
+      <entry key="H2" value="36.21598649631991" />
+      <entry key="H4" value="55.093943154548334" />
+      <entry key="D1" value="99.94277297997371" />
+      <entry key="W1" value="114.29284827935739" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -176,7 +174,7 @@
       <workItem from="1791272686745" duration="8564000" />
       <workItem from="1791352737110" duration="2085000" />
       <workItem from="1791427922834" duration="4718000" />
-      <workItem from="1791440637382" duration="9685000" />
+      <workItem from="1791440637382" duration="10449000" />
     </task>
     <task id="LOCAL-00001" summary="Backtest Manuell">
       <option name="closed" value="true" />
@@ -418,7 +416,23 @@
       <option name="project" value="LOCAL" />
       <updated>1791459870121</updated>
     </task>
-    <option name="localTasksCounter" value="31" />
+    <task id="LOCAL-00031" summary="LitteWebMan">
+      <option name="closed" value="true" />
+      <created>1791461528155</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1791461528155</updated>
+    </task>
+    <task id="LOCAL-00032" summary="LitteWebMan">
+      <option name="closed" value="true" />
+      <created>1791461804878</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1791461804878</updated>
+    </task>
+    <option name="localTasksCounter" value="33" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -436,7 +450,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Login" />
     <MESSAGE value="Email Api" />
     <MESSAGE value="Admin" />
     <MESSAGE value="Admin 2" />
@@ -461,6 +474,7 @@
     <MESSAGE value="Design 2" />
     <MESSAGE value="Design 2 - Live Reiter" />
     <MESSAGE value="Design 3 - Rechte Spalte" />
-    <option name="LAST_COMMIT_MESSAGE" value="Design 3 - Rechte Spalte" />
+    <MESSAGE value="LitteWebMan" />
+    <option name="LAST_COMMIT_MESSAGE" value="LitteWebMan" />
   </component>
 </project>

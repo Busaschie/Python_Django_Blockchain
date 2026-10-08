@@ -49,4 +49,6 @@ CATALOG = {
  'Kreuze bis zu 8 fertige Läufe an und erzeuge daraus ein PDF mit Übersichtstabelle, gemeinsamem Diagramm und der Einzelauswertung je Lauf.': 'Tick up to 8 finished runs and generate a PDF from them with an overview table, a combined chart and the individual evaluation of each run.',
  'Das Handelsverfahren, das Kauf- und Verkaufssignale erzeugt. SMA-Crossover folgt dem Trend, RSI kauft nach starken Kursrückgängen auf eine Gegenbewegung, Kombiniert verbindet beides. Bollinger kauft unter dem unteren Band, MACD folgt dem Trend über zwei EMAs, Donchian kauft Ausbrüche über das letzte Hoch, Momentum bleibt long, solange der Kurs steigt. Mit „Alle Strategien vergleichen“ siehst du alle nebeneinander.': 'The trading method that produces buy and sell signals. SMA crossover follows the trend, RSI buys after sharp price drops expecting a rebound, Combined merges both. Bollinger buys below the lower band, MACD follows the trend via two EMAs, Donchian buys breakouts above the recent high, Momentum stays long as long as the price is rising. "Compare all strategies" shows all of them side by side.',
  'Konto und Daten: angemeldet als {}': 'Account and data: logged in as {}',
+ 'Trading Backtester - by LittleWebMan': 'Trading Backtester - by LittleWebMan',
+ 'by LittleWebMan': 'by LittleWebMan',
 }
