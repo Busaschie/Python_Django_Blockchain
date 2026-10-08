@@ -6,24 +6,31 @@
 <h3>Welche Daten verarbeitet werden</h3>
 <ul>
 <li><b>Konto:</b> E-Mail-Adresse (zugleich Benutzername) und das Passwort in verschlüsselt gespeicherter Form (Hash). Das Passwort selbst ist für uns nicht lesbar.</li>
-<li><b>Nutzung:</b> deine Auswertungen (Einstellungen, Ergebnisse, Kennzahlen) und, falls du die Funktion nutzt, der KI-Kommentar samt Zähler der täglichen Aufrufe.</li>
-<li><b>Sicherheit:</b> Zähler fehlgeschlagener Anmeldungen und Mail-Anfragen (E-Mail-Adresse bzw. IP-Adresse, Zeitpunkt), die nach spätestens 24 Stunden gelöscht werden.</li>
+<li><b>Nutzung:</b> deine Auswertungen (Einstellungen, Ergebnisse, Kennzahlen, Tags, vorgefertigte Vorlagen), Paper-Trading-Konten mit Journal (virtuelle Orders, kein echtes Geld) und, falls du die Funktion nutzt, KI-Antworten samt Zähler der täglichen Aufrufe. Von dir freigegebene Auswertungen sind über einen geheimen Link ohne Anmeldung lesbar, bis du die Freigabe beendest; sie enthalten keine persönlichen Daten.</li>
+<li><b>Sicherheit:</b> Zähler fehlgeschlagener Anmeldungen (auch am Admin-Login) und Mail-Anfragen (E-Mail-Adresse bzw. IP-Adresse, Zeitpunkt), die nach spätestens 24 Stunden gelöscht werden.</li>
 <li><b>Server-Logdaten:</b> beim Aufruf fallen beim Hoster technisch bedingt IP-Adresse, Zeitpunkt und aufgerufene Seite an.</li>
 </ul>
 
 <h3>Zwecke und Rechtsgrundlagen</h3>
 <p>Bereitstellung des Kontos und der Funktionen (Art. 6 Abs. 1 lit. b DSGVO); Sicherheit und Missbrauchsschutz, z. B. Sperre nach Fehlversuchen (Art. 6 Abs. 1 lit. f DSGVO).</p>
 
-<h3>Cookies</h3>
-<p>Es werden nur technisch notwendige Cookies gesetzt: ein Sitzungs-Cookie (Anmeldung) und ein CSRF-Cookie (Schutz vor gefälschten Anfragen). Es gibt kein Tracking und keine Werbung; eine Einwilligung ist dafür nicht erforderlich.</p>
+<h3>Cookies und lokale Speicherung</h3>
+<p>Es werden nur Cookies und Speicherinhalte gesetzt, die für den Betrieb oder für deine ausdrückliche Auswahl nötig sind. Es gibt kein Tracking, keine Analyse und keine Werbung; eine Einwilligung (Cookie-Banner) ist dafür nicht erforderlich (§ 25 Abs. 2 TDDDG).</p>
+<table>
+<tr><th>Name</th><th>Art</th><th>Zweck</th><th>Dauer</th></tr>
+<tr><td><code>sessionid</code></td><td>Cookie (HttpOnly)</td><td>Anmeldung (Sitzung)</td><td>bis zur Abmeldung, höchstens 14 Tage</td></tr>
+<tr><td><code>csrftoken</code></td><td>Cookie</td><td>Schutz vor gefälschten Anfragen</td><td>bis zu 1 Jahr</td></tr>
+<tr><td><code>tb_lang</code></td><td>Cookie</td><td>deine Sprachwahl (Deutsch/Englisch), nur nach Klick auf den Umschalter</td><td>1 Jahr</td></tr>
+<tr><td><code>tb_theme</code></td><td>Local Storage im Browser</td><td>deine Wahl Dunkel/Hell, nur nach Klick auf den Umschalter; wird nicht an den Server gesendet</td><td>bis du es löschst</td></tr>
+</table>
 
 <h3>Empfänger und Dienstleister</h3>
 <ul>
 <li><b>Hosting:</b> Render Services, Inc. (Anwendung).</li>
 <li><b>Datenbank:</b> Neon, Inc. (Konten und Auswertungen).</li>
 <li><b>E-Mail-Versand:</b> Brevo (Sendinblue SAS, Frankreich) oder Resend, je nach Konfiguration. Sie erhalten deine E-Mail-Adresse und den Mailinhalt, um Bestätigungs- und Reset-Mails zu senden.</li>
-<li><b>KI-Kommentar (nur auf Knopfdruck):</b> Groq, Inc. (USA). Übermittelt werden ausschließlich Kennzahlen der jeweiligen Auswertung, keine E-Mail-Adresse und keine Kontodaten.</li>
-<li><b>Diagramme:</b> Die Diagrammbibliothek Plotly wird von <code>cdn.plot.ly</code> geladen; dabei erhält der Anbieter technisch bedingt deine IP-Adresse.</li>
+<li><b>KI-Funktionen (nur auf Knopfdruck):</b> Groq, Inc. (USA) für Kommentar, Laufvergleich, Variantenvorschlag, Fragen zum Ergebnis und die Übersetzung einer Strategie-Beschreibung. Übermittelt werden Kennzahlen der jeweiligen Auswertung bzw. der von dir eingegebene Beschreibungstext (höchstens 280 Zeichen), keine E-Mail-Adresse und keine Kontodaten. Bitte gib in das Beschreibungsfeld keine personenbezogenen Daten ein.</li>
+<li><b>Diagramme:</b> Die Diagrammbibliothek Plotly wird von diesem Server selbst ausgeliefert. Es werden keine Schriften, Skripte oder Bilder von Drittanbietern nachgeladen.</li>
 <li><b>Marktdaten:</b> Kurse werden serverseitig von Börsen-Schnittstellen (z. B. Kraken, Binance) abgerufen; dabei werden keine Daten von dir übermittelt.</li>
 </ul>
 <p>Einige Dienstleister sitzen in den USA; die Übermittlung stützt sich auf deren Angemessenheitsbeschluss bzw. Standardvertragsklauseln.</p>
@@ -32,5 +39,5 @@
 <p>Konto und Auswertungen bleiben bis zur Löschung des Kontos gespeichert. Du kannst dein Konto jederzeit selbst unter <a href="{% url 'account' %}">Konto</a> endgültig löschen; dabei werden auch alle Auswertungen entfernt. Mails können beim Versanddienstleister kurzzeitig in dessen Protokollen verbleiben.</p>
 
 <h3>Deine Rechte</h3>
-<p>Du hast das Recht auf Auskunft, Berichtigung (die E-Mail-Adresse kannst du im Konto selbst ändern), Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch. Wende dich dazu an die oben genannte Adresse. Außerdem kannst du dich bei einer Datenschutz-Aufsichtsbehörde beschweren.</p>
+<p>Du hast das Recht auf Auskunft, Berichtigung (die E-Mail-Adresse kannst du im Konto selbst ändern), Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch. Auskunft und Datenübertragbarkeit erledigst du selbst unter <a href="{% url 'account' %}">Konto</a> mit „Meine Daten herunterladen“ (JSON); für alles Weitere wende dich an die oben genannte Adresse. Außerdem kannst du dich bei einer Datenschutz-Aufsichtsbehörde beschweren.</p>
 {% endblock %}

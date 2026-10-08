@@ -1,4 +1,5 @@
 {% extends "backtester/base.html" %}
+{% load static %}
 {% block content %}
 {% for m in messages %}<p class="box small {% if m.level_tag == 'error' %}err{% else %}good{% endif %}" role="status">{{ m }}</p>{% endfor %}
 <div class="box" id="paperhead">
@@ -44,15 +45,14 @@
  {% else %}<p class="small muted">Noch keine Order. Das Konto wartet auf den nächsten Signal-Wechsel.</p>{% endif %}
 </div>
 {{ equity|json_script:"eqdata" }}
-<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<script src="{% static 'backtester/plotly-2.35.2.min.js' %}"></script>
+{% include "backtester/_plot_theme.html" %}
 <script>
  (function () {
    const box = document.getElementById("paperchart"); if (!box) return;
    const d = JSON.parse(document.getElementById("eqdata").textContent);
-   const css = getComputedStyle(document.documentElement);
-   Plotly.newPlot(box, [{x: d.map(r => r[0]), y: d.map(r => r[1]), name: "Kontowert", line: {color: "#2f5bea", width: 2}}],
-     {margin: {l: 55, r: 10, t: 28, b: 35}, title: {text: "Kontowert (virtuell)", font: {size: 13}}, paper_bgcolor: "rgba(0,0,0,0)",
-      plot_bgcolor: "rgba(0,0,0,0)", font: {color: css.getPropertyValue("--ink").trim() || "#ddd"}}, {displayModeBar: false, responsive: true});
+   Plotly.newPlot(box, [{x: d.map(r => r[0]), y: d.map(r => r[1]), name: "Kontowert", line: {color: "#81d4fa", width: 2}}],
+     {margin: {l: 55, r: 10, t: 28, b: 35}, title: {text: "Kontowert (virtuell)", font: {size: 13}}, }, {displayModeBar: false, responsive: true});
  })();
 </script>
 {% include "backtester/_tips.html" %}

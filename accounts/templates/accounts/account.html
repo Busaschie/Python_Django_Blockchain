@@ -12,7 +12,7 @@
 .acc .field:has(input[type=checkbox]) label{display:flex;gap:.3rem;align-items:flex-start;line-height:1.35}
 .acc button{margin-top:.4rem}
 .acc .danger h3{color:var(--bad,#f66)}
-.acc .msg{padding:.5rem .7rem;border-radius:6px;background:#17301f;color:var(--good);margin-bottom:1rem}
+.acc .msg{padding:.5rem .7rem;border-radius:6px;background:var(--okbg);color:var(--good);margin-bottom:1rem}
 .acc .back{margin:1rem 0 0;font-size:.9rem}
 </style>
 <div class="acc">
@@ -26,6 +26,9 @@
   <div class="box danger"><h3>Konto löschen</h3>
    <form method="post" action="{% url 'account_delete' %}">{% csrf_token %}{% for f in delete_form %}<div class="field"><label for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}{{ f.errors }}</div>{% endfor %}{{ delete_form.non_field_errors }}<button style="background:#7a1f1f">Konto endgültig löschen</button></form></div>
  </div>
+ <form method="post" action="{% url 'account_export' %}" style="margin-top:1rem">{% csrf_token %}
+  <button class="secondary" type="submit" style="margin-left:0">Meine Daten herunterladen (JSON)</button>
+  <span class="small muted">Alle Daten, die zu deinem Konto gespeichert sind (Art. 15/20 DSGVO).</span></form>
  <p class="back"><a href="{% url 'index' %}">← Zur App</a></p>
 </div>
 {% endblock %}

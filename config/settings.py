@@ -32,6 +32,8 @@ if RENDER_HOST:  # hinter dem Render-Proxy: HTTPS erkennen, Formulare (CSRF) zul
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 if ON_RENDER and not DEBUG:
     SESSION_COOKIE_SECURE = CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 31_536_000          # Browser sprechen diese Adresse nur noch per HTTPS an
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = False
 
 # Fehler (Tracebacks) in die Konsole, damit sie im Render-Log stehen (auch mit DEBUG=False)
 LOGGING = {
@@ -51,12 +53,14 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",   # liefert Static-Dateien (Admin) auch unter gunicorn
+    "config.i18n.LanguageMiddleware",               # Sprache DE/EN (Cookie tb_lang), übersetzt die fertige HTML-Antwort
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.auth.middleware.LoginRequiredMiddleware",   # alle Seiten nur angemeldet
     "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",   # X-Frame-Options: DENY (Seite nicht in fremde Frames einbettbar)
 ]
 ROOT_URLCONF = "config.urls"
 TEMPLATES = [{
@@ -123,3 +127,9 @@ AUTH_PASSWORD_VALIDATORS = [
 SIGNALS_ENABLED = os.environ.get("SIGNALS_ENABLED", "0").strip().lower() in ("1", "true", "yes", "on")
 SIGNAL_CRON_TOKEN = os.environ.get("SIGNAL_CRON_TOKEN", "")          # schützt /signale/pruefen/ (externer Zeitplan)
 SIGNAL_MAX_PER_USER = int(os.environ.get("SIGNAL_MAX_PER_USER", "5"))   # Läufe mit Signal-Mail je Benutzer
+
+# Cookies: nur die in der Datenschutzerklaerung genannten (sessionid, csrftoken, tb_lang), ohne Zugriff durch Skripte (Sitzung)
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = "Lax"
+CSRF_COOKIE_SAMESITE = "Lax"
+SESSION_COOKIE_AGE = 14 * 24 * 3600

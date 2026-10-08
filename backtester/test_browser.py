@@ -94,7 +94,7 @@ class BrowserCase(StaticLiveServerTestCase):
         p.goto(self.url("/anmelden/"))
         p.fill("input[name=username]", "niko@example.com")
         p.fill("input[name=password]", PASSWORD)
-        p.click("form button")
+        p.click("form:not(.lang) button")
         p.wait_for_url(self.url("/"), wait_until="domcontentloaded")
 
     def run_synthetic(self, strategy="sma_cross", mode="single"):
@@ -118,7 +118,7 @@ class LoginAndLayoutTests(BrowserCase):
         self.assertIn("/anmelden/", p.url)
         p.fill("input[name=username]", "niko@example.com")
         p.fill("input[name=password]", "falsch")
-        p.click("form button")
+        p.click("form:not(.lang) button")
         self.assertIn("/anmelden/", p.url)
         self.assertTrue(p.locator(".errorlist, .err").first.is_visible())
 
@@ -167,10 +167,17 @@ class RunInBrowserTests(BrowserCase):
         self.login()
         self.run_synthetic()
         p = self.page
-        p.wait_for_selector("#price .js-plotly-plot, #price .plot-container", timeout=15000)
-        self.assertTrue(p.locator("#chart .plot-container").count() >= 1)
+        p.wait_for_selector("#price .main-svg", timeout=15000)
+        self.assertTrue(p.locator("#chart  .main-svg").count() >= 1)
+        self.assertTrue(p.locator("#tab-ov").is_visible())
+        self.assertFalse(p.locator("#plausbox").is_visible())            # liegt im Reiter Robustheit
+        p.click("#tb-rob")
         self.assertTrue(p.locator("#plausbox").is_visible())
+        self.assertFalse(p.locator("#price").is_visible())
+        p.click("#tb-ki")
         self.assertTrue(p.locator("#aibox").is_visible())
+        p.click("#tb-ov")
+        self.assertTrue(p.locator("#price").is_visible())
         self.assertIn("Sharpe", p.inner_text("body"))
         run = BacktestRun.objects.get(owner=self.user)
         self.assertEqual((run.status, run.source), ("done", "synthetic"))
@@ -179,8 +186,11 @@ class RunInBrowserTests(BrowserCase):
     def test_train_test_run_shows_heatmap_and_stability(self):
         self.login()
         self.run_synthetic(mode="split")
-        self.page.wait_for_selector("#heatmap .plot-container", timeout=15000)
+        self.page.wait_for_selector("#heatmap  .main-svg", timeout=15000)
+        self.page.click("#tb-rob")
         self.assertTrue(self.page.locator("#stabbox").is_visible())
+        self.page.wait_for_selector("#stabchart  .main-svg", timeout=15000)
+        self.assertGreater(self.page.locator("#stabchart .main-svg").first.bounding_box()["width"], 100)  # nach dem Einblenden richtig skaliert
         self.assertEqual(self.js_errors, [])
 
     def test_history_entry_opens_run_and_delete_works(self):
@@ -233,7 +243,7 @@ class ShareAndOrganizeTests(BrowserCase):
         errors = []
         a.on("pageerror", lambda e: errors.append(str(e)))
         a.goto(url.replace(self.live_server_url, self.live_server_url), wait_until="domcontentloaded")
-        a.wait_for_selector("#price .plot-container", timeout=15000)
+        a.wait_for_selector("#price  .main-svg", timeout=15000)
         self.assertIn("Geteilte Auswertung", a.inner_text("#sharedbanner"))
         for sel in ("#bt-form", "#sharebox", ".hist", "#tplbox"):
             self.assertEqual(a.locator(sel).count(), 0, sel)
@@ -303,12 +313,12 @@ class NewStrategyBrowserTests(BrowserCase):
         self.login()
         for strat in ("bollinger", "macd", "donchian", "momentum"):
             self.run_synthetic(strategy=strat)
-            self.page.wait_for_selector("#chart .plot-container", timeout=15000)
+            self.page.wait_for_selector("#chart  .main-svg", timeout=15000)
             run = BacktestRun.objects.filter(owner=self.user).latest("pk")
             self.assertEqual((run.strategy, run.status), (strat, "done"), strat)
             self.assertIn("Robustheit", self.page.inner_text("body"))
         self.run_synthetic(strategy="momentum", mode="split")
-        self.page.wait_for_selector("#heatmap .plot-container", timeout=15000)
+        self.page.wait_for_selector("#heatmap  .main-svg", timeout=15000)
         self.assertEqual(self.js_errors, [])
 
 
@@ -336,6 +346,7 @@ class AiBoxesBrowserTests(BrowserCase):
         self.login()
         self.run_synthetic()
         p = self.page
+        p.click("#tb-ki")
         p.wait_for_selector("#askbox")
         self.assertEqual(p.locator("#askbox textarea, #askbox input[type=text]").count(), 0)
         self.assertFalse(p.locator("#ask_period").is_visible())
@@ -346,3 +357,40 @@ class AiBoxesBrowserTests(BrowserCase):
         p.wait_for_selector("#askbox .askitem")
         self.assertIn("Kosten", p.inner_text("#askbox .askitem"))
         self.assertEqual(self.js_errors, [])
+
+
+class ThemeBrowserTests(BrowserCase):
+    def test_theme_toggle_persists_and_default_is_dark(self):
+        self.login()
+        p = self.page
+        p.goto(self.url("/"))
+        self.assertIsNone(p.evaluate("document.documentElement.getAttribute('data-theme')"))      # Standard: dunkel
+        bg_dark = p.evaluate("getComputedStyle(document.body).backgroundColor")
+        p.click("#themebtn")
+        self.assertEqual(p.evaluate("document.documentElement.getAttribute('data-theme')"), "light")
+        self.assertNotEqual(p.evaluate("getComputedStyle(document.body).backgroundColor"), bg_dark)
+        p.reload()
+        self.assertEqual(p.evaluate("document.documentElement.getAttribute('data-theme')"), "light")  # bleibt nach Neuladen
+        p.click("#themebtn")
+        self.assertIsNone(p.evaluate("document.documentElement.getAttribute('data-theme')"))
+        self.assertEqual(self.js_errors, [])
+
+    def test_charts_follow_theme(self):
+        self.login()
+        self.run_synthetic()
+        p = self.page
+        p.wait_for_selector("#chart  .main-svg", timeout=15000)
+        dark_font = p.evaluate("document.querySelector('#chart .gtitle, #chart .xtick text').style.fill || getComputedStyle(document.querySelector('#chart .xtick text')).fill")
+        p.click("#themebtn")
+        p.wait_for_timeout(500)
+        light_font = p.evaluate("getComputedStyle(document.querySelector('#chart .xtick text')).fill")
+        self.assertNotEqual(dark_font, light_font)
+        self.assertEqual(self.js_errors, [])
+
+    def test_disclaimer_visible_on_dashboard_and_legal_pages(self):
+        self.login()
+        p = self.page
+        for path in ("/", "/impressum/", "/datenschutz/"):
+            p.goto(self.url(path))
+            self.assertTrue(p.locator("#disclaimer").is_visible(), path)
+        self.assertIn("Keine Anlageberatung", p.inner_text("#disclaimer"))

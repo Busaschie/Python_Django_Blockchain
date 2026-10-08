@@ -1,0 +1,27 @@
+<script>
+ // Diagramm-Design folgt dem gewählten Theme (Dunkel/Hell); beim Umschalten werden alle Diagramme neu gezeichnet.
+ (function(){
+   if (typeof Plotly === "undefined" || Plotly.__tb) return;
+   Plotly.__tb = true;
+   const MAP = {"#81d4fa":"--c1", "#f5dd5d":"--c2", "#ffffff":"--c3", "#868e96":"--c4"};
+   const merge = (a, b) => { const o = Object.assign({}, a); for (const k in b) o[k] = (b[k] && typeof b[k] === "object" && !Array.isArray(b[k])) ? merge(a && a[k] || {}, b[k]) : b[k]; return o; };
+   const col = v => window.tbColor ? window.tbColor(v) : "";
+   const theme = () => ({paper_bgcolor:"rgba(0,0,0,0)", plot_bgcolor:"rgba(0,0,0,0)", font:{color:col("--plotink")},
+     xaxis:{gridcolor:col("--plotgrid"), zerolinecolor:col("--plotzero")}, yaxis:{gridcolor:col("--plotgrid"), zerolinecolor:col("--plotzero")}});
+   const recolor = x => {
+     if (typeof x === "string") { const v = MAP[x.toLowerCase()]; return v ? (col(v) || x) : x; }
+     if (Array.isArray(x)) return x.map(recolor);
+     if (x && typeof x === "object") { const o = {}; for (const k in x) o[k] = recolor(x[k]); return o; }
+     return x;
+   };
+   const reg = {}, orig = Plotly.newPlot;
+   Plotly.newPlot = (id, data, layout, cfg) => {
+     const el = typeof id === "string" ? document.getElementById(id) : id;
+     if (el && el.id) reg[el.id] = [data, layout, cfg];
+     return orig.call(Plotly, id, recolor(data), merge(theme(), layout || {}), cfg);
+   };
+   document.addEventListener("tb-theme", () => {
+     for (const id in reg) { const el = document.getElementById(id); if (el) orig.call(Plotly, id, recolor(reg[id][0]), merge(theme(), reg[id][1] || {}), reg[id][2]); }
+   });
+ })();
+</script>

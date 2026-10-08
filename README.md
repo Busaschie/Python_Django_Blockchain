@@ -105,7 +105,7 @@ Knopf „Auswertung kommentieren“ (nur auf Knopfdruck, einmal je Lauf gespeich
 
 ## Anmelde-Bremse, Impressum, Datenschutz
 
-- **Bremse** (`accounts/throttle.py`, Tabelle `accounts_attempt`, Migration 0001): Anmeldung 5 Fehlversuche pro Konto / 20 pro IP in 15 min; Registrierung und Passwort-Reset 3 Anfragen pro E-Mail / 10 pro IP pro Stunde. Gesperrt = HTTP 429 mit Hinweis, das Passwort wird dann nicht mehr geprüft. Ein erfolgreicher Login setzt den Zähler zurück; Einträge älter als 24 h werden gelöscht. Nicht abgedeckt: der Django-Admin-Login (`/admin/`).
+- **Bremse** (`accounts/throttle.py`, Tabelle `accounts_attempt`, Migration 0001): Anmeldung 5 Fehlversuche pro Konto / 20 pro IP in 15 min; Registrierung und Passwort-Reset 3 Anfragen pro E-Mail / 10 pro IP pro Stunde. Gesperrt = HTTP 429 mit Hinweis, das Passwort wird dann nicht mehr geprüft. Ein erfolgreicher Login setzt den Zähler zurück; Einträge älter als 24 h werden gelöscht. Der Django-Admin-Login (`/admin/`) ist ebenfalls gedrosselt (5 Fehlversuche pro Konto / 20 pro IP in 15 min).
 - **Impressum / Datenschutz:** `/impressum/` und `/datenschutz/` (ohne Login, Links im Footer, Hinweis auf der Registrierung). Betreiberangaben aus Umgebungsvariablen: `LEGAL_NAME`, `LEGAL_STREET`, `LEGAL_CITY`, `LEGAL_EMAIL`, optional `LEGAL_PHONE`. Fehlen Pflichtangaben, zeigt die Seite eine Warnung. Der Datenschutztext ist eine Vorlage, keine Rechtsberatung; bei Änderungen an Dienstleistern (Mail, KI, Hosting) anpassen.
 
 ## Export, Parameter-Stabilität, aktuelles Signal
@@ -167,3 +167,10 @@ Ein virtuelles Konto führt das Signal eines Laufs mit Spielgeld aus (nur mit ec
 - **Strategie in Worten**: ein Satz (max. 280 Zeichen, nur gewöhnliche Zeichen) → Strategie und Parameter. Erst ein regelbasierter Parser, nur bei Misserfolg die KI mit festem JSON-Schema; alle Werte laufen durch Whitelists und `BacktestForm`, die Anzeige „Verstanden als …“ entsteht nur aus geprüften Werten, Modelltext wird nie angezeigt, das Formular wird nur vorbelegt.
 - Für alle Antworten gilt: erst regelbasiert aus den berechneten Zahlen, die KI formuliert nur um, jede Zahl wird geprüft, sonst gilt der Regeltext. Ohne `GROQ_API_KEY` oder bei erreichtem Tageslimit gibt es den Regeltext. Antworten werden gespeichert (`AiResult`). Module `ai_extra.py`, `nl_strategy.py`, `views_ai.py`; Tests `test_ai_extra.py`.
 - Neu geprüft im Formular: SMA fast < slow, RSI low < high.
+
+## Sprache (DE/EN), Hell/Dunkel, Tabs, Rechtliches
+
+- **Sprache:** Umschalter DE/EN oben rechts (Cookie `tb_lang`, 1 Jahr, nur nach Klick). Die Oberfläche ist deutsch geschrieben; `config/i18n.py` (Middleware) übersetzt die fertige Seite anhand der Kataloge in `config/i18n_en/*.py` (exakte Texte, Muster mit `{}`/`{#}`, Fragmente mit `~`; Zahlen- und Datumsformat wird mitgewandelt, `<!--i18n:off-->` schützt Bereiche). Auch Analysetexte, PDF-Export und Reset-/Bestätigungsmails folgen der Sprache; KI-Antworten werden auf Englisch angefordert. Impressum und Datenschutz gibt es als eigene englische Vorlagen (`*_en.html`). Neue deutsche Texte ohne Katalogeintrag bleiben deutsch; `backtester/test_i18n.py` (CoverageTests) listet solche Lücken, mit `I18N_DUMP=datei.txt` in eine Datei. Grenzen: gespeicherte KI-Antworten bleiben in der Sprache, in der sie erzeugt wurden; die Signal-Mail wird deutsch versendet.
+- **Hell/Dunkel:** Knopf oben rechts, Wahl im Browser (`localStorage tb_theme`); Farben über CSS-Variablen, Diagramme folgen (`_plot_theme.html`).
+- **Tabs im Ergebnis:** Die mittlere Spalte ist in Reiter gegliedert, damit nicht alles untereinander steht (Tastatur- und Hash-tauglich).
+- **Rechtliches:** dauerhafter Hinweis „keine Anlageberatung“, Cookie-/Datenschutzübersicht in der Datenschutzerklärung (nur technisch nötige Cookies, kein Banner nötig), Konto-Export und -Löschung, Admin-Login-Drosselung.

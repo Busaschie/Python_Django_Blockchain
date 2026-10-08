@@ -1,0 +1,9 @@
+{% extends "accounts/legal_base.html" %}
+{% block legal %}<!--i18n:off--><h2>Legal notice</h2>
+<h3>Information pursuant to § 5 DDG (German Digital Services Act)</h3>
+<p>{{ l.name|default:"[name missing]" }}<br>{{ l.street|default:"[street missing]" }}<br>{{ l.city|default:"[postcode and city missing]" }}</p>
+<h3>Contact</h3>
+<p>Email: {% if l.email %}<a href="mailto:{{ l.email }}">{{ l.email }}</a>{% else %}[missing]{% endif %}{% if l.phone %}<br>Phone: {{ l.phone }}{% endif %}</p>
+<h3>Notice</h3>
+<p>This application calculates backtests on historical market data. It is not investment advice and not an invitation to buy or sell financial products. Past results are no guarantee of future results. The AI comments are generated automatically and may contain errors.</p>
+<!--i18n:on-->{% endblock %}

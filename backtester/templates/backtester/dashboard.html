@@ -1,4 +1,5 @@
 {% extends "backtester/base.html" %}
+{% load static %}
 {% block content %}
 {% for m in messages %}{% if "signal" not in m.extra_tags and "nl" not in m.extra_tags and "ask" not in m.extra_tags %}<p class="box small {% if m.level_tag == 'error' %}err{% else %}good{% endif %}" role="status">{{ m }}</p>{% endif %}{% endfor %}
 {% if shared %}
@@ -223,24 +224,35 @@
  <!-- Spalte 2: Charts + Trades -->
  <section>
   {% if run_done %}
-  {% if not shared or run.ai_comment.zusammenfassung %}
-  <div class="box" id="aibox">
-   <h3 class="lbl">Kommentar zur Auswertung <button type="button" class="tip" data-tip="{{ ui_tips.ai }}" aria-label="Erklärung: Kommentar">i</button></h3>
-   {% with ac=run.ai_comment %}{% if ac.zusammenfassung %}
-   <p>{{ ac.zusammenfassung }}</p>
-   {% if ac.staerken %}<h4>Stärken</h4><ul class="aiul">{% for x in ac.staerken %}<li>{{ x }}</li>{% endfor %}</ul>{% endif %}
-   {% if ac.schwaechen %}<h4>Schwächen und Einschränkungen</h4><ul class="aiul">{% for x in ac.schwaechen %}<li>{{ x }}</li>{% endfor %}</ul>{% endif %}
-   {% if ac.naechste_schritte %}<h4>Nächste Schritte zum Testen</h4><ul class="aiul">{% for x in ac.naechste_schritte %}<li>{{ x }}</li>{% endfor %}</ul>{% endif %}
-   <p class="small muted">{% if run.ai_source != "regeln" %}Erstellt mit {{ run.ai_source|cut:"groq:" }}{% else %}Regelbasiert erstellt{% endif %} · automatische Auswertungshilfe, keine Anlageberatung. Alle Aussagen beziehen sich auf vergangene Daten.{% if ac.note %} <span class="err">{{ ac.note }}</span>{% endif %}</p>
-   {% endif %}{% endwith %}
-   {% if not shared and not run.ai_comment.zusammenfassung or not shared and run.ai_source == "regeln" %}
-   <form method="post" action="{% url 'ai_comment' run.pk %}">{% csrf_token %}
-    <button type="submit" {% if ai_left <= 0 and run.ai_source == "regeln" %}disabled{% endif %}>{% if run.ai_source == "regeln" %}Mit KI neu erstellen{% else %}Auswertung kommentieren{% endif %}</button>
-    <span class="small muted">Heute noch {{ ai_left }} von {{ ai_limit }} KI-Kommentaren.</span>
-   </form>
-   {% endif %}
+  <div class="tabs" role="tablist" aria-label="Ergebnisbereiche" id="restabs">
+   <button type="button" role="tab" id="tb-ov" aria-controls="tab-ov" aria-selected="true" title="Kurs, Equity-Kurve, Trades und Vergleich mit Buy &amp; Hold">Übersicht</button>
+   <button type="button" role="tab" id="tb-rob" aria-controls="tab-rob" aria-selected="false" title="Plausibilität, Monte-Carlo, Marktphasen, Kosten und Parameter-Stabilität: hält das Ergebnis einer Prüfung stand?">Robustheit{% with pl=run.curves.plaus %}{% if pl %} <span class="dot lv-{{ pl.level }}"></span>{% endif %}{% endwith %}</button>
+   {% if signals_enabled %}<button type="button" role="tab" id="tb-live" aria-controls="tab-live" aria-selected="false" title="Aktuelles Signal, Signal-Mail und Paper-Trading">Live</button>{% endif %}
+   <button type="button" role="tab" id="tb-ki" aria-controls="tab-ki" aria-selected="false" title="Kommentar zur Auswertung, nächste Variante und feste Fragen zum Ergebnis">KI &amp; Fragen</button>
+  </div>
+  <span id="tabhint" hidden data-tab="{% for m in messages %}{% if 'signal' in m.extra_tags %}live{% endif %}{% endfor %}"></span>
+  <div class="tabpanel" role="tabpanel" id="tab-ov" aria-labelledby="tb-ov">
+  <div class="box"><div id="price" style="height:380px"></div></div>
+  <div class="box"><div id="chart" style="height:330px"></div></div>
+  {% if run.validation.kind == "split" %}<div class="box"><div id="heatmap" style="height:340px"></div></div>{% endif %}
+  {% if run.curves.trades %}
+  <div class="box">
+   <h3>Trades ({{ run.curves.trades|length }})</h3>
+   {% if run.risk_label and exit_reasons %}<p class="small">Ausstiege: {% for r, n in exit_reasons %}{{ r }} {{ n }}{% if not forloop.last %} · {% endif %}{% endfor %}</p>{% endif %}
+   <div class="scroll" style="max-height:320px;overflow-y:auto"><table>
+    <tr><th>Kauf</th><th>Preis</th><th>Verkauf</th><th>Preis</th><th>Netto %</th><th>Grund</th>{% if run.risk_label %}<th>Größe %</th>{% endif %}</tr>
+    {% for t in run.curves.trades %}
+    <tr><td>{{ t.entry_ts|slice:":10" }}</td><td>{{ t.entry_px }}</td>
+     <td>{% if t.exit_ts %}{{ t.exit_ts|slice:":10" }}{% else %}offen{% endif %}</td>
+     <td>{{ t.exit_px|default_if_none:"–" }}</td>
+     <td class="{% if t.ret_pct >= 0 %}good{% else %}err{% endif %}">{{ t.ret_pct }}</td>
+     <td>{{ t.reason|default:"–" }}</td>{% if run.risk_label %}<td>{{ t.size_pct|default:"–" }}</td>{% endif %}</tr>
+    {% endfor %}
+   </table></div>
   </div>
   {% endif %}
+  </div>
+  <div class="tabpanel" role="tabpanel" id="tab-rob" aria-labelledby="tb-rob" hidden>
   {% with pl=run.curves.plaus %}{% if pl %}
   <div class="box plaus" id="plausbox">
    <h3><span class="dot lv-{{ pl.level }}"></span>Plausibilität: {% if pl.level == "ok" %}in Ordnung{% elif pl.level == "warn" %}mit Hinweisen{% else %}Probleme{% endif %}
@@ -254,8 +266,6 @@
    </details>
   </div>
   {% endif %}{% endwith %}
-  <div class="box"><div id="price" style="height:380px"></div></div>
-  <div class="box"><div id="chart" style="height:330px"></div></div>
   {% with mc=run.curves.mc %}{% if mc %}
   <div class="box" id="mcbox">
    <h3 class="lbl">Robustheit (Monte-Carlo) <button type="button" class="tip" data-tip="{{ ui_tips.montecarlo }}" aria-label="Erklärung: Robustheit">i</button></h3>
@@ -323,6 +333,54 @@
    {% else %}<p class="small muted">Nicht verfügbar: {{ st.reason }}.</p>{% endif %}
   </div>
   {% endif %}{% endwith %}
+  </div>
+  <div class="tabpanel" role="tabpanel" id="tab-live" aria-labelledby="tb-live" hidden>
+  {% if signals_enabled %}
+  <div class="box" id="sigbox">
+   <h3 class="lbl">Aktuelles Signal <button type="button" class="tip" data-tip="{{ ui_tips.signal }}" aria-label="Erklärung: Aktuelles Signal">i</button></h3>
+   {% for m in messages %}<p class="small {% if m.level_tag == 'error' %}err{% else %}good{% endif %}">{{ m }}</p>{% endfor %}
+   {% with sg=run.signal_state %}
+   {% if run.source == "synthetic" %}<p class="small muted">Bei synthetischen Daten gibt es kein aktuelles Signal.</p>
+   {% else %}
+   {% if sg.ok %}
+   <p><strong class="{% if sg.position == 1 %}good{% endif %}">{% if sg.position == 1 %}LONG (investiert){% else %}FLAT (nicht investiert){% endif %}</strong>
+    <span class="small">{% if sg.since %}seit {{ sg.since|slice:":10" }} {{ sg.since|slice:"11:16" }} UTC{% else %}seit Beginn der geladenen Daten{% endif %} · Schlusskurs {{ sg.price }} · Kerze {{ sg.candle|slice:":10" }} {{ sg.candle|slice:"11:16" }} UTC</span></p>
+   <p class="small muted">Geprüft {{ sg.checked|slice:":10" }} {{ sg.checked|slice:"11:16" }} UTC. Zustand der Strategie mit den Parametern dieses Laufs auf den zuletzt abgeschlossenen Kerzen; Stop-Loss, Take-Profit, Trailing-Stop und Positionsgröße sind nicht berücksichtigt. Keine Anlageberatung.</p>
+   {% else %}<p class="small muted">Noch nicht geprüft.</p>{% endif %}
+   <form method="post" action="{% url 'signal_refresh' run.pk %}" style="display:inline">{% csrf_token %}<button class="secondary" type="submit">Jetzt prüfen</button></form>
+   <form method="post" action="{% url 'signal_toggle' run.pk %}" style="display:inline">{% csrf_token %}
+    <button class="secondary" type="submit">{% if run.signal_alert %}Signal-Mail ausschalten{% else %}Mail bei Signal-Wechsel einschalten{% endif %}</button></form>
+   {% for pa in run.paper_accounts.all %}{% if pa.owner_id == user.pk %}<p class="small">Paper-Konto: <a href="{% url 'paper_detail' pa.pk %}">{{ pa.name }}</a> ({{ pa.return_pct }} %)</p>{% endif %}{% endfor %}
+   <form method="post" action="{% url 'paper_start' run.pk %}" style="display:inline" id="paperstart">{% csrf_token %}
+    <input type="number" name="capital" value="10000" min="100" max="1000000" step="100" aria-label="Startkapital" style="width:6.5rem">
+    <button class="secondary" type="submit">Paper-Trading starten</button>
+    <button type="button" class="tip" data-tip="{{ ui_tips.paper }}" aria-label="Erklärung: Paper-Trading">i</button></form>
+   <a class="small" href="{% url 'paper_list' %}">Alle Paper-Konten</a>
+   <p class="small muted">{% if run.signal_alert %}Aktiv: Bei einem Wechsel geht eine Mail an {{ user.email }}. {% endif %}Höchstens {{ signal_max }} Läufe gleichzeitig. Mails entstehen nur, wenn die automatische Prüfung eingerichtet ist (Betreiber).</p>
+   {% endif %}
+   {% endwith %}
+  </div>
+  {% endif %}
+  </div>
+  <div class="tabpanel" role="tabpanel" id="tab-ki" aria-labelledby="tb-ki" hidden>
+  {% if not shared or run.ai_comment.zusammenfassung %}
+  <div class="box" id="aibox">
+   <h3 class="lbl">Kommentar zur Auswertung <button type="button" class="tip" data-tip="{{ ui_tips.ai }}" aria-label="Erklärung: Kommentar">i</button></h3>
+   {% with ac=run.ai_comment %}{% if ac.zusammenfassung %}
+   <p>{{ ac.zusammenfassung }}</p>
+   {% if ac.staerken %}<h4>Stärken</h4><ul class="aiul">{% for x in ac.staerken %}<li>{{ x }}</li>{% endfor %}</ul>{% endif %}
+   {% if ac.schwaechen %}<h4>Schwächen und Einschränkungen</h4><ul class="aiul">{% for x in ac.schwaechen %}<li>{{ x }}</li>{% endfor %}</ul>{% endif %}
+   {% if ac.naechste_schritte %}<h4>Nächste Schritte zum Testen</h4><ul class="aiul">{% for x in ac.naechste_schritte %}<li>{{ x }}</li>{% endfor %}</ul>{% endif %}
+   <p class="small muted">{% if run.ai_source != "regeln" %}Erstellt mit {{ run.ai_source|cut:"groq:" }}{% else %}Regelbasiert erstellt{% endif %} · automatische Auswertungshilfe, keine Anlageberatung. Alle Aussagen beziehen sich auf vergangene Daten.{% if ac.note %} <span class="err">{{ ac.note }}</span>{% endif %}</p>
+   {% endif %}{% endwith %}
+   {% if not shared and not run.ai_comment.zusammenfassung or not shared and run.ai_source == "regeln" %}
+   <form method="post" action="{% url 'ai_comment' run.pk %}">{% csrf_token %}
+    <button type="submit" {% if ai_left <= 0 and run.ai_source == "regeln" %}disabled{% endif %}>{% if run.ai_source == "regeln" %}Mit KI neu erstellen{% else %}Auswertung kommentieren{% endif %}</button>
+    <span class="small muted">Heute noch {{ ai_left }} von {{ ai_limit }} KI-Kommentaren.</span>
+   </form>
+   {% endif %}
+  </div>
+  {% endif %}
   {% if not shared and ask_questions %}
   <div class="box" id="suggestbox">
    <h3 class="lbl">Nächste Variante <button type="button" class="tip" data-tip="{{ ui_tips.suggest }}" aria-label="Erklärung: Nächste Variante">i</button></h3>
@@ -359,49 +417,7 @@
    <p class="small muted">Feste Fragen, kein freier Chat. Gleiche Fragen sind gespeichert und kosten nichts.</p>
   </div>
   {% endif %}
-  {% if signals_enabled %}
-  <div class="box" id="sigbox">
-   <h3 class="lbl">Aktuelles Signal <button type="button" class="tip" data-tip="{{ ui_tips.signal }}" aria-label="Erklärung: Aktuelles Signal">i</button></h3>
-   {% for m in messages %}<p class="small {% if m.level_tag == 'error' %}err{% else %}good{% endif %}">{{ m }}</p>{% endfor %}
-   {% with sg=run.signal_state %}
-   {% if run.source == "synthetic" %}<p class="small muted">Bei synthetischen Daten gibt es kein aktuelles Signal.</p>
-   {% else %}
-   {% if sg.ok %}
-   <p><strong class="{% if sg.position == 1 %}good{% endif %}">{% if sg.position == 1 %}LONG (investiert){% else %}FLAT (nicht investiert){% endif %}</strong>
-    <span class="small">{% if sg.since %}seit {{ sg.since|slice:":10" }} {{ sg.since|slice:"11:16" }} UTC{% else %}seit Beginn der geladenen Daten{% endif %} · Schlusskurs {{ sg.price }} · Kerze {{ sg.candle|slice:":10" }} {{ sg.candle|slice:"11:16" }} UTC</span></p>
-   <p class="small muted">Geprüft {{ sg.checked|slice:":10" }} {{ sg.checked|slice:"11:16" }} UTC. Zustand der Strategie mit den Parametern dieses Laufs auf den zuletzt abgeschlossenen Kerzen; Stop-Loss, Take-Profit, Trailing-Stop und Positionsgröße sind nicht berücksichtigt. Keine Anlageberatung.</p>
-   {% else %}<p class="small muted">Noch nicht geprüft.</p>{% endif %}
-   <form method="post" action="{% url 'signal_refresh' run.pk %}" style="display:inline">{% csrf_token %}<button class="secondary" type="submit">Jetzt prüfen</button></form>
-   <form method="post" action="{% url 'signal_toggle' run.pk %}" style="display:inline">{% csrf_token %}
-    <button class="secondary" type="submit">{% if run.signal_alert %}Signal-Mail ausschalten{% else %}Mail bei Signal-Wechsel einschalten{% endif %}</button></form>
-   {% for pa in run.paper_accounts.all %}{% if pa.owner_id == user.pk %}<p class="small">Paper-Konto: <a href="{% url 'paper_detail' pa.pk %}">{{ pa.name }}</a> ({{ pa.return_pct }} %)</p>{% endif %}{% endfor %}
-   <form method="post" action="{% url 'paper_start' run.pk %}" style="display:inline" id="paperstart">{% csrf_token %}
-    <input type="number" name="capital" value="10000" min="100" max="1000000" step="100" aria-label="Startkapital" style="width:6.5rem">
-    <button class="secondary" type="submit">Paper-Trading starten</button>
-    <button type="button" class="tip" data-tip="{{ ui_tips.paper }}" aria-label="Erklärung: Paper-Trading">i</button></form>
-   <a class="small" href="{% url 'paper_list' %}">Alle Paper-Konten</a>
-   <p class="small muted">{% if run.signal_alert %}Aktiv: Bei einem Wechsel geht eine Mail an {{ user.email }}. {% endif %}Höchstens {{ signal_max }} Läufe gleichzeitig. Mails entstehen nur, wenn die automatische Prüfung eingerichtet ist (Betreiber).</p>
-   {% endif %}
-   {% endwith %}
   </div>
-  {% endif %}
-  {% if run.validation.kind == "split" %}<div class="box"><div id="heatmap" style="height:340px"></div></div>{% endif %}
-  {% if run.curves.trades %}
-  <div class="box">
-   <h3>Trades ({{ run.curves.trades|length }})</h3>
-   {% if run.risk_label and exit_reasons %}<p class="small">Ausstiege: {% for r, n in exit_reasons %}{{ r }} {{ n }}{% if not forloop.last %} · {% endif %}{% endfor %}</p>{% endif %}
-   <div class="scroll" style="max-height:320px;overflow-y:auto"><table>
-    <tr><th>Kauf</th><th>Preis</th><th>Verkauf</th><th>Preis</th><th>Netto %</th><th>Grund</th>{% if run.risk_label %}<th>Größe %</th>{% endif %}</tr>
-    {% for t in run.curves.trades %}
-    <tr><td>{{ t.entry_ts|slice:":10" }}</td><td>{{ t.entry_px }}</td>
-     <td>{% if t.exit_ts %}{{ t.exit_ts|slice:":10" }}{% else %}offen{% endif %}</td>
-     <td>{{ t.exit_px|default_if_none:"–" }}</td>
-     <td class="{% if t.ret_pct >= 0 %}good{% else %}err{% endif %}">{{ t.ret_pct }}</td>
-     <td>{{ t.reason|default:"–" }}</td>{% if run.risk_label %}<td>{{ t.size_pct|default:"–" }}</td>{% endif %}</tr>
-    {% endfor %}
-   </table></div>
-  </div>
-  {% endif %}
   {% elif batch_runs %}
   <div class="box"><div id="cmp" style="height:420px"></div>
    <p class="small">Equity normiert auf Start = 100. Durchgezogen: Strategie, gestrichelt: Buy &amp; Hold.</p></div>
@@ -691,21 +707,15 @@
 {{ run.curves|json_script:"curves" }}
 {{ run.validation.lines|json_script:"lines" }}
 {{ run.validation.heatmap|json_script:"heat" }}
-<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<script src="{% static 'backtester/plotly-2.35.2.min.js' %}"></script>
 <script>
  const c = JSON.parse(document.getElementById("curves").textContent);
  const linesRaw = JSON.parse(document.getElementById("lines").textContent);
  const shapes = (Array.isArray(linesRaw) ? linesRaw : []).map(x => ({
    type:"line", x0:x, x1:x, yref:"paper", y0:0, y1:1, line:{dash:"dot", color:"gray"}}));
- // Dunkles Diagramm-Design passend zum Rest (Admin-Look)
- (function(){
-   const dark = {paper_bgcolor:"rgba(0,0,0,0)", plot_bgcolor:"rgba(0,0,0,0)", font:{color:"#e8e8e8"},
-                 xaxis:{gridcolor:"#333", zerolinecolor:"#444"}, yaxis:{gridcolor:"#333", zerolinecolor:"#444"}};
-   const merge = (a, b) => { const o = Object.assign({}, a); for (const k in b) o[k] = (b[k] && typeof b[k] === "object" && !Array.isArray(b[k])) ? merge(a && a[k] || {}, b[k]) : b[k]; return o; };
-   if (typeof Plotly === "undefined") return;
-   const orig = Plotly.newPlot;
-   Plotly.newPlot = (id, data, layout, cfg) => orig.call(Plotly, id, data, merge(dark, layout || {}), cfg);
- })();
+</script>
+{% include "backtester/_plot_theme.html" %}
+<script>
  const RG = (c.regimes && c.regimes.ok) ? c.regimes : null;
  const regimeShapes = RG ? RG.segments.filter(g => g.key !== "side").map(g => ({
    type:"rect", xref:"x", yref:"paper", x0:g.x0, x1:g.x1, y0:0, y1:1, line:{width:0}, layer:"below",
@@ -784,7 +794,7 @@
 
 {% if batch_runs %}
 {{ compare_data|json_script:"cmpdata" }}
-<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<script src="{% static 'backtester/plotly-2.35.2.min.js' %}"></script>
 <script>
  (function () {
    const P = JSON.parse(document.getElementById("cmpdata").textContent);
@@ -814,6 +824,35 @@
 </script>
 {% endif %}
 
+<script>
+ // Tabs im Ergebnisbereich
+ (function () {
+   const bar = document.getElementById("restabs"); if (!bar) return;
+   const tabs = Array.from(bar.querySelectorAll("[role=tab]"));
+   const panelOf = t => document.getElementById(t.getAttribute("aria-controls"));
+   tabs.forEach(t => { const p = panelOf(t); if (!p || !p.querySelector(".box")) { t.remove(); if (p) p.remove(); } });
+   const live = tabs.filter(t => t.isConnected);
+   function show(t, push) {
+     live.forEach(x => { const on = x === t; x.setAttribute("aria-selected", on ? "true" : "false"); x.tabIndex = on ? 0 : -1; panelOf(x).hidden = !on; });
+     if (window.Plotly) panelOf(t).querySelectorAll(".js-plotly-plot").forEach(g => { try { Plotly.Plots.resize(g); } catch (e) {} });
+     if (push) try { history.replaceState(null, "", "#" + t.getAttribute("aria-controls")); } catch (e) {}
+   }
+   live.forEach(t => t.addEventListener("click", () => show(t, true)));
+   bar.addEventListener("keydown", e => {
+     const i = live.indexOf(document.activeElement); if (i < 0) return;
+     if (e.key === "ArrowRight" || e.key === "ArrowLeft") { const n = live[(i + (e.key === "ArrowRight" ? 1 : live.length - 1)) % live.length]; n.focus(); show(n, true); e.preventDefault(); }
+   });
+   // Startreiter: Anker (#aibox, #sigbox, #tab-rob …) > Hinweis vom Server > Übersicht
+   let start = live[0];
+   const h = location.hash.slice(1), hint = (document.getElementById("tabhint") || {dataset: {}}).dataset.tab;
+   const target = h && document.getElementById(h);
+   const owner = target && target.closest(".tabpanel");
+   if (owner) start = live.find(t => t.getAttribute("aria-controls") === owner.id) || start;
+   else if (hint) start = live.find(t => t.id === "tb-" + hint) || start;
+   show(start, false);
+   if (target && owner && target !== owner) setTimeout(() => target.scrollIntoView(), 50);
+ })();
+</script>
 {% if pending_ids %}
 <script>
  // Läuft noch etwas im Hintergrund? Dann Status abfragen und bei Abschluss neu laden.

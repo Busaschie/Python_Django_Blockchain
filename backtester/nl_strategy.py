@@ -59,8 +59,8 @@ def parse_rules(text: str) -> dict:
     t = text.lower().replace("ü", "ue").replace("ä", "ae").replace("ö", "oe").replace("ß", "ss")
     plan = {}
     kinds = [("bollinger", r"bollinger"), ("macd", r"\bmacd\b"), ("donchian", r"donchian|ausbruch|breakout"),
-             ("momentum", r"momentum"), ("combo", r"kombi"), ("rsi", r"\brsi\b"),
-             ("sma_cross", r"\bsma\b|crossover|gleitend|golden ?cross|durchschnitt")]
+             ("momentum", r"momentum"), ("combo", r"kombi|combined|combo"), ("rsi", r"\brsi\b"),
+             ("sma_cross", r"\bsma\b|crossover|gleitend|golden ?cross|durchschnitt|moving average")]
     hits = [(m.start(), k) for k, pat in kinds if (m := re.search(pat, t))]
     if not hits:
         return {}
@@ -76,8 +76,8 @@ def parse_rules(text: str) -> dict:
         if len(ints) >= 2:
             a, b = sorted(ints[:2])
     elif strat == "rsi":
-        m_low, m_high, m_per = (_after(t, r"(?:unter|<|low)\D{0,12}" + _NUM), _after(t, r"(?:ueber|>|high)\D{0,12}" + _NUM),
-                                _after(t, r"(?:periode|period|rsi)\D{0,6}" + _NUM))
+        m_low, m_high, m_per = (_after(t, r"(?:unter|below|under|<|low)\D{0,12}" + _NUM), _after(t, r"(?:ueber|above|over|>|high)\D{0,12}" + _NUM),
+                                _after(t, r"(?:periode|period|length|rsi)\D{0,6}" + _NUM))
         if m_per:
             a = int(_f(m_per.group(1)))
         if m_low:
@@ -87,7 +87,7 @@ def parse_rules(text: str) -> dict:
     elif strat == "bollinger":
         if ints:
             a = ints[0]
-        k = _after(t, r"(?:faktor|abweichung\w*|std\w*|sigma|k)\D{0,6}" + _NUM) or (re.search(r"\b" + _NUM + r" ?(?:std|sigma)", t))
+        k = _after(t, r"(?:faktor|factor|abweichung\w*|deviation\w*|std\w*|sigma|k)\D{0,6}" + _NUM) or (re.search(r"\b" + _NUM + r" ?(?:std|sigma)", t))
         if k:
             b = round(_f(k.group(1)) * 10)
         elif len(nums) >= 2:
@@ -105,18 +105,18 @@ def parse_rules(text: str) -> dict:
     elif strat == "momentum":
         if ints:
             a = ints[0]
-        th = _after(t, r"(?:schwelle|ueber|>|mehr als)\D{0,8}" + _NUM)
+        th = _after(t, r"(?:schwelle|threshold|ueber|above|over|>|mehr als|more than)\D{0,8}" + _NUM)
         if th:
             b = int(round(_f(th.group(1))))
     plan.update(param_a=a, param_b=b, param_c=c)
     tf = None
-    if re.search(r"\b15 ?m(?:in)?\b|viertelstund", t):
+    if re.search(r"\b15 ?m(?:in)?\b|viertelstund|quarter ?hour", t):
         tf = "15m"
-    elif re.search(r"\b4 ?h\b|4 ?stund|vierstuend", t):
+    elif re.search(r"\b4 ?h\b|4 ?stund|vierstuend|4 ?hour|four ?hour", t):
         tf = "4h"
-    elif re.search(r"\b1 ?h\b|stuendlich|stundenkerz|1 ?stunde", t):
+    elif re.search(r"\b1 ?h\b|stuendlich|stundenkerz|1 ?stunde|hourly|1 ?hour|one ?hour", t):
         tf = "1h"
-    elif re.search(r"taeglich|\b1 ?d\b|daily|tageskerz|tagesbasis", t):
+    elif re.search(r"taeglich|\b1 ?d\b|daily|tageskerz|tagesbasis|1 ?day", t):
         tf = "1d"
     if tf:
         plan["timeframe"] = tf

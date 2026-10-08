@@ -5,13 +5,16 @@ from django.contrib import messages
 from django.contrib.auth import views as auth_views
 from django.contrib.auth import get_user_model, login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_not_required
-from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth.forms import PasswordChangeForm, PasswordResetForm
+from django.core.mail import EmailMultiAlternatives
 from django.core import signing
 from django.core.mail import send_mail
 from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.views.decorators.http import require_POST
+
+from config.i18n import mail_text
 
 from . import throttle
 from .forms import DeleteAccountForm, EmailChangeForm, EmailForm, PasswordSetForm
@@ -21,7 +24,7 @@ User = get_user_model()
 
 def _send(subject, body, to):
     try:
-        send_mail(subject, body, None, [to])
+        send_mail(mail_text(subject), mail_text(body), None, [to])
         return True
     except Exception:
         logging.getLogger(__name__).exception("E-Mail-Versand an %s fehlgeschlagen", to)
@@ -171,7 +174,16 @@ class ThrottledLoginView(auth_views.LoginView):
         return super().form_valid(form)
 
 
+class _ResetForm(PasswordResetForm):
+    def send_mail(self, subject_template_name, email_template_name, context, from_email, to_email, html_email_template_name=None):
+        subject = mail_text("".join(render_to_string(subject_template_name, context).splitlines()))
+        body = mail_text(render_to_string(email_template_name, context))
+        EmailMultiAlternatives(subject, body, from_email, [to_email]).send()
+
+
 class ThrottledPasswordResetView(auth_views.PasswordResetView):
+    form_class = _ResetForm
+
     def form_valid(self, form):
         email = form.cleaned_data["email"].strip().lower()
         if throttle.blocked(self.request, "forgot", email):
@@ -187,4 +199,62 @@ def legal(request, page):
     keys = ("NAME", "STREET", "CITY", "EMAIL", "PHONE")
     info = {k.lower(): os.environ.get(f"LEGAL_{k}", "").strip() for k in keys}
     info["missing"] = [k for k in ("NAME", "STREET", "CITY", "EMAIL") if not info[k.lower()]]
-    return render(request, f"accounts/{page}.html", {"l": info})
+    suffix = "_en" if getattr(request, "lang", "de") == "en" else ""     # englische Fassung der Rechtstexte
+    return render(request, f"accounts/{page}{suffix}.html", {"l": info})
+
+
+@login_not_required
+def admin_login(request, **kwargs):
+    """Admin-Login mit Bremse gegen Passwort-Raten (gleiche Zaehler wie die normale Anmeldung, strengere Grenzen).
+    Gesperrt wird nach zu vielen Fehlversuchen je Konto und je IP; erfolgreiche Anmeldung setzt den Zaehler zurueck."""
+    from django.contrib import admin
+    from django.http import HttpResponse
+    ident = request.POST.get("username", "").strip().lower() if request.method == "POST" else ""
+    if request.method == "POST" and throttle.blocked(request, "admin", ident):
+        resp = HttpResponse(throttle.MESSAGE["admin"], status=429, content_type="text/plain; charset=utf-8")
+        resp["Retry-After"] = str(throttle.retry_after("admin"))
+        return resp
+    resp = admin.site.login(request, **kwargs)
+    if request.method == "POST":
+        if resp.status_code in (301, 302):
+            throttle.clear("admin", ident)
+        else:
+            throttle.record(request, "admin", ident)
+    return resp
+
+
+@require_POST
+def account_export(request):
+    """Datenauskunft/-uebertragbarkeit (Art. 15, 20 DSGVO): alle eigenen Daten als JSON-Download.
+    Enthalten: Konto, Auswertungen (Einstellungen, Kennzahlen, Trades, Tags, KI-Kommentar), Vorlagen, Paper-Konten mit Journal,
+    gespeicherte KI-Antworten. Nicht enthalten: Passwort-Hash und die (grossen) Kursreihen der Diagramme."""
+    import json
+
+    from django.http import HttpResponse
+    from django.utils import timezone
+
+    from backtester.models import AiResult, BacktestRun, PaperAccount, RunTemplate
+    u = request.user
+    data = {
+        "exportiert_am": timezone.now().isoformat(),
+        "konto": {"benutzername": u.username, "email": u.email, "angelegt": u.date_joined.isoformat()},
+        "auswertungen": [{
+            "id": r.pk, "angelegt": r.created_at.isoformat(), "chain": r.chain, "symbol": r.symbol, "zeitfenster": r.timeframe,
+            "strategie": r.strategy, "parameter": r.params, "modus": r.mode, "von": str(r.start_date), "bis": str(r.end_date),
+            "gebuehr": r.fee, "slippage": r.slippage, "quelle": r.source, "boerse": r.exchange, "ausfuehrung": r.execution,
+            "status": r.status, "kennzahlen": r.metrics, "validierung": r.validation, "einstellungen": r.job,
+            "trades": (r.curves or {}).get("trades", []), "favorit": r.favorite, "tags": r.tag_list,
+            "kommentar": r.ai_comment, "oeffentlicher_link_aktiv": bool(r.share_token),
+        } for r in BacktestRun.objects.filter(owner=u).order_by("pk")],
+        "vorlagen": [{"name": t.name, "einstellungen": t.job} for t in RunTemplate.objects.filter(owner=u)],
+        "paper_konten": [{
+            "name": a.name, "start": a.created_at.isoformat(), "startkapital": a.start_capital, "kontowert": a.equity(),
+            "strategie": a.strategy, "parameter": a.params, "aktiv": a.active,
+            "journal": [{"kerze": e.candle, "seite": e.side, "kurs": e.price, "menge": e.units, "kosten": e.cost_paid,
+                         "kontowert_danach": e.equity_after, "trade_pct": e.ret_pct} for e in a.entries.all()],
+        } for a in PaperAccount.objects.filter(owner=u)],
+        "ki_antworten": [{"art": a.kind, "lauf": a.run_id, "schluessel": a.key, "antwort": a.payload} for a in AiResult.objects.filter(owner=u)],
+    }
+    resp = HttpResponse(json.dumps(data, ensure_ascii=False, indent=1, default=str), content_type="application/json; charset=utf-8")
+    resp["Content-Disposition"] = 'attachment; filename="meine-daten.json"'
+    return resp

@@ -8,11 +8,13 @@ from .models import Attempt
 # scope -> [(Schlüsselart, Limit, Zeitfenster in Sekunden)]
 RULES = {
     "login":    [("user", 5, 900), ("ip", 20, 900)],
+    "admin":    [("user", 5, 900), ("ip", 10, 900)],     # Admin-Login: strenger, es gibt nur wenige Admins
     "register": [("email", 3, 3600), ("ip", 10, 3600)],
     "forgot":   [("email", 3, 3600), ("ip", 10, 3600)],
 }
 MESSAGE = {
     "login": "Zu viele Fehlversuche. Bitte in 15 Minuten erneut versuchen.",
+    "admin": "Zu viele Fehlversuche beim Admin-Login. Bitte in 15 Minuten erneut versuchen.",
     "register": "Zu viele Anfragen. Bitte in einer Stunde erneut versuchen.",
     "forgot": "Zu viele Anfragen. Bitte in einer Stunde erneut versuchen.",
 }
@@ -40,6 +42,11 @@ def record(request, scope, ident):
     now = timezone.now()
     Attempt.objects.bulk_create([Attempt(scope=scope, key=key) for _k, key, _l, _w in _keys(request, scope, ident)])
     Attempt.objects.filter(created__lt=now - timedelta(days=1)).delete()   # aufräumen
+
+
+def retry_after(scope) -> int:
+    """Sekunden, nach denen ein erneuter Versuch sinnvoll ist (laengstes Fenster der Regel)."""
+    return max(win for _k, _l, win in RULES[scope])
 
 
 def clear(scope, ident):

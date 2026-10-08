@@ -2,8 +2,19 @@
 <html lang="de"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Trading Backtester</title>
+<script>try{if(localStorage.getItem('tb_theme')==='light')document.documentElement.setAttribute('data-theme','light')}catch(e){}</script>
 <style>
- :root{color-scheme:dark;--bg:#121212;--card:#1c1c1c;--line:#333;--ink:#e8e8e8;--ink2:#c4c4c4;--muted:#9a9a9a;--accent:#417690;--link:#81d4fa;--head:#205067;--title:#f5dd5d;--field:#121212;--sel:#1b2f3b;--bad:#ff7a7a;--good:#6fcf8a}
+ :root{color-scheme:dark;--plotink:#e8e8e8;--plotgrid:#333;--plotzero:#444;--c1:#81d4fa;--c2:#f5dd5d;--c3:#ffffff;--c4:#868e96;--okbg:#17301f;--bg:#121212;--card:#1c1c1c;--line:#333;--ink:#e8e8e8;--ink2:#c4c4c4;--muted:#9a9a9a;--accent:#417690;--link:#81d4fa;--head:#205067;--title:#f5dd5d;--field:#121212;--sel:#1b2f3b;--bad:#ff7a7a;--good:#6fcf8a;--warnbg:#2b2411;--warnline:#6b5a1f;--warnink:#f0d78a}
+ :root[data-theme=light]{color-scheme:light;--okbg:#e2f4e7;--bg:#f4f5f7;--card:#ffffff;--line:#d3d8de;--ink:#1b1f23;--ink2:#3d444b;--muted:#5f6972;--accent:#2f6b88;--link:#0b6a99;--field:#ffffff;--sel:#e1eff6;--bad:#c62828;--good:#1e7e3a;--warnbg:#fff4d1;--warnline:#e0c36a;--warnink:#5e4800;--plotink:#1b1f23;--plotgrid:#dde1e6;--plotzero:#b8bfc7;--c1:#0b6a99;--c2:#b07d00;--c3:#1b1f23;--c4:#6b747d}
+ .tools{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+ .tools button,.tools .lang a{background:transparent;border:1px solid #fff;color:#fff;border-radius:6px;padding:.25rem .6rem;margin:0;font-size:.85rem;font-weight:600;cursor:pointer;text-decoration:none}
+ .tools .lang{display:flex;gap:.25rem;margin:0}
+ .tools .lang button.on{background:#fff;color:var(--head)}
+ .tabs{display:flex;gap:.25rem;border-bottom:1px solid var(--line);margin:0 0 .8rem;flex-wrap:wrap}
+ .tabs button{background:transparent;color:var(--ink2);border:1px solid transparent;border-bottom:0;border-radius:6px 6px 0 0;margin:0;padding:.45rem .9rem;font-weight:600}
+ .tabs button[aria-selected=true]{background:var(--card);color:var(--ink);border-color:var(--line);box-shadow:0 2px 0 var(--card)}
+ .tabs button:hover,.tabs button:focus-visible{color:var(--ink);outline:none}
+ .tabpanel[hidden]{display:none}
  *{box-sizing:border-box}
  body{font:14px/1.45 system-ui,-apple-system,Segoe UI,sans-serif;background:var(--bg);color:var(--ink);margin:0}
  .wrap{max-width:1750px;margin:0 auto;padding:1rem 1.25rem 2rem}
@@ -14,6 +25,9 @@
  h2{font-size:1.1rem;margin:0 0 .6rem} h3{font-size:.98rem;margin:.2rem 0 .5rem} h4{font-size:.92rem;margin:0 0 .35rem}
  a{color:var(--link)} small,.small{color:var(--muted);font-size:.82rem} .muted{color:var(--muted)}
  .err{color:var(--bad)} .good{color:var(--good)}
+
+ .disclaimer{display:flex;gap:.6rem;align-items:baseline;flex-wrap:wrap;border:1px solid var(--warnline);background:var(--warnbg);color:var(--warnink);border-radius:8px;padding:.45rem .8rem;margin:-.4rem 0 1rem;font-size:.84rem;line-height:1.4}
+ .disclaimer strong{white-space:nowrap}
 
  /* Auswahl der Chain (ganz oben) */
  .chains{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1rem}
@@ -99,9 +113,30 @@
 <div class="wrap">
 <div class="topbar">
 <h1><a href="{% url 'index' %}">Trading Backtester</a></h1>
-{% if user.is_authenticated %}<form method="post" action="{% url 'logout' %}" style="margin:0;font-size:.88rem">{% csrf_token %}
+<div class="tools">
+<form method="post" action="{% url 'set_language' %}" class="lang" aria-label="Sprache"><input type="hidden" name="next" value="{{ request.get_full_path }}">
+<button name="lang" value="de" lang="de" class="{% if request.lang != 'en' %}on{% endif %}" title="Deutsch" aria-pressed="{% if request.lang != 'en' %}true{% else %}false{% endif %}">DE</button>
+<button name="lang" value="en" lang="en" class="{% if request.lang == 'en' %}on{% endif %}" title="English" aria-pressed="{% if request.lang == 'en' %}true{% else %}false{% endif %}">EN</button></form>
+<button type="button" id="themebtn" title="Darstellung wechseln (Dunkel/Hell)" aria-label="Darstellung wechseln">Hell</button>
+{% if user.is_authenticated %}<form method="post" action="{% url 'logout' %}" style="margin:0;font-size:.88rem;display:flex;align-items:center;gap:.5rem">{% csrf_token %}
 <a href="{% url 'account' %}">Konto ({{ user.username }})</a>
-<button class="secondary" style="padding:.25rem .7rem;margin:0 0 0 .4rem;color:#fff;border-color:#fff">Abmelden</button></form>{% endif %}</div>
+<button>Abmelden</button></form>{% endif %}</div></div>
+<div class="disclaimer" role="note" id="disclaimer"><strong>Keine Anlageberatung.</strong>
+<span>Backtests rechnen mit vergangenen Kursen, Paper-Trading mit Spielgeld. Ergebnisse der Vergangenheit sind keine Garantie für die Zukunft; beim Handel mit Kryptowährungen sind Verluste bis zum Totalverlust möglich. Nichts hier ist eine Empfehlung zum Kauf oder Verkauf. KI-Texte entstehen automatisch und können Fehler enthalten.</span></div>
 {% block content %}{% endblock %}
 <p class="small" style="text-align:center;margin:1.5rem 0 .5rem"><a href="{% url 'impressum' %}">Impressum</a> · <a href="{% url 'datenschutz' %}">Datenschutz</a></p>
-</div></body></html>
+</div>
+<script>
+(function(){
+ var b=document.getElementById('themebtn'),R=document.documentElement;
+ function cur(){return R.getAttribute('data-theme')==='light'?'light':'dark'}
+ function lab(){b.textContent=cur()==='light'?'Dunkel':'Hell'}
+ b.addEventListener('click',function(){
+  var n=cur()==='light'?'dark':'light';
+  if(n==='light')R.setAttribute('data-theme','light');else R.removeAttribute('data-theme');
+  try{localStorage.setItem('tb_theme',n)}catch(e){}
+  lab();document.dispatchEvent(new CustomEvent('tb-theme'));});
+ lab();
+ window.tbColor=function(v){return getComputedStyle(R).getPropertyValue(v).trim()};
+})();
+</script></body></html>

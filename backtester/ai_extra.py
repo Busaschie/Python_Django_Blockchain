@@ -220,7 +220,7 @@ def suggest_facts(run):
     base = {"strategie": run.strategy_label, "x_name": st["x_name"], "y_name": st["y_name"],
             "aktuell": {st["x_name"]: cx, st["y_name"]: cy, "rendite_pct": ret[iy][ix], "sharpe": shp[iy][ix],
                         "plateau_sharpe": None if center_score is None else round(center_score, 2)},
-            "stabilitaet": st.get("level"), "grundlage": "Testdaten des Laufs" if st.get("on_test") else "Zeitraum des Laufs"}
+            "stabilitaet": st.get("level"), "grundlage": "den Testdaten des Laufs" if st.get("on_test") else "dem Zeitraum des Laufs"}
     if best is None or center_score is None or best[0] <= center_score + 0.05:
         base["vorschlag"] = None
         return base, None
@@ -247,7 +247,7 @@ def suggest_rules(f: dict) -> dict:
                             f"Sharpe {de(sug['sharpe'])} gegenüber {de(cur['sharpe'])}; im Mittel mit den Nachbarpunkten "
                             f"{de(sug['plateau_sharpe'])} gegenüber {de(cur['plateau_sharpe'])}.",
                             "Gewählt wurde ein Punkt mit guten Nachbarn (Plateau), nicht die höchste Einzelzahl."],
-            "hinweis": f"Die Zahlen stammen aus den {f['grundlage']}. Ob die Variante hält, zeigt erst ein neuer Lauf, am besten mit Walk-Forward."}
+            "hinweis": f"Die Zahlen stammen aus {f['grundlage']}. Ob die Variante hält, zeigt erst ein neuer Lauf, am besten mit Walk-Forward."}
 
 
 def _parse_suggest(text):

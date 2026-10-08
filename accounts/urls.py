@@ -28,5 +28,6 @@ urlpatterns = [
     path("konto/", views.account, name="account"),
     path("konto/email/", views.email_change, name="email_change"),
     path("konto/email/bestaetigen/<token>/", views.email_change_confirm, name="email_change_confirm"),
+    path("konto/export/", views.account_export, name="account_export"),
     path("konto/loeschen/", views.account_delete, name="account_delete"),
 ]

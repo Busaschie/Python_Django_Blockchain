@@ -1,7 +1,7 @@
 {% extends "backtester/base.html" %}
 {% block content %}
 <style>.legal{max-width:760px;margin:1.5rem auto}.legal h2{margin-top:0}.legal h3{margin:1.4rem 0 .4rem}.legal p,.legal li{line-height:1.55;color:var(--ink2)}
-.legal .warn{padding:.6rem .8rem;border-radius:6px;background:#3a2a10;color:#f0c060;margin-bottom:1rem;font-size:.9rem}</style>
+.legal .warn{padding:.6rem .8rem;border-radius:6px;background:var(--warnbg);color:var(--warnink);margin-bottom:1rem;font-size:.9rem}</style>
 <div class="box legal">
 {% if l.missing %}<div class="warn">Angaben des Betreibers fehlen noch ({% for k in l.missing %}LEGAL_{{ k }}{% if not forloop.last %}, {% endif %}{% endfor %}): bitte als Umgebungsvariablen setzen.</div>{% endif %}
 {% block legal %}{% endblock %}

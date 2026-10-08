@@ -1,0 +1,43 @@
+{% extends "accounts/legal_base.html" %}
+{% block legal %}<!--i18n:off--><h2>Privacy policy</h2>
+<h3>Controller</h3>
+<p>{{ l.name|default:"[name missing]" }}, {{ l.street|default:"[street missing]" }}, {{ l.city|default:"[postcode and city missing]" }}<br>Email: {% if l.email %}<a href="mailto:{{ l.email }}">{{ l.email }}</a>{% else %}[missing]{% endif %}</p>
+
+<h3>What data is processed</h3>
+<ul>
+<li><b>Account:</b> email address (also your username) and your password in hashed form. We cannot read the password itself.</li>
+<li><b>Usage:</b> your evaluations (settings, results, metrics, tags, saved templates), paper-trading accounts with journal (virtual orders, no real money) and, if you use the feature, AI answers together with a counter of daily calls. Evaluations you share can be read without logging in via a secret link until you end the sharing; they contain no personal data.</li>
+<li><b>Security:</b> counters of failed logins (including the admin login) and email requests (email address or IP address, time), which are deleted after 24 hours at the latest.</li>
+<li><b>Server log data:</b> when the site is accessed, the hosting provider technically records the IP address, the time and the requested page.</li>
+</ul>
+
+<h3>Purposes and legal bases</h3>
+<p>Providing the account and the functions (Art. 6(1)(b) GDPR); security and protection against abuse, e.g. blocking after failed attempts (Art. 6(1)(f) GDPR).</p>
+
+<h3>Cookies and local storage</h3>
+<p>Only cookies and stored items that are necessary for operation or for your explicit choice are set. There is no tracking, no analytics and no advertising; consent (cookie banner) is therefore not required (§ 25(2) TDDDG).</p>
+<table>
+<tr><th>Name</th><th>Type</th><th>Purpose</th><th>Duration</th></tr>
+<tr><td><code>sessionid</code></td><td>Cookie (HttpOnly)</td><td>Login (session)</td><td>until logout, at most 14 days</td></tr>
+<tr><td><code>csrftoken</code></td><td>Cookie</td><td>Protection against forged requests</td><td>up to 1 year</td></tr>
+<tr><td><code>tb_lang</code></td><td>Cookie</td><td>your language choice (German/English), only after you click the switch</td><td>1 year</td></tr>
+<tr><td><code>tb_theme</code></td><td>Local storage in the browser</td><td>your dark/light choice, only after you click the switch; it is not sent to the server</td><td>until you delete it</td></tr>
+</table>
+
+<h3>Recipients and service providers</h3>
+<ul>
+<li><b>Hosting:</b> Render Services, Inc. (application).</li>
+<li><b>Database:</b> Neon, Inc. (accounts and evaluations).</li>
+<li><b>Email delivery:</b> Brevo (Sendinblue SAS, France) or Resend, depending on configuration. They receive your email address and the message content in order to send confirmation and reset emails.</li>
+<li><b>AI functions (only on button press):</b> Groq, Inc. (USA) for the comment, run comparison, variant suggestion, questions about the result and the translation of a strategy description. Metrics of the respective evaluation or the description text you entered (at most 280 characters) are transmitted, no email address and no account data. Please do not enter personal data in the description field.</li>
+<li><b>Charts:</b> The charting library Plotly is delivered by this server itself. No fonts, scripts or images are loaded from third parties.</li>
+<li><b>Market data:</b> Prices are retrieved server-side from exchange interfaces (e.g. Kraken, Binance); no data about you is transmitted in the process.</li>
+</ul>
+<p>Some service providers are based in the USA; the transfer relies on their adequacy decision or standard contractual clauses.</p>
+
+<h3>Retention</h3>
+<p>Account and evaluations are kept until the account is deleted. You can delete your account permanently at any time yourself under <a href="{% url 'account' %}">Account</a>; all evaluations are removed as well. Emails may remain briefly in the email provider's logs.</p>
+
+<h3>Your rights</h3>
+<p>You have the right of access, rectification (you can change your email address yourself in the account), erasure, restriction of processing, data portability and objection. You handle access and data portability yourself under <a href="{% url 'account' %}">Account</a> with "Download my data" (JSON); for anything else, contact the address given above. You can also lodge a complaint with a data protection supervisory authority.</p>
+<!--i18n:on-->{% endblock %}

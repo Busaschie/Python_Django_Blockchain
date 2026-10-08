@@ -3,6 +3,8 @@ import csv
 import io
 from xml.sax.saxutils import escape
 
+from config.i18n import get_lang, tr
+
 from .fmt import de
 
 _REPL = {"≥": ">=", "≤": "<=", "≈": "ca.", "→": "->", "−": "-", "✓": "ok", "⚠": "!", "–": "–", "’": "'", "“": '"', "”": '"'}
@@ -27,6 +29,8 @@ def trades_csv(run) -> bytes:
 def _t(s) -> str:
     """Text für die PDF-Standardschrift (Latin-1/WinAnsi): nicht darstellbare Zeichen ersetzen, XML maskieren."""
     s = str(s)
+    if get_lang() == "en":
+        s = tr(s)
     for a, b in _REPL.items():
         s = s.replace(a, b)
     return escape(s.encode("cp1252", "replace").decode("cp1252"))
@@ -280,9 +284,11 @@ def _build(story, title):
         canvas.setFillColor(colors.HexColor(ACCENT)); canvas.rect(0, h - 9 * mm, w, 9 * mm, stroke=0, fill=1)
         canvas.setFillColor(colors.white); canvas.setFont("Helvetica-Bold", 8.5)
         canvas.drawString(18 * mm, h - 6 * mm, "Trading Backtester")
-        canvas.setFont("Helvetica", 8); canvas.drawRightString(w - 18 * mm, h - 6 * mm, date.today().strftime("%d.%m.%Y"))
+        canvas.setFont("Helvetica", 8); canvas.drawRightString(w - 18 * mm, h - 6 * mm, date.today().strftime("%Y-%m-%d" if get_lang() == "en" else "%d.%m.%Y"))
         canvas.setFillColor(colors.HexColor(MUTED)); canvas.setFont("Helvetica", 7.5)
-        canvas.drawCentredString(w / 2, 9 * mm, f"Keine Anlageberatung · Ergebnisse der Vergangenheit sind keine Garantie · Seite {doc.page}")
+        foot = (f"Not investment advice · Past results are no guarantee · Page {doc.page}" if get_lang() == "en"
+                else f"Keine Anlageberatung · Ergebnisse der Vergangenheit sind keine Garantie · Seite {doc.page}")
+        canvas.drawCentredString(w / 2, 9 * mm, foot)
         canvas.restoreState()
 
     buf = io.BytesIO()

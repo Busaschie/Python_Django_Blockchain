@@ -13,6 +13,7 @@ import urllib.request
 from django.utils import timezone
 
 from .fmt import de
+from config.i18n import get_lang
 
 log = logging.getLogger("tradebot.ai")
 GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
@@ -95,7 +96,13 @@ def _nums(text: str):
         yield float(s), (len(s.split(".")[1]) if "." in s else 0)
 
 
+EN_NOTE = ("\n\nLanguage: write all text values of the JSON answer in English (keep the JSON keys exactly as specified). "
+           "Use a decimal point and no thousands separators.")
+
+
 def unknown_numbers(answer: str, fact_text: str) -> list:
+    if get_lang() == "en":
+        answer = re.sub(r"(?<=\d),(?=\d{3}(?!\d))", "", answer)
     known = [x for x, _ in _nums(fact_text)]
     bad = []
     for x, d in _nums(answer):
@@ -137,6 +144,8 @@ def chat(model: str, messages: list) -> str:
     key = os.environ.get("GROQ_API_KEY")
     if not key:
         raise AiError("GROQ_API_KEY fehlt")
+    if get_lang() == "en":
+        messages = [dict(m, content=m["content"] + EN_NOTE) if m["role"] == "system" else m for m in messages]
     body = {"model": model, "messages": messages, "temperature": 0.2, "max_completion_tokens": 2500,
             "response_format": {"type": "json_object"}}
     if "gpt-oss" in model:

@@ -1,7 +1,7 @@
 {% extends "backtester/base.html" %}
 {% block content %}
 <style>.auth{max-width:420px;margin:2rem auto}.auth .field input{width:100%}.auth p.alt{margin:.9rem 0 0;font-size:.9rem}
-.msg{padding:.5rem .7rem;border-radius:6px;background:#17301f;color:var(--good);margin-bottom:.7rem}</style>
+.msg{padding:.5rem .7rem;border-radius:6px;background:var(--okbg);color:var(--good);margin-bottom:.7rem}</style>
 <div class="box auth">
  {% for m in messages %}<div class="msg">{{ m }}</div>{% endfor %}
  {% block auth %}{% endblock %}
