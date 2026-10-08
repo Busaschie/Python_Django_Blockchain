@@ -4,46 +4,9 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d8010543-1eed-4775-a043-da519baf32cf" name="Changes" comment="Paper Test and KI">
-      <change afterPath="$PROJECT_DIR$/accounts/templates/accounts/datenschutz_en.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/accounts/templates/accounts/impressum_en.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/accounts/test_legal.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backtester/static/backtester/plotly-2.35.2.min.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backtester/static/backtester/plotly-LICENSE.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backtester/templates/backtester/_plot_theme.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backtester/test_i18n.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config/i18n.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config/i18n_check.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config/i18n_en/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config/i18n_en/ana_01.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config/i18n_en/ana_02.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config/i18n_en/ana_03.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config/i18n_en/ui_01.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config/i18n_en/ui_02.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config/i18n_en/ui_03.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config/i18n_en/ui_04.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config/i18n_en/ui_05.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config/i18n_en/ui_06.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config/i18n_en/ui_07.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/accounts/templates/accounts/account.html" beforeDir="false" afterPath="$PROJECT_DIR$/accounts/templates/accounts/account.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/accounts/templates/accounts/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/accounts/templates/accounts/base.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/accounts/templates/accounts/datenschutz.html" beforeDir="false" afterPath="$PROJECT_DIR$/accounts/templates/accounts/datenschutz.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/accounts/templates/accounts/legal_base.html" beforeDir="false" afterPath="$PROJECT_DIR$/accounts/templates/accounts/legal_base.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/accounts/throttle.py" beforeDir="false" afterPath="$PROJECT_DIR$/accounts/throttle.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/accounts/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/accounts/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/accounts/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/accounts/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtester/ai.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/ai.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtester/ai_extra.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/ai_extra.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtester/export.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/export.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtester/nl_strategy.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/nl_strategy.py" afterDir="false" />
+    <list default="true" id="d8010543-1eed-4775-a043-da519baf32cf" name="Changes" comment="EN New Design">
       <change beforePath="$PROJECT_DIR$/backtester/templates/backtester/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/templates/backtester/base.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtester/templates/backtester/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/templates/backtester/dashboard.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtester/templates/backtester/paper_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/templates/backtester/paper_detail.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtester/test_browser.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/test_browser.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/config/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/config/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/i18n_en/ui_07.py" beforeDir="false" afterPath="$PROJECT_DIR$/config/i18n_en/ui_07.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -70,23 +33,23 @@
 }</component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0000117256097787" />
-      <entry key="MS500" value="1.1153192911748868" />
-      <entry key="S2" value="2.157529612152809" />
-      <entry key="S5" value="3.320729635339446" />
-      <entry key="S10" value="4.021010963937334" />
-      <entry key="S30" value="4.635792014927509" />
-      <entry key="S60" value="4.81264521273064" />
-      <entry key="M2" value="4.904971312480761" />
-      <entry key="M5" value="4.974843031649561" />
-      <entry key="M10" value="5.219647508338233" />
-      <entry key="M15" value="5.795905387134921" />
-      <entry key="M30" value="8.848667188885287" />
-      <entry key="H1" value="15.487713401539358" />
-      <entry key="H2" value="25.790374790138078" />
-      <entry key="H4" value="38.68325193404676" />
-      <entry key="D1" value="62.99304626783039" />
-      <entry key="W1" value="69.76126732231118" />
+      <entry key="MS100" value="1.4269659354191355" />
+      <entry key="MS500" value="3.5831398126845264" />
+      <entry key="S2" value="6.647572703647283" />
+      <entry key="S5" value="7.919007314776052" />
+      <entry key="S10" value="8.432515119616308" />
+      <entry key="S30" value="8.804453320458293" />
+      <entry key="S60" value="8.90378790338751" />
+      <entry key="M2" value="9.096988981734079" />
+      <entry key="M5" value="10.715922425752654" />
+      <entry key="M10" value="13.044543344492297" />
+      <entry key="M15" value="14.658038112227818" />
+      <entry key="M30" value="18.766574222174317" />
+      <entry key="H1" value="25.99088956248695" />
+      <entry key="H2" value="36.81670902383659" />
+      <entry key="H4" value="50.24513793157033" />
+      <entry key="D1" value="75.61146275598415" />
+      <entry key="W1" value="82.70110119407974" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -108,23 +71,23 @@
       <entry key="W1" value="0.0" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.9526487132820151" />
-      <entry key="MS500" value="1.103494917207779" />
-      <entry key="S2" value="2.1371195748086684" />
-      <entry key="S5" value="3.299618073628584" />
-      <entry key="S10" value="4.006158998119151" />
-      <entry key="S30" value="4.629546203467781" />
-      <entry key="S60" value="4.809333806695353" />
-      <entry key="M2" value="4.903266219866253" />
-      <entry key="M5" value="4.974102342286287" />
-      <entry key="M10" value="5.218931328046426" />
-      <entry key="M15" value="5.7950401742330895" />
-      <entry key="M30" value="8.84758978926304" />
-      <entry key="H1" value="15.486542011559417" />
-      <entry key="H2" value="25.789273834050952" />
-      <entry key="H4" value="38.68236092804132" />
-      <entry key="D1" value="62.992786502116914" />
-      <entry key="W1" value="69.761225742843" />
+      <entry key="MS100" value="1.381125127097325" />
+      <entry key="MS500" value="3.4800247610108865" />
+      <entry key="S2" value="6.579987243921229" />
+      <entry key="S5" value="7.885517054011137" />
+      <entry key="S10" value="8.41449670749641" />
+      <entry key="S30" value="8.798142921392257" />
+      <entry key="S60" value="8.900592082335626" />
+      <entry key="M2" value="9.09534513184401" />
+      <entry key="M5" value="10.715093475754882" />
+      <entry key="M10" value="13.043859413364906" />
+      <entry key="M15" value="14.657282109158574" />
+      <entry key="M30" value="18.76562076104899" />
+      <entry key="H1" value="25.989799057683825" />
+      <entry key="H2" value="36.815645870693096" />
+      <entry key="H4" value="50.24425923517164" />
+      <entry key="D1" value="75.61120149765779" />
+      <entry key="W1" value="82.70105922341806" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -213,7 +176,7 @@
       <workItem from="1791272686745" duration="8564000" />
       <workItem from="1791352737110" duration="2085000" />
       <workItem from="1791427922834" duration="4718000" />
-      <workItem from="1791440637382" duration="1943000" />
+      <workItem from="1791440637382" duration="3311000" />
     </task>
     <task id="LOCAL-00001" summary="Backtest Manuell">
       <option name="closed" value="true" />
@@ -407,7 +370,15 @@
       <option name="project" value="LOCAL" />
       <updated>1791438122888</updated>
     </task>
-    <option name="localTasksCounter" value="25" />
+    <task id="LOCAL-00025" summary="EN New Design">
+      <option name="closed" value="true" />
+      <created>1791447117945</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1791447117945</updated>
+    </task>
+    <option name="localTasksCounter" value="26" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -448,6 +419,7 @@
     <MESSAGE value="Neu functions" />
     <MESSAGE value="New Test" />
     <MESSAGE value="Paper Test and KI" />
-    <option name="LAST_COMMIT_MESSAGE" value="Paper Test and KI" />
+    <MESSAGE value="EN New Design" />
+    <option name="LAST_COMMIT_MESSAGE" value="EN New Design" />
   </component>
 </project>

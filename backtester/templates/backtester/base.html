@@ -19,7 +19,7 @@
  body{font:14px/1.45 system-ui,-apple-system,Segoe UI,sans-serif;background:var(--bg);color:var(--ink);margin:0}
  .wrap{max-width:1750px;margin:0 auto;padding:1rem 1.25rem 2rem}
  h1{font-size:1.3rem;margin:0} h1 a{color:var(--title);text-decoration:none}
- .topbar{display:flex;justify-content:space-between;align-items:center;gap:1rem;background:var(--head);border-radius:10px;padding:.7rem 1rem;margin-bottom:1rem}
+ .topbar{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:.5rem 1rem;background:var(--head);border-radius:10px;padding:.7rem 1rem;margin-bottom:1rem}
  .topbar a{color:#fff} .topbar h1 a{color:var(--title)}
  .chains label:hover{border-color:var(--accent)}
  h2{font-size:1.1rem;margin:0 0 .6rem} h3{font-size:.98rem;margin:.2rem 0 .5rem} h4{font-size:.92rem;margin:0 0 .35rem}
@@ -118,7 +118,7 @@
 <button name="lang" value="de" lang="de" class="{% if request.lang != 'en' %}on{% endif %}" title="Deutsch" aria-pressed="{% if request.lang != 'en' %}true{% else %}false{% endif %}">DE</button>
 <button name="lang" value="en" lang="en" class="{% if request.lang == 'en' %}on{% endif %}" title="English" aria-pressed="{% if request.lang == 'en' %}true{% else %}false{% endif %}">EN</button></form>
 <button type="button" id="themebtn" title="Darstellung wechseln (Dunkel/Hell)" aria-label="Darstellung wechseln">Hell</button>
-{% if user.is_authenticated %}<form method="post" action="{% url 'logout' %}" style="margin:0;font-size:.88rem;display:flex;align-items:center;gap:.5rem">{% csrf_token %}
+{% if user.is_authenticated %}<form method="post" action="{% url 'logout' %}" style="margin:0;font-size:.88rem;display:flex;flex-wrap:wrap;align-items:center;gap:.25rem .5rem">{% csrf_token %}
 <a href="{% url 'account' %}">Konto ({{ user.username }})</a>
 <button>Abmelden</button></form>{% endif %}</div></div>
 <div class="disclaimer" role="note" id="disclaimer"><strong>Keine Anlageberatung.</strong>

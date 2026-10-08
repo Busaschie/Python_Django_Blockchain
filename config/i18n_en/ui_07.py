@@ -36,4 +36,5 @@ CATALOG = {
  'Du hast bereits ein Konto': 'You already have an account',
  'Bestätige deine E-Mail-Adresse': 'Confirm your email address',
  'Neue E-Mail-Adresse bestätigen': 'Confirm new email address',
+ 'Indikatoren: TA-Lib': 'Indicators: TA-Lib',
 }
