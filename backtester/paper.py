@@ -1,5 +1,4 @@
 """Paper-Trading: ein virtuelles Konto fuehrt das Signal einer Strategie mit Spielgeld aus und fuehrt ein Journal.
-
 Ablauf bei jeder Pruefung (Knopf oder externer Zeitplan, siehe README):
 - die letzten abgeschlossenen Kerzen laden, die Strategie mit den Parametern des Laufs anwenden;
 - wechselt das Signal gegenueber der Position, wird zum zuletzt bekannten Kurs (Schluss der letzten abgeschlossenen
@@ -27,7 +26,6 @@ log = logging.getLogger("tradebot.paper")
 COOLDOWN = timedelta(seconds=60)
 MAX_LOG = 3000
 CAPITAL_RANGE = (100.0, 1_000_000.0)
-
 
 class PaperError(Exception):
     pass
