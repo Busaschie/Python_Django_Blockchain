@@ -64,7 +64,11 @@ def facts(run) -> dict:
     mc = c.get("mc") or {}
     if mc.get("ok"):
         f["monte_carlo"] = {k: mc.get(k) for k in ("n_trades", "prob_profit", "return_p5", "return_p50", "return_p95",
-                                                   "dd_median", "dd_p95", "random_median", "p_value", "beats_random")}
+                                                   "dd_median", "dd_p95", "random_median", "p_value", "p_min", "p_max",
+                                                   "beats_random")}
+        ci = mc.get("ci") or {}
+        if ci.get("sharpe"):
+            f["monte_carlo"]["sharpe_intervall"] = {k: ci["sharpe"][k] for k in ("point", "lo", "hi", "sig")}
     rg = c.get("regimes") or {}
     if rg.get("ok"):
         f["marktphasen"] = {"phasen": [{k: r[k] for k in ("label", "share_pct", "strategy_pct", "buyhold_pct", "trades")}
@@ -193,6 +197,10 @@ def rules_comment(f: dict) -> dict:
     mc = f.get("monte_carlo") or {}
     if mc.get("beats_random"):
         strong.append(f"Besser als zufällige Einstiege (p = {de(mc['p_value'], 3)}).")
+    sh = (mc.get("sharpe_intervall") or {})
+    if sh and not sh.get("sig"):
+        weak.append(f"Das {95} %-Intervall der Sharpe-Ratio ({de(sh['lo'])} bis {de(sh['hi'])}) schließt 0 ein: "
+                    "ein echter Vorteil ist statistisch nicht gesichert.")
     ct = f.get("kosten_test") or {}
     if ct.get("kosten_bis_gewinn_null_x") is None and ct:
         strong.append("Das Ergebnis bleibt auch bei deutlich höheren Kosten positiv.")

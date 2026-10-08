@@ -257,8 +257,13 @@
     <tr><td>Max Drawdown (Median / 95-%-Fall)</td><td>{{ mc.dd_median }} % / {{ mc.dd_p95 }} %</td></tr>
     {% if mc.p_value is not None %}
     <tr><td>Zufalls-Einstiege (Median)</td><td>{{ mc.random_median }} % (95 %: {{ mc.random_p95 }} %)</td></tr>
-    <tr><td>Besser als Zufall?</td><td>{% if mc.beats_random %}<strong class="good">ja</strong>{% else %}<strong class="err">nein</strong>{% endif %} (p = {{ mc.p_value }})</td></tr>
+    <tr><td>Besser als Zufall?</td><td>{% if mc.beats_random %}<strong class="good">ja</strong>{% else %}<strong class="err">nein</strong>{% endif %} (p = {{ mc.p_value }}{% if mc.n_seeds %}, Spanne {{ mc.p_min }} bis {{ mc.p_max }} über {{ mc.n_seeds }} Seeds{% endif %})</td></tr>
     {% endif %}
+    {% with ci=mc.ci %}{% if ci %}
+    {% if ci.sharpe %}<tr><td>Sharpe, {{ ci.level }} %-Intervall</td><td>{{ ci.sharpe.point }} ({{ ci.sharpe.lo }} bis {{ ci.sharpe.hi }}) {% if ci.sharpe.sig %}<strong class="good">über 0 gesichert</strong>{% else %}<strong class="err">nicht von 0 unterscheidbar</strong>{% endif %}</td></tr>{% endif %}
+    <tr><td>Ø Trade, {{ ci.level }} %-Intervall</td><td>{{ ci.mean_trade.point }} % ({{ ci.mean_trade.lo }} bis {{ ci.mean_trade.hi }} %) {% if ci.mean_trade.sig %}<strong class="good">über 0 gesichert</strong>{% else %}<strong class="err">nicht von 0 unterscheidbar</strong>{% endif %}</td></tr>
+    <tr><td>Trefferquote, {{ ci.level }} %-Intervall</td><td>{{ ci.win_rate.point }} % ({{ ci.win_rate.lo }} bis {{ ci.win_rate.hi }} %)</td></tr>
+    {% endif %}{% endwith %}
    </table>
    <div id="mcfan" style="height:300px"></div>
    {% else %}
@@ -563,6 +568,14 @@
      sma_cross: ["SMA fast (kurzes Fenster, Kerzen)", "SMA slow (langes Fenster, Kerzen)", ""],
      rsi: ["RSI period (Kerzen)", "RSI low (Kaufschwelle)", "RSI high (Verkaufsschwelle)"],
      combo: ["SMA fast (kurzes Fenster, Kerzen)", "SMA slow (langes Fenster, Kerzen)", ""],
+     bollinger: ["Bollinger period (Kerzen)", "Band-Faktor in Zehnteln (20 = 2,0)", ""],
+     macd: ["MACD fast (Kerzen)", "MACD slow (Kerzen)", "MACD Signal (Kerzen)"],
+     donchian: ["Einstieg: Hoch der letzten N Kerzen", "Ausstieg: Tief der letzten N Kerzen", ""],
+     momentum: ["Rückblick (Kerzen)", "Schwelle (% Kursänderung)", ""],
+   };
+   const defaults = {   // Startwerte beim Wechsel der Strategie
+     sma_cross: [20, 50, ""], combo: [20, 50, ""], rsi: [14, 30, 70], bollinger: [20, 20, ""],
+     macd: [12, 26, 9], donchian: [20, 10, ""], momentum: [30, 0, ""],
    };
    function sync() {
      const mode = f.elements["mode"].value, strat = f.elements["strategy"].value;
@@ -573,7 +586,7 @@
      show("wf_train_mult", mode === "walkforward");
      show("param_a", mode === "single");
      show("param_b", mode === "single");
-     show("param_c", mode === "single" && strat === "rsi");
+     show("param_c", mode === "single" && (strat === "rsi" || strat === "macd"));
      ["combo_logic", "rsi_period", "rsi_entry", "rsi_exit"].forEach(n => show(n, strat === "combo"));
      const sm = f.elements["size_mode"].value;
      show("size_value", sm !== "full");
@@ -591,7 +604,10 @@
      }
    }
    f.elements["mode"].addEventListener("change", sync);
-   f.elements["strategy"].addEventListener("change", sync);
+   f.elements["strategy"].addEventListener("change", () => {
+     (defaults[f.elements["strategy"].value] || []).forEach((v, i) => { f.elements["param_" + "abc"[i]].value = v; });
+     sync();
+   });
    f.elements["source"].addEventListener("change", sync);
    f.elements["size_mode"].addEventListener("change", sync);
    sync();
@@ -717,7 +733,7 @@
  (function () {
    const P = JSON.parse(document.getElementById("cmpdata").textContent);
    const chainColors = {btc:"#f7931a", sol:"#9945ff", eth:"#4f6bed"};
-   const stratColors = {sma_cross:"#2f5bea", rsi:"#e8590c", combo:"#2b8a3e"};
+   const stratColors = {sma_cross:"#2f5bea", rsi:"#e8590c", combo:"#2b8a3e", bollinger:"#9c36b5", macd:"#0c8599", donchian:"#c2255c", momentum:"#5c940d"};
    const norm = a => a.map(v => v / a[0] * 100);
    const traces = [];
    P.series.forEach(d => {

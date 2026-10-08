@@ -148,3 +148,9 @@ Knopf „Auswertung kommentieren“ (nur auf Knopfdruck, einmal je Lauf gespeich
 - **Favoriten und Tags:** Stern und bis zu 5 Tags je Lauf; die Liste rechts filtert nach Tag und nach Favoriten.
 - **Vorlagen:** Alle Formularwerte unter einem Namen speichern (höchstens 20 je Nutzer), mit einem Klick wieder laden; der Zeitraum
   wird als Länge in Tagen gespeichert und beim Laden bis heute gerechnet.
+
+## Weitere Strategien und Konfidenzintervalle
+
+- **Strategien** (`strategies.py`): Bollinger-Bänder (Rückkehr zum Mittelwert), MACD, Donchian-Ausbruch, Momentum. Alle liefern wie bisher 1 = long / 0 = flat, rechnen nur mit Daten bis zur aktuellen Kerze und haben ein Raster für Train/Test und Walk-Forward sowie Achsen für die Parameter-Stabilität. Parameter-Belegung im Formular: Bollinger (Periode, Faktor in Zehnteln, 20 = 2,0), MACD (fast, slow, Signal), Donchian (Einstieg, Ausstieg), Momentum (Rückblick, Schwelle in %). Beim Wechsel der Strategie setzt das Formular passende Startwerte.
+- **Robustheit** (`montecarlo.py`): Der Zufallsvergleich läuft mit 5 Seeds (p-Wert = Median, Spanne wird angezeigt). Neu sind 95-%-Konfidenzintervalle für Sharpe (Block-Bootstrap der Kerzenrenditen), Ø Trade und Trefferquote. Liegt die Untergrenze nicht über 0, gilt der Vorteil als statistisch nicht gesichert (auch im PDF und im KI-Kommentar).
+- Tests: `test_strategies.py`, `test_confidence.py`, Browser-Tests `NewStrategyBrowserTests`.

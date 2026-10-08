@@ -217,7 +217,15 @@ def _run_story(run, S, W):
              ["Rendite (5 % / Median / 95 %)", f"{mc['return_p5']} % / {mc['return_p50']} % / {mc['return_p95']} %"],
              ["Max Drawdown (Median / 95-%-Fall)", f"{mc['dd_median']} % / {mc['dd_p95']} %"]]
         if mc.get("p_value") is not None:
-            r.append(["Besser als Zufall?", f"{'ja' if mc.get('beats_random') else 'nein'} (p = {mc['p_value']})"])
+            r.append(["Besser als Zufall?", f"{'ja' if mc.get('beats_random') else 'nein'} (p = {mc['p_value']}"
+                     + (f", Spanne {mc['p_min']} bis {mc['p_max']} über {mc['n_seeds']} Seeds)" if mc.get("n_seeds") else ")")])
+        ci = mc.get("ci")
+        if ci:
+            if ci.get("sharpe"):
+                sh = ci["sharpe"]
+                r.append([f"Sharpe ({ci['level']} %-Intervall)", f"{sh['point']} ({sh['lo']} bis {sh['hi']}) – {'über 0 gesichert' if sh['sig'] else 'nicht von 0 unterscheidbar'}"])
+            mt = ci["mean_trade"]
+            r.append([f"Ø Trade ({ci['level']} %-Intervall)", f"{mt['point']} % ({mt['lo']} bis {mt['hi']} %) – {'über 0 gesichert' if mt['sig'] else 'nicht von 0 unterscheidbar'}"])
         e.append(KeepTogether([P("Robustheit (Monte-Carlo)", "h2"), _table(r, [75 * mm, 85 * mm], head=False, S=S)]))
 
     rg = cv.get("regimes")

@@ -5,7 +5,25 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d8010543-1eed-4775-a043-da519baf32cf" name="Changes" comment="Neu functions">
+      <change afterPath="$PROJECT_DIR$/backtester/test_confidence.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backtester/test_strategies.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/zip/Tradebot – Dateiübersicht und Zusammenspiel.docx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/zip/Tradebot – Entwicklungsverlauf (Iterationen).docx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/zip/Tradebot – Fragen und Antworten für die Vorstellung.docx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/zip/Tradebot – Tests und Gegenrechnung.docx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtester/ai.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/ai.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtester/export.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/export.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtester/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/forms.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtester/indicators.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/indicators.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtester/jobs.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/jobs.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtester/montecarlo.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/montecarlo.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtester/stability.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/stability.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtester/strategies.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/strategies.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtester/templates/backtester/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/templates/backtester/dashboard.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtester/test_browser.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/test_browser.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -37,18 +55,18 @@
       <entry key="S2" value="1.0" />
       <entry key="S5" value="1.0" />
       <entry key="S10" value="1.0" />
-      <entry key="S30" value="1.0000122822067985" />
-      <entry key="S60" value="1.0128905752176507" />
-      <entry key="M2" value="1.4673433776541076" />
-      <entry key="M5" value="5.152745765945357" />
-      <entry key="M10" value="9.668621125716983" />
-      <entry key="M15" value="12.218025966949272" />
-      <entry key="M30" value="16.36583937811301" />
-      <entry key="H1" value="21.361803155812286" />
-      <entry key="H2" value="29.026897016473537" />
-      <entry key="H4" value="38.94280443492316" />
-      <entry key="D1" value="57.180806243473484" />
-      <entry key="W1" value="62.105504075780594" />
+      <entry key="S30" value="1.0" />
+      <entry key="S60" value="1.0000000000014226" />
+      <entry key="M2" value="1.0000017390307256" />
+      <entry key="M5" value="1.0219557822366618" />
+      <entry key="M10" value="1.6311311884194448" />
+      <entry key="M15" value="2.98078699973078" />
+      <entry key="M30" value="7.5895635560323225" />
+      <entry key="H1" value="14.554924162559844" />
+      <entry key="H2" value="24.1222559230036" />
+      <entry key="H4" value="35.75697884046899" />
+      <entry key="D1" value="57.107304800465755" />
+      <entry key="W1" value="62.937582865187075" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -70,23 +88,23 @@
       <entry key="W1" value="0.0" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.0022748702860712023" />
-      <entry key="MS500" value="0.2960679029634081" />
-      <entry key="S2" value="0.7376457285414196" />
-      <entry key="S5" value="0.8853992153391853" />
-      <entry key="S10" value="0.9409565427474242" />
-      <entry key="S30" value="0.9799305470322774" />
-      <entry key="S60" value="1.0027951810256894" />
-      <entry key="M2" value="1.4622175322021536" />
-      <entry key="M5" value="5.150476921746478" />
-      <entry key="M10" value="9.667282200701937" />
-      <entry key="M15" value="12.216852070374408" />
-      <entry key="M30" value="16.364538684508837" />
-      <entry key="H1" value="21.360508994242235" />
-      <entry key="H2" value="29.025794165822195" />
-      <entry key="H4" value="38.94196604885126" />
-      <entry key="D1" value="57.18057872828043" />
-      <entry key="W1" value="62.10546821110777" />
+      <entry key="MS100" value="2.4604486769968805E-15" />
+      <entry key="MS500" value="0.0011972996680206607" />
+      <entry key="S2" value="0.18601617742856105" />
+      <entry key="S5" value="0.5102937934939532" />
+      <entry key="S10" value="0.7143485098283283" />
+      <entry key="S30" value="0.8939297298024721" />
+      <entry key="S60" value="0.9454785718381645" />
+      <entry key="M2" value="0.9723589573526545" />
+      <entry key="M5" value="1.0107959330924972" />
+      <entry key="M10" value="1.6254530695518172" />
+      <entry key="M15" value="2.976866060073636" />
+      <entry key="M30" value="7.587172786319655" />
+      <entry key="H1" value="14.553169000447657" />
+      <entry key="H2" value="24.120910322507854" />
+      <entry key="H4" value="35.7559969966338" />
+      <entry key="D1" value="57.107042623985855" />
+      <entry key="W1" value="62.93754153559066" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -174,7 +192,7 @@
       <workItem from="1791271946884" duration="667000" />
       <workItem from="1791272686745" duration="8564000" />
       <workItem from="1791352737110" duration="2085000" />
-      <workItem from="1791427922834" duration="2227000" />
+      <workItem from="1791427922834" duration="3249000" />
     </task>
     <task id="LOCAL-00001" summary="Backtest Manuell">
       <option name="closed" value="true" />
@@ -344,7 +362,15 @@
       <option name="project" value="LOCAL" />
       <updated>1791432833964</updated>
     </task>
-    <option name="localTasksCounter" value="22" />
+    <task id="LOCAL-00022" summary="Neu functions">
+      <option name="closed" value="true" />
+      <created>1791433516356</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1791433516356</updated>
+    </task>
+    <option name="localTasksCounter" value="23" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

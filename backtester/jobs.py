@@ -81,7 +81,7 @@ def compute(run) -> None:
     run.symbol, run.data_note, run.params = info["symbol"], info["note"][:200], params
     run.indicator_lib = indicators.backend()
     run.metrics, run.curves = json_safe(result["metrics"]), json_safe(result["curves"])
-    run.curves["mc"] = json_safe(montecarlo.analyze(run.curves, fee))   # Robustheits-Test (Trades)
+    run.curves["mc"] = json_safe(montecarlo.analyze(run.curves, fee, ppy=ppy))   # Robustheits-Test (Trades)
     run.validation = json_safe(result.get("validation", {}))
     run.params = json_safe(run.params)
     run.curves["regimes"] = json_safe(_safe(regimes.analyze, run.curves, j["timeframe"],

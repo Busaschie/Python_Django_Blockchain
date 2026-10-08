@@ -20,6 +20,19 @@ PARAM_TIPS = {  # je Strategie die Erklärung für Parameter 1, 2, 3 (das Skript
             "RSI low: Kaufschwelle. Fällt der RSI darunter (überverkauft, z. B. 30), wird gekauft, in der Erwartung "
             "einer Gegenbewegung nach oben.",
             "RSI high: Verkaufsschwelle. Steigt der RSI darüber (überkauft, z. B. 70), wird verkauft."],
+    "bollinger": ["Bollinger period: Fenster in Kerzen für Mittelwert und Standardabweichung (Standard 20).",
+                  "Band-Faktor in Zehnteln: 20 bedeutet 2,0 Standardabweichungen. Gekauft wird, wenn der Kurs unter "
+                  "dem unteren Band schließt, verkauft, wenn er wieder über den Mittelwert steigt. Größer = seltener, "
+                  "aber extremer.", ""],
+    "macd": ["MACD fast: Länge des schnellen EMA in Kerzen (Standard 12).",
+             "MACD slow: Länge des langsamen EMA in Kerzen, größer als fast (Standard 26).",
+             "MACD Signal: Länge des EMA der MACD-Linie (Standard 9). Long, solange MACD über der Signallinie liegt."],
+    "donchian": ["Einstieg: Kauf, wenn der Schluss über dem Hoch der letzten N Kerzen liegt (Standard 20).",
+                 "Ausstieg: Verkauf, wenn der Schluss unter dem Tief der letzten N Kerzen liegt (Standard 10, höchstens "
+                 "so groß wie der Einstieg).", ""],
+    "momentum": ["Rückblick: Kursänderung über N Kerzen (Standard 30).",
+                 "Schwelle in %: Long, solange die Änderung über dem Rückblick größer als dieser Wert ist (0 = "
+                 "Kurs höher als vor N Kerzen).", ""],
     "combo": ["SMA fast (Trend-Teil der Kombi-Strategie): " + SMA_FAST.split(": ", 1)[1],
               "SMA slow (Trend-Teil der Kombi-Strategie): " + SMA_SLOW.split(": ", 1)[1], ""],
 }
@@ -32,8 +45,7 @@ SIZE_TIPS = {
 }
 HELP = {
     "strategy": "Das Handelsverfahren, das Kauf- und Verkaufssignale erzeugt. SMA-Crossover folgt dem Trend, RSI kauft "
-                "nach starken Kursrückgängen auf eine Gegenbewegung, Kombiniert verbindet beides. Mit „Strategien "
-                "vergleichen“ siehst du alle drei nebeneinander.",
+                "nach starken Kursrückgängen auf eine Gegenbewegung, Kombiniert verbindet beides. Bollinger kauft unter dem unteren Band, MACD folgt dem Trend über zwei EMAs, Donchian kauft Ausbrüche über das letzte Hoch, Momentum bleibt long, solange der Kurs steigt. Mit „Strategien vergleichen“ siehst du alle nebeneinander.",
     "mode": "Wie ausgewertet wird. Train/Test-Split: Parameter werden auf den ersten Daten gesucht und auf ungesehenen "
             "Daten geprüft. Walk-Forward: wiederholt das rollierend und ist am aussagekräftigsten. Einzellauf: eigene "
             "Parameter über den ganzen Zeitraum, schnell, aber anfällig für Überanpassung.",
@@ -92,7 +104,9 @@ UI_TIPS = {
                       "nebeneinander.",
     "montecarlo": "Robustheits-Test: Die Trades werden 1.000-mal zufällig neu gemischt bzw. gezogen. Statt einer einzelnen "
                   "Zahl siehst du, wie stark Rendite und Drawdown streuen, und ob die Strategie besser ist als "
-                  "zufällige Einstiege mit gleicher Haltedauer.",
+                  "zufällige Einstiege mit gleicher Haltedauer (5 Zufalls-Seeds, die Spanne zeigt, ob das Ergebnis vom Zufall "
+                  "des Generators abhängt). Dazu 95-%-Konfidenzintervalle für Sharpe, Ø Trade und Trefferquote: "
+                  "Liegt die Untergrenze nicht über 0, ist der Vorteil statistisch nicht gesichert.",
     "plausibility": "Automatische Prüfungen je Lauf: sind die Kursdaten vollständig, rechnet die Simulation in sich stimmig "
                     "(Gegenrechnung, kein Blick in die Zukunft) und reicht die Datenbasis für eine Aussage? Grün = in "
                     "Ordnung, gelb = Hinweise beachten, rot = Ergebnis nicht verwertbar.",
@@ -119,7 +133,7 @@ UI_TIPS = {
             "Die Liste rechts lässt sich danach nach Tag und nach Favoriten filtern.",
     "report": "Kreuze links an den Läufen Häkchen an (höchstens 8) und erzeuge daraus ein PDF mit Übersichtstabelle, "
               "gemeinsamem Diagramm und der Einzelauswertung je Lauf.",
-    "compare_strategies": "Startet dieselben Einstellungen mit SMA-Crossover, RSI und Kombiniert auf der gewählten "
+    "compare_strategies": "Startet dieselben Einstellungen mit allen Strategien auf der gewählten "
                           "Chain und zeigt die Ergebnisse nebeneinander. Im Einzellauf gelten Standardparameter.",
 }
 
@@ -197,6 +211,19 @@ class BacktestForm(forms.Form):
         d = super().clean()
         if d.get("mode") == "single" and (d.get("param_a") is None or d.get("param_b") is None):
             raise forms.ValidationError("Beim Einzellauf werden Parameter 1 und 2 benötigt.")
+        a, b, c = d.get("param_a"), d.get("param_b"), d.get("param_c")
+        if d.get("mode") == "single" and a is not None and b is not None:
+            st = d.get("strategy")
+            if st in ("bollinger", "macd", "donchian", "momentum") and a < 2:
+                self.add_error("param_a", "Parameter 1 muss mindestens 2 sein.")
+            if st == "bollinger" and not 1 <= b <= 50:
+                self.add_error("param_b", "Der Band-Faktor liegt zwischen 1 und 50 (Zehntel, 20 = 2,0).")
+            if st == "macd" and not a < b:
+                self.add_error("param_b", "MACD slow muss größer als fast sein.")
+            if st == "macd" and c is not None and c < 1:
+                self.add_error("param_c", "Die Signal-Länge muss mindestens 1 sein.")
+            if st == "donchian" and not 1 <= b <= a:
+                self.add_error("param_b", "Der Ausstieg muss zwischen 1 und dem Einstieg liegen.")
         entry, exit_ = d.get("rsi_entry"), d.get("rsi_exit")
         if entry and exit_ and entry >= exit_:
             self.add_error("rsi_exit", "Der RSI-Ausstieg muss über dem RSI-Einstieg liegen.")

@@ -29,6 +29,27 @@ def _axes(strategy: str, params: dict):
         def build(p, lo):
             return {**params, "period": p, "low": lo} if lo < params["high"] else None
         return "period", _scaled(int(params["period"]), 3), "low", lows, build
+    if strategy == "bollinger":
+        ks = sorted({round(min(4.0, max(0.5, params["k"] + d)), 1) for d in (-1.0, -0.5, 0, 0.5, 1.0)})
+
+        def build(p, k):
+            return {**params, "period": p, "k": k}
+        return "period", _scaled(int(params["period"]), 5), "k", ks, build
+    if strategy == "macd":
+        def build(f, sl):
+            return {**params, "fast": f, "slow": sl} if f < sl else None
+        return "fast", _scaled(int(params["fast"]), 3), "slow", _scaled(int(params["slow"]), 5), build
+    if strategy == "donchian":
+        def build(en, ex):
+            return {**params, "entry": en, "exit": ex} if ex <= en else None
+        return "entry", _scaled(int(params["entry"]), 3), "exit", _scaled(int(params["exit"]), 2), build
+    if strategy == "momentum":
+        th = float(params["threshold"])
+        ths = sorted({round(th + d, 1) for d in (-5.0, -2.0, 0, 2.0, 5.0)})
+
+        def build(lb, t):
+            return {**params, "lookback": lb, "threshold": t}
+        return "lookback", _scaled(int(params["lookback"]), 3), "threshold", ths, build
     return None
 
 

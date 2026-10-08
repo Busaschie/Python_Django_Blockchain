@@ -279,3 +279,34 @@ class ShareAndOrganizeTests(BrowserCase):
             p.click("#reportform button:text('Bericht aus Auswahl')")
         self.assertTrue(dl.value.suggested_filename.endswith(".pdf"))
         self.assertEqual(self.js_errors, [])
+
+
+class NewStrategyBrowserTests(BrowserCase):
+    def test_switching_strategy_sets_defaults_labels_and_param_c(self):
+        self.login()
+        p = self.page
+        p.goto(self.url("/"))
+        p.select_option("#id_mode", "single")
+        for strat, vals, c_visible in (("macd", ("12", "26", "9"), True), ("donchian", ("20", "10", None), False),
+                                       ("bollinger", ("20", "20", None), False), ("momentum", ("30", "0", None), False),
+                                       ("rsi", ("14", "30", "70"), True)):
+            p.select_option("#id_strategy", strat)
+            self.assertEqual((p.input_value("#id_param_a"), p.input_value("#id_param_b")), vals[:2], strat)
+            self.assertEqual(p.locator("[data-field=param_c]").is_visible(), bool(c_visible), strat)
+            if vals[2]:
+                self.assertEqual(p.input_value("#id_param_c"), vals[2], strat)
+        p.select_option("#id_strategy", "donchian")
+        self.assertIn("Einstieg", p.inner_text("[data-field=param_a] label"))
+        self.assertEqual(self.js_errors, [])
+
+    def test_each_new_strategy_runs_single_and_split(self):
+        self.login()
+        for strat in ("bollinger", "macd", "donchian", "momentum"):
+            self.run_synthetic(strategy=strat)
+            self.page.wait_for_selector("#chart .plot-container", timeout=15000)
+            run = BacktestRun.objects.filter(owner=self.user).latest("pk")
+            self.assertEqual((run.strategy, run.status), (strat, "done"), strat)
+            self.assertIn("Robustheit", self.page.inner_text("body"))
+        self.run_synthetic(strategy="momentum", mode="split")
+        self.page.wait_for_selector("#heatmap .plot-container", timeout=15000)
+        self.assertEqual(self.js_errors, [])
