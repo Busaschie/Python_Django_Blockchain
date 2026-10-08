@@ -4,7 +4,7 @@
 {% for m in messages %}<p class="box small {% if m.level_tag == 'error' %}err{% else %}good{% endif %}" role="status">{{ m }}</p>{% endfor %}
 <div class="box" id="paperhead">
  <h2 class="lbl">{{ acc.name }} <button type="button" class="tip" data-tip="{{ ui_tips.paper }}" aria-label="Erklärung: Paper-Trading">i</button></h2>
- <p class="small"><a href="{% url 'paper_list' %}">← alle Paper-Konten</a>{% if acc.run_id %} · <a href="{% url 'detail' acc.run_id %}">zur Auswertung</a>{% endif %}</p>
+ <p class="small">{% if acc.run_id %}<a href="{% url 'detail' acc.run_id %}">← zurück zur Auswertung</a> · {% endif %}<a href="{% url 'paper_list' %}{% if acc.run_id %}?von={{ acc.run_id }}{% endif %}">alle Paper-Konten</a></p>
  <table>
   <tr><td>Kontowert</td><td><strong>{{ acc.equity|floatformat:2 }}</strong> (Start {{ acc.start_capital|floatformat:2 }})</td></tr>
   <tr><td>Rendite seit Start</td><td class="{% if acc.return_pct >= 0 %}good{% else %}err{% endif %}">{{ acc.return_pct }} %</td></tr>

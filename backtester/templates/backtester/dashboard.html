@@ -62,9 +62,11 @@
       {{ field }}{{ field.errors }}{% if field.help_text %}<span id="{{ field.auto_id }}_helptext" class="sr-only">{{ field.help_text }}</span>{% endif %}
      </div>
     {% endif %}{% endfor %}
+    <div class="runbtns">
     <button type="submit" data-tip="{{ ui_tips.run }}">Backtest starten</button>
     <button type="submit" name="compare" value="1" class="secondary" data-tip="{{ ui_tips.compare_chains }}">Auf allen 3 Chains vergleichen</button>
-    <button type="submit" name="compare_strategies" value="1" class="secondary" data-tip="{{ ui_tips.compare_strategies }}">Strategien vergleichen</button>
+    <button type="submit" name="compare_strategies" value="1" class="secondary" data-tip="{{ ui_tips.compare_strategies }}">Alle Strategien vergleichen</button>
+    </div>
    </form>
   </div>
 
@@ -368,7 +370,7 @@
     <input type="number" name="capital" value="10000" min="100" max="1000000" step="100" aria-label="Startkapital">
     <button class="secondary" type="submit">Paper-Trading starten</button>
    </form>
-   <p class="small"><a href="{% url 'paper_list' %}">Alle Paper-Konten</a></p>
+   <p class="small"><a href="{% url 'paper_list' %}?von={{ run.pk }}">Alle Paper-Konten</a></p>
   </div>
   {% endif %}
   {% endif %}
@@ -446,14 +448,13 @@
   <h2>Gelaufene Auswertungen</h2>
   <form method="get" action="{{ request.path }}" class="histfilter">
    <select name="tag" aria-label="Nach Tag filtern"><option value="">Alle Tags</option>{% for t in all_tags %}<option value="{{ t }}" {% if t == tag_filter %}selected{% endif %}>{{ t }}</option>{% endfor %}</select>
-   <label><input type="checkbox" name="fav" value="1" {% if fav_filter %}checked{% endif %}> nur ★</label>
+   <div class="histrow"><label><input type="checkbox" name="fav" value="1" {% if fav_filter %}checked{% endif %}> nur ★</label>
    <button type="submit" class="secondary">Filtern</button>
-   {% if tag_filter or fav_filter %}<a class="small" href="{{ request.path }}">zurücksetzen</a>{% endif %}
+   {% if tag_filter or fav_filter %}<a class="small" href="{{ request.path }}">zurücksetzen</a>{% endif %}</div>
   </form>
-  <form method="get" action="{% url 'export_report' %}" id="reportform" class="histfilter">
-   <button type="submit" class="secondary">Bericht aus Auswahl (PDF)</button>
+  <form method="get" action="{% url 'export_report' %}" id="reportform" class="histfilter reportbtns">
+   <button type="submit" class="secondary" data-tip="{{ ui_tips.report }}">Bericht aus Auswahl (PDF)</button>
    <button type="submit" class="secondary" formaction="{% url 'ai_compare' %}" data-tip="{{ ui_tips.ai_compare }}">Zwei Läufe erklären</button>
-   <button type="button" class="tip" data-tip="{{ ui_tips.report }}" aria-label="Erklärung: Bericht">i</button>
   </form>
   {% for g in groups %}
   <div class="grp">

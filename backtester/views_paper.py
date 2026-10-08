@@ -23,8 +23,12 @@ def _num(text, default):
 
 def paper_list(request):
     _need()
+    back = None
+    von = request.GET.get("von", "")
+    if von.isdigit():                                     # Rücksprung zur Auswertung, von der der Nutzer kam
+        back = BacktestRun.objects.filter(pk=int(von), owner=request.user).first()
     return render(request, "backtester/paper_list.html", {
-        "accounts": PaperAccount.objects.filter(owner=request.user), "ui_tips": UI_TIPS,
+        "back_run": back, "accounts": PaperAccount.objects.filter(owner=request.user), "ui_tips": UI_TIPS,
         "max_accounts": paper.max_accounts()})
 
 

@@ -213,3 +213,9 @@ class PageTests(TestCase):
 
     def test_dashboard_shows_start_button(self):
         self.assertIn("Paper-Trading starten", self.client.get(reverse("detail", args=[self.r.pk])).content.decode())
+
+    def test_paper_list_back_link_returns_to_run(self):
+        html = self.client.get(reverse("paper_list") + f"?von={self.r.pk}").content.decode()
+        self.assertIn(f'href="{reverse("detail", args=[self.r.pk])}">← zurück zur Auswertung', html)
+        other = self.client.get(reverse("paper_list") + "?von=999999").content.decode()
+        self.assertIn("zurück zu den Auswertungen", other)

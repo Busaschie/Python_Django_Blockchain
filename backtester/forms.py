@@ -45,7 +45,7 @@ SIZE_TIPS = {
 }
 HELP = {
     "strategy": "Das Handelsverfahren, das Kauf- und Verkaufssignale erzeugt. SMA-Crossover folgt dem Trend, RSI kauft "
-                "nach starken Kursrückgängen auf eine Gegenbewegung, Kombiniert verbindet beides. Bollinger kauft unter dem unteren Band, MACD folgt dem Trend über zwei EMAs, Donchian kauft Ausbrüche über das letzte Hoch, Momentum bleibt long, solange der Kurs steigt. Mit „Strategien vergleichen“ siehst du alle nebeneinander.",
+                "nach starken Kursrückgängen auf eine Gegenbewegung, Kombiniert verbindet beides. Bollinger kauft unter dem unteren Band, MACD folgt dem Trend über zwei EMAs, Donchian kauft Ausbrüche über das letzte Hoch, Momentum bleibt long, solange der Kurs steigt. Mit „Alle Strategien vergleichen“ siehst du alle nebeneinander.",
     "mode": "Wie ausgewertet wird. Train/Test-Split: Parameter werden auf den ersten Daten gesucht und auf ungesehenen "
             "Daten geprüft. Walk-Forward: wiederholt das rollierend und ist am aussagekräftigsten. Einzellauf: eigene "
             "Parameter über den ganzen Zeitraum, schnell, aber anfällig für Überanpassung.",
@@ -148,7 +148,7 @@ UI_TIPS = {
                  "wieder laden kannst. Der Zeitraum wird als Länge in Tagen bis heute gespeichert.",
     "tags": "Ordne Läufe mit kurzen Stichworten (mit Komma getrennt, höchstens 5) und markiere wichtige Läufe mit dem Stern. "
             "Die Liste rechts lässt sich danach nach Tag und nach Favoriten filtern.",
-    "report": "Kreuze links an den Läufen Häkchen an (höchstens 8) und erzeuge daraus ein PDF mit Übersichtstabelle, "
+    "report": "Kreuze bis zu 8 fertige Läufe an und erzeuge daraus ein PDF mit Übersichtstabelle, "
               "gemeinsamem Diagramm und der Einzelauswertung je Lauf.",
     "compare_strategies": "Startet dieselben Einstellungen mit allen Strategien auf der gewählten "
                           "Chain und zeigt die Ergebnisse nebeneinander. Im Einzellauf gelten Standardparameter.",

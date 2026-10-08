@@ -81,11 +81,11 @@ class TooltipRenderTests(TestCase):
 
         c = Collect()
         c.feed(self.html)
-        self.assertEqual(len(c.tips), len(HELP) + 1 + 3)  # alle Felder + Blockchain-Auswahl + Vorlagen + Bericht + Strategie in Worten
+        self.assertEqual(len(c.tips), len(HELP) + 1 + 2)  # alle Felder + Blockchain-Auswahl + Vorlagen + Strategie in Worten (Bericht-Tipp hängt am Button)
         for a in c.tips:
             self.assertTrue(a.get("data-tip") and len(a["data-tip"]) > 40, a)
             self.assertTrue(a.get("aria-label", "").startswith("Erklärung: "), a)
-        self.assertIn("„Strategien vergleichen“", self.html)
+        self.assertIn("„Alle Strategien vergleichen“", self.html)
 
     def test_aria_describedby_targets_exist(self):
         for name in HELP:

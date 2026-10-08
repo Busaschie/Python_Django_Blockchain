@@ -3,7 +3,7 @@
 {% for m in messages %}<p class="box small {% if m.level_tag == 'error' %}err{% else %}good{% endif %}" role="status">{{ m }}</p>{% endfor %}
 <div class="box" id="paperlist">
  <h2 class="lbl">Paper-Trading <button type="button" class="tip" data-tip="{{ ui_tips.paper }}" aria-label="Erklärung: Paper-Trading">i</button></h2>
- <p class="small"><a href="{% url 'index' %}">← zurück zu den Auswertungen</a></p>
+ <p class="small">{% if back_run %}<a href="{% url 'detail' back_run.pk %}">← zurück zur Auswertung</a>{% else %}<a href="{% url 'index' %}">← zurück zu den Auswertungen</a>{% endif %}</p>
  {% if accounts %}
  <table>
   <tr><th>Konto</th><th>Stand</th><th>Position</th><th>Rendite</th><th>Zuletzt geprüft</th><th></th></tr>
