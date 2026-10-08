@@ -1,6 +1,6 @@
 {% extends "backtester/base.html" %}
 {% block content %}
-{% for m in messages %}{% if "signal" not in m.extra_tags %}<p class="box small {% if m.tags == 'error' %}err{% else %}good{% endif %}" role="status">{{ m }}</p>{% endif %}{% endfor %}
+{% for m in messages %}{% if "signal" not in m.extra_tags and "nl" not in m.extra_tags and "ask" not in m.extra_tags %}<p class="box small {% if m.level_tag == 'error' %}err{% else %}good{% endif %}" role="status">{{ m }}</p>{% endif %}{% endfor %}
 {% if shared %}
 <div class="box" id="sharedbanner"><strong>Geteilte Auswertung (nur Lesen).</strong>
  <span class="small">Diese Seite wurde von einem Nutzer des Trading Backtesters freigegeben. Einstellungen, Kennzahlen und Diagramme sind sichtbar, persönliche Daten nicht. Ein Backtest bildet nur die Vergangenheit ab und ist keine Anlageberatung.</span></div>
@@ -39,6 +39,16 @@
     <button type="submit" data-tip="{{ ui_tips.run }}">Backtest starten</button>
     <button type="submit" name="compare" value="1" class="secondary" data-tip="{{ ui_tips.compare_chains }}">Auf allen 3 Chains vergleichen</button>
     <button type="submit" name="compare_strategies" value="1" class="secondary" data-tip="{{ ui_tips.compare_strategies }}">Strategien vergleichen</button>
+   </form>
+  </div>
+
+  <div class="box" id="nlbox">
+   <h3 class="lbl">Strategie in Worten <button type="button" class="tip" data-tip="{{ ui_tips.nl }}" aria-label="Erklärung: Strategie in Worten">i</button></h3>
+   {% for m in messages %}{% if "nl" in m.extra_tags %}<p class="small {% if m.level_tag == 'error' %}err{% else %}good{% endif %}" role="status">{{ m }}</p>{% endif %}{% endfor %}
+   <form method="post" action="{% url 'nl_strategy' %}">{% csrf_token %}
+    <textarea name="text" rows="2" maxlength="{{ nl_max }}" required aria-label="Regel in einem Satz" placeholder="z. B. {{ nl_examples.0 }}" style="width:100%;box-sizing:border-box"></textarea>
+    <button class="secondary" type="submit">In Einstellungen übersetzen</button>
+    <span class="small muted">Nur Einstellungen, kein Chat.</span>
    </form>
   </div>
 
@@ -313,10 +323,46 @@
    {% else %}<p class="small muted">Nicht verfügbar: {{ st.reason }}.</p>{% endif %}
   </div>
   {% endif %}{% endwith %}
+  {% if not shared and ask_questions %}
+  <div class="box" id="suggestbox">
+   <h3 class="lbl">Nächste Variante <button type="button" class="tip" data-tip="{{ ui_tips.suggest }}" aria-label="Erklärung: Nächste Variante">i</button></h3>
+   {% with sg=suggest.payload %}{% if sg %}
+    {% if sg.ok %}
+    <p>{{ sg.zusammenfassung }}</p>
+    {% if sg.begruendung %}<ul class="aiul">{% for x in sg.begruendung %}<li>{{ x }}</li>{% endfor %}</ul>{% endif %}
+    <p class="small muted">{{ sg.hinweis }}{% if sg.note %} <span class="err">{{ sg.note }}</span>{% endif %}</p>
+    {% if sg.form %}<form method="get" action="{% url 'index' %}"><input type="hidden" name="vorschlag" value="{{ suggest.pk }}"><button class="secondary" type="submit">Variante ins Formular übernehmen</button></form>{% endif %}
+    {% else %}<p class="small muted">{{ sg.reason }}</p>{% endif %}
+   {% else %}
+   <form method="post" action="{% url 'ai_suggest' run.pk %}">{% csrf_token %}
+    <button class="secondary" type="submit">Nächste Variante vorschlagen</button>
+    <span class="small muted">Aus der Parameter-Stabilität dieses Laufs, nicht aus neuen Daten.</span>
+   </form>
+   {% endif %}{% endwith %}
+  </div>
+  <div class="box" id="askbox">
+   <h3 class="lbl">Fragen zum Ergebnis <button type="button" class="tip" data-tip="{{ ui_tips.ask }}" aria-label="Erklärung: Fragen zum Ergebnis">i</button></h3>
+   {% for m in messages %}{% if "ask" in m.extra_tags %}<p class="small err" role="status">{{ m }}</p>{% endif %}{% endfor %}
+   <form method="post" action="{% url 'ai_ask' run.pk %}" id="askform">{% csrf_token %}
+    <select name="q" id="ask_q" aria-label="Frage wählen">{% for qid, title in ask_questions %}<option value="{{ qid }}">{{ title }}</option>{% endfor %}</select>
+    <select name="period" id="ask_period" aria-label="Zeitraum wählen" style="display:none">{% for p in ask_periods %}<option value="{{ p }}">{{ p }}</option>{% endfor %}</select>
+    <button class="secondary" type="submit">Fragen</button>
+   </form>
+   <script>(function(){const q=document.getElementById("ask_q"),p=document.getElementById("ask_period");
+    const sync=()=>{p.style.display=q.value==="period"?"":"none";}; q.addEventListener("change",sync); sync();})();</script>
+   {% for r in ask_results %}
+   <div class="askitem"><h4>{{ r.payload.frage }}{% if r.key|slice:":7" == "period:" %} ({{ r.key|slice:"7:" }}){% endif %}</h4>
+    <p>{{ r.payload.antwort }}</p>
+    {% if r.payload.punkte %}<ul class="aiul">{% for x in r.payload.punkte %}<li>{{ x }}</li>{% endfor %}</ul>{% endif %}
+    <p class="small muted">{% if r.source != "regeln" %}Formuliert mit {{ r.source|cut:"groq:" }}{% else %}Regelbasiert{% endif %}, nur aus den berechneten Zahlen dieses Laufs.{% if r.payload.note %} <span class="err">{{ r.payload.note }}</span>{% endif %}</p></div>
+   {% endfor %}
+   <p class="small muted">Feste Fragen, kein freier Chat. Gleiche Fragen sind gespeichert und kosten nichts.</p>
+  </div>
+  {% endif %}
   {% if signals_enabled %}
   <div class="box" id="sigbox">
    <h3 class="lbl">Aktuelles Signal <button type="button" class="tip" data-tip="{{ ui_tips.signal }}" aria-label="Erklärung: Aktuelles Signal">i</button></h3>
-   {% for m in messages %}<p class="small {% if m.tags == 'error' %}err{% else %}good{% endif %}">{{ m }}</p>{% endfor %}
+   {% for m in messages %}<p class="small {% if m.level_tag == 'error' %}err{% else %}good{% endif %}">{{ m }}</p>{% endfor %}
    {% with sg=run.signal_state %}
    {% if run.source == "synthetic" %}<p class="small muted">Bei synthetischen Daten gibt es kein aktuelles Signal.</p>
    {% else %}
@@ -328,6 +374,12 @@
    <form method="post" action="{% url 'signal_refresh' run.pk %}" style="display:inline">{% csrf_token %}<button class="secondary" type="submit">Jetzt prüfen</button></form>
    <form method="post" action="{% url 'signal_toggle' run.pk %}" style="display:inline">{% csrf_token %}
     <button class="secondary" type="submit">{% if run.signal_alert %}Signal-Mail ausschalten{% else %}Mail bei Signal-Wechsel einschalten{% endif %}</button></form>
+   {% for pa in run.paper_accounts.all %}{% if pa.owner_id == user.pk %}<p class="small">Paper-Konto: <a href="{% url 'paper_detail' pa.pk %}">{{ pa.name }}</a> ({{ pa.return_pct }} %)</p>{% endif %}{% endfor %}
+   <form method="post" action="{% url 'paper_start' run.pk %}" style="display:inline" id="paperstart">{% csrf_token %}
+    <input type="number" name="capital" value="10000" min="100" max="1000000" step="100" aria-label="Startkapital" style="width:6.5rem">
+    <button class="secondary" type="submit">Paper-Trading starten</button>
+    <button type="button" class="tip" data-tip="{{ ui_tips.paper }}" aria-label="Erklärung: Paper-Trading">i</button></form>
+   <a class="small" href="{% url 'paper_list' %}">Alle Paper-Konten</a>
    <p class="small muted">{% if run.signal_alert %}Aktiv: Bei einem Wechsel geht eine Mail an {{ user.email }}. {% endif %}Höchstens {{ signal_max }} Läufe gleichzeitig. Mails entstehen nur, wenn die automatische Prüfung eingerichtet ist (Betreiber).</p>
    {% endif %}
    {% endwith %}
@@ -373,6 +425,7 @@
   </form>
   <form method="get" action="{% url 'export_report' %}" id="reportform" class="histfilter">
    <button type="submit" class="secondary">Bericht aus Auswahl (PDF)</button>
+   <button type="submit" class="secondary" formaction="{% url 'ai_compare' %}" data-tip="{{ ui_tips.ai_compare }}">Zwei Läufe erklären</button>
    <button type="button" class="tip" data-tip="{{ ui_tips.report }}" aria-label="Erklärung: Bericht">i</button>
   </form>
   {% for g in groups %}
@@ -469,6 +522,9 @@
    <div class="term"><dt>Parameter-Stabilität</dt><dd>Rechnet die Strategie mit leicht verschobenen Parametern (5 × 5 Raster um deinen Wert, z. B. fast 12 bis 30 und slow 30 bis 75), ohne neue Optimierung. Ein <em>Plateau</em> (Nachbarn ähnlich gut) spricht für Robustheit, eine einzelne <em>Spitze</em> (Nachbarn deutlich schlechter oder im Minus) für Überanpassung. Beim Train/Test-Split zählt die Testphase; bei Walk-Forward gibt es die Prüfung nicht, dort zeigt die Folds-Tabelle die Parameter-Schwankung.</dd></div>
    <div class="term"><dt>Export (CSV, PDF)</dt><dd>Über dem Kennzahlen-Block eines Laufs: die Trades als CSV-Datei (Semikolon, Dezimalkomma, öffnet in deutschem Excel direkt) und eine PDF-Zusammenfassung mit Einstellungen, Kennzahlen, Equity-Diagramm, Plausibilität, Robustheit, Marktphasen, Kosten, Parameter-Stabilität und KI-Kommentar.</dd></div>
    {% if signals_enabled %}<div class="term"><dt>Aktuelles Signal, Signal-Mail</dt><dd>Zeigt, ob die Strategie mit den Parametern des Laufs auf den zuletzt abgeschlossenen Kerzen long (investiert) oder flat (nicht investiert) ist und seit wann. Optional kommt bei jedem Wechsel eine Mail. Stops und Positionsgröße sind nicht berücksichtigt; keine Anlageberatung.</dd></div>{% endif %}
+   {% if signals_enabled %}<div class="term"><dt>Paper-Trading</dt><dd>Ein virtuelles Konto führt das Signal des Laufs mit Spielgeld aus und führt ein Journal. Der Abgleich rechnet dieselbe Strategie ab Start als Backtest und zeigt, ob beides zusammenpasst. Keine echten Orders.</dd></div>{% endif %}
+   <div class="term"><dt>Strategie in Worten</dt><dd>Beschreibe eine Regel in einem Satz; die App übersetzt sie in Strategie und Parameter und füllt das Formular vor. Alle Werte werden wie im Formular geprüft. Kein Chat, nichts startet automatisch.</dd></div>
+   <div class="term"><dt>Nächste Variante, Fragen zum Ergebnis, Läufe erklären</dt><dd>Feste Auswertungshilfen: ein Parametervorschlag aus der Stabilität, vorgegebene Fragen zum Ergebnis und die Erklärung zweier angekreuzter Läufe. Antworten beruhen nur auf den berechneten Zahlen und werden geprüft.</dd></div>
    <div class="term"><dt>Kommentar zur Auswertung (KI)</dt><dd>Auf Knopfdruck erklärt eine KI (Groq) das Ergebnis in Klartext, nennt Stärken und Schwächen und schlägt nächste Tests vor. Sie bekommt nur die berechneten Kennzahlen (keine Kursreihen, keine Benutzerdaten), rechnet nichts selbst, und jede Zahl ihrer Antwort wird gegen die berechneten Werte geprüft. Bei Ausfall, Tageslimit oder unbrauchbarer Antwort erscheint ein regelbasierter Kommentar. Der Text wird je Lauf einmal gespeichert. Er ist eine Auswertungshilfe, keine Anlageberatung und keine Prognose.</dd></div>
    <div class="term"><dt>Plausibilitäts-Ampel</dt><dd>Automatische Prüfungen je Lauf. <em>Daten:</em> Menge, Lücken, doppelte Kerzen, ungültige Preise, extreme Sprünge, Volumen. <em>Engine:</em> Max Drawdown, Buy &amp; Hold, Gesamtrendite und einzelne Trades werden aus den Kurven bzw. Kursen unabhängig nachgerechnet; Trades dürfen sich nicht überschneiden; ein Look-ahead-Test prüft, dass Signale unverändert bleiben, wenn spätere Kerzen fehlen. <em>Aussagekraft:</em> Anzahl Trades, Zeitraum, Abhängigkeit vom besten Trade, Zeit im Markt, unrealistisch gute Kennzahlen, Train gegen Test, Parameter am Rand des Suchbereichs. Grün = in Ordnung, gelb = Hinweis beachten, rot = Ergebnis nicht verwertbar.</dd></div>
    <div class="term"><dt>Look-ahead (Blick in die Zukunft)</dt><dd>Fehler, bei dem ein Signal Informationen aus späteren Kerzen nutzt. Solche Backtests sehen großartig aus, sind aber in der Praxis nicht handelbar.</dd></div>

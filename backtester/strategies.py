@@ -171,3 +171,20 @@ def params_from_inputs(strategy: str, a, b, c, extra=None) -> dict:
     if strategy == "momentum":
         return {"lookback": a, "threshold": float(b)}
     return {"period": a, "low": b, "high": c or 70}
+
+
+def inputs_from_params(strategy: str, p: dict) -> dict:
+    """Umkehrung von params_from_inputs: Strategie-Parameter -> Formularfelder Parameter 1-3."""
+    if strategy in ("sma_cross", "combo"):
+        return {"param_a": p["fast"], "param_b": p["slow"], "param_c": None}
+    if strategy == "rsi":
+        return {"param_a": p["period"], "param_b": p["low"], "param_c": p["high"]}
+    if strategy == "bollinger":
+        return {"param_a": p["period"], "param_b": round(p["k"] * 10), "param_c": None}
+    if strategy == "macd":
+        return {"param_a": p["fast"], "param_b": p["slow"], "param_c": p.get("signal", 9)}
+    if strategy == "donchian":
+        return {"param_a": p["entry"], "param_b": p["exit"], "param_c": None}
+    if strategy == "momentum":
+        return {"param_a": p["lookback"], "param_b": round(p["threshold"]), "param_c": None}
+    raise KeyError(strategy)

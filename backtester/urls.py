@@ -1,5 +1,5 @@
 from django.urls import path
-from . import views
+from . import views, views_ai, views_paper
 
 urlpatterns = [
     path("", views.dashboard, name="index"),
@@ -20,5 +20,15 @@ urlpatterns = [
     path("signal/<int:pk>/pruefen/", views.signal_refresh, name="signal_refresh"),
     path("signal/<int:pk>/mail/", views.signal_toggle, name="signal_toggle"),
     path("signale/pruefen/", views.signal_check, name="signal_check"),
+    path("paper/", views_paper.paper_list, name="paper_list"),
+    path("paper/start/<int:pk>/", views_paper.paper_start, name="paper_start"),
+    path("paper/<int:pk>/", views_paper.paper_detail, name="paper_detail"),
+    path("paper/<int:pk>/pruefen/", views_paper.paper_check, name="paper_check"),
+    path("paper/<int:pk>/anhalten/", views_paper.paper_toggle, name="paper_toggle"),
+    path("paper/<int:pk>/loeschen/", views_paper.paper_delete, name="paper_delete"),
+    path("ki/vorschlag/<int:pk>/", views_ai.ai_suggest, name="ai_suggest"),
+    path("ki/frage/<int:pk>/", views_ai.ai_ask, name="ai_ask"),
+    path("ki/vergleich/", views_ai.ai_compare, name="ai_compare"),
+    path("ki/strategie/", views_ai.nl_strategy_view, name="nl_strategy"),
     path("status/", views.status, name="status"),
 ]

@@ -1,0 +1,59 @@
+{% extends "backtester/base.html" %}
+{% block content %}
+{% for m in messages %}<p class="box small {% if m.level_tag == 'error' %}err{% else %}good{% endif %}" role="status">{{ m }}</p>{% endfor %}
+<div class="box" id="paperhead">
+ <h2 class="lbl">{{ acc.name }} <button type="button" class="tip" data-tip="{{ ui_tips.paper }}" aria-label="Erklärung: Paper-Trading">i</button></h2>
+ <p class="small"><a href="{% url 'paper_list' %}">← alle Paper-Konten</a>{% if acc.run_id %} · <a href="{% url 'detail' acc.run_id %}">zur Auswertung</a>{% endif %}</p>
+ <table>
+  <tr><td>Kontowert</td><td><strong>{{ acc.equity|floatformat:2 }}</strong> (Start {{ acc.start_capital|floatformat:2 }})</td></tr>
+  <tr><td>Rendite seit Start</td><td class="{% if acc.return_pct >= 0 %}good{% else %}err{% endif %}">{{ acc.return_pct }} %</td></tr>
+  <tr><td>Position</td><td>{% if acc.position %}long (seit Kauf zu {{ acc.entry_price|floatformat:2 }}){% else %}flat (Bargeld){% endif %}</td></tr>
+  <tr><td>Strategie</td><td>{{ acc.strategy_label }} · {{ acc.params }} · {{ acc.timeframe }} · Kosten je Seite {{ acc.cost }}</td></tr>
+  <tr><td>Letzte Prüfung</td><td>{% if acc.last_checked %}{{ acc.last_checked|date:"d.m.Y H:i" }} · Kerze {{ acc.last_candle|slice:":16" }} UTC · Kurs {{ acc.last_price }}{% else %}–{% endif %}{% if not acc.active %} · <strong>angehalten</strong>{% endif %}{% if acc.error %} · <span class="err">{{ acc.error }}</span>{% endif %}</td></tr>
+ </table>
+ <form method="post" action="{% url 'paper_check' acc.pk %}" style="display:inline">{% csrf_token %}<button type="submit">Jetzt prüfen</button></form>
+ <form method="post" action="{% url 'paper_toggle' acc.pk %}" style="display:inline">{% csrf_token %}<button class="secondary" type="submit">{% if acc.active %}Anhalten{% else %}Fortsetzen{% endif %}</button></form>
+ <form method="post" action="{% url 'paper_delete' acc.pk %}" style="display:inline" onsubmit="return confirm('Paper-Konto samt Journal löschen?')">{% csrf_token %}<button class="secondary" type="submit">Löschen</button></form>
+ <p class="small muted">Geprüft wird per Knopf und, wenn der Betreiber den Zeitplan eingerichtet hat, automatisch. Zwischen zwei Prüfungen bleibt das Konto unverändert.</p>
+</div>
+<div class="box" id="paperrec">
+ <h3 class="lbl">Backtest gegen Paper-Konto <button type="button" class="tip" data-tip="{{ ui_tips.paper_reconcile }}" aria-label="Erklärung: Abgleich">i</button></h3>
+ {% if rec.ok %}
+ <table>
+  <tr><td>Paper-Konto</td><td>{{ rec.paper_pct }} % ({{ rec.trades_paper }} Trades)</td></tr>
+  <tr><td>Backtest, gleiche Kerzen ab Start</td><td>{{ rec.backtest_pct }} % ({{ rec.trades_backtest }} Trades)</td></tr>
+  <tr><td>Abweichung</td><td><strong class="{% if rec.level == 'ok' %}good{% else %}err{% endif %}">{{ rec.diff_pct }} Prozentpunkte</strong></td></tr>
+  <tr><td>Buy &amp; Hold im selben Zeitraum</td><td>{{ rec.buyhold_pct }} %</td></tr>
+ </table>
+ <p><strong class="{% if rec.level == 'ok' %}good{% else %}err{% endif %}">{{ rec.verdict }}</strong> <span class="small muted">Basis: {{ rec.candles }} Kerzen seit Start.</span></p>
+ {% if rec.reasons %}<ul class="aiul">{% for r in rec.reasons %}<li>{{ r }}</li>{% endfor %}</ul>{% endif %}
+ {% else %}<p class="small muted">{{ rec.reason }}</p>{% endif %}
+</div>
+{% if equity|length > 1 %}<div class="box"><div id="paperchart" style="height:260px"></div></div>{% endif %}
+<div class="box" id="paperjournal">
+ <h3 class="lbl">Journal ({{ entries|length }}) <button type="button" class="tip" data-tip="{{ ui_tips.paper_journal }}" aria-label="Erklärung: Journal">i</button></h3>
+ {% if entries %}
+ <div class="scroll" style="max-height:340px;overflow-y:auto"><table>
+  <tr><th>Kerze (UTC)</th><th>Order</th><th>Kurs</th><th>Menge</th><th>Kosten</th><th>Kontowert</th><th>Trade %</th></tr>
+  {% for e in entries %}
+  <tr><td>{{ e.candle|slice:":16" }}</td><td>{% if e.side == "buy" %}Kauf{% else %}Verkauf{% endif %}</td><td>{{ e.price }}</td>
+   <td>{{ e.units|floatformat:6 }}</td><td>{{ e.cost_paid|floatformat:2 }}</td><td>{{ e.equity_after|floatformat:2 }}</td>
+   <td>{% if e.ret_pct is not None %}<span class="{% if e.ret_pct >= 0 %}good{% else %}err{% endif %}">{{ e.ret_pct }}</span>{% else %}–{% endif %}</td></tr>
+  {% endfor %}
+ </table></div>
+ {% else %}<p class="small muted">Noch keine Order. Das Konto wartet auf den nächsten Signal-Wechsel.</p>{% endif %}
+</div>
+{{ equity|json_script:"eqdata" }}
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<script>
+ (function () {
+   const box = document.getElementById("paperchart"); if (!box) return;
+   const d = JSON.parse(document.getElementById("eqdata").textContent);
+   const css = getComputedStyle(document.documentElement);
+   Plotly.newPlot(box, [{x: d.map(r => r[0]), y: d.map(r => r[1]), name: "Kontowert", line: {color: "#2f5bea", width: 2}}],
+     {margin: {l: 55, r: 10, t: 28, b: 35}, title: {text: "Kontowert (virtuell)", font: {size: 13}}, paper_bgcolor: "rgba(0,0,0,0)",
+      plot_bgcolor: "rgba(0,0,0,0)", font: {color: css.getPropertyValue("--ink").trim() || "#ddd"}}, {displayModeBar: false, responsive: true});
+ })();
+</script>
+{% include "backtester/_tips.html" %}
+{% endblock %}

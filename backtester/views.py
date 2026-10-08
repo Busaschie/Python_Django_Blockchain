@@ -13,10 +13,10 @@ from django.views.decorators.http import require_POST
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
-from . import ai, export, jobs, signals
+from . import ai, ai_extra, export, jobs, nl_strategy, paper, signals, views_ai
 from .chains import CHAINS
 from .forms import PARAM_TIPS, SIZE_TIPS, UI_TIPS, BacktestForm
-from .models import BacktestRun, ExchangeBlock, RunTemplate
+from .models import AiResult, BacktestRun, ExchangeBlock, RunTemplate
 from .strategies import STRATEGIES, default_inputs, params_from_inputs
 
 STALE_AFTER = timedelta(minutes=15)
@@ -59,6 +59,15 @@ def _template_job(d: dict) -> dict:
     job = {k: v for k, v in d.items() if k not in ("start_date", "end_date") and v is not None}
     job["period_days"] = (d["end_date"] - d["start_date"]).days + 1
     return job
+
+
+def _suggestion_initial(user, pk):
+    """Formular mit der vorgeschlagenen Variante (naechster Test als Einzellauf mit den neuen Parametern)."""
+    res = get_object_or_404(AiResult, pk=pk, owner=user, kind="suggest")
+    form = (res.payload or {}).get("form")
+    if not form:
+        raise Http404
+    return {**_initial(res.run), **{k: v for k, v in form.items() if v is not None}}
 
 
 def _template_initial(t: RunTemplate) -> dict:
@@ -204,6 +213,12 @@ def dashboard(request, pk=None, batch=None):
         first = run or (batch_runs[0] if batch_runs else None)
         if first:
             initial = _initial(first)
+        elif request.GET.get("vorschlag", "").isdigit():
+            initial = _suggestion_initial(request.user, int(request.GET["vorschlag"]))
+        elif request.GET.get("plan") == "1":
+            initial = nl_strategy.plan_from_query(request.GET) or None
+            if initial:
+                initial = {**initial, "mode": "single"}
         elif request.GET.get("vorlage", "").isdigit():
             initial = _template_initial(get_object_or_404(RunTemplate, pk=int(request.GET["vorlage"]), owner=request.user))
         else:
@@ -228,6 +243,8 @@ def dashboard(request, pk=None, batch=None):
         "chains": [{"key": k, **m} for k, m in CHAINS.items()],
         "ai_left": ai.remaining_today(request.user), "ai_limit": ai.limits()[0],
         "signals_enabled": signals.enabled(), "signal_max": settings.SIGNAL_MAX_PER_USER,
+        "nl_max": nl_strategy.MAX_LEN, "nl_examples": nl_strategy.EXAMPLES,
+        **views_ai.ai_context(run, request.user),
     })
 
 
@@ -340,7 +357,8 @@ def signal_check(request):
     given = request.headers.get("Authorization", "").removeprefix("Bearer ") or request.GET.get("token", "")
     if not hmac.compare_digest(given.encode(), token.encode()):
         return JsonResponse({"error": "unauthorized"}, status=403)
-    return JsonResponse(signals.check_all(f"{request.scheme}://{request.get_host()}"))
+    result = signals.check_all(f"{request.scheme}://{request.get_host()}")
+    return JsonResponse({**result, "paper": paper.check_all()})
 
 
 # --------------------------------------------------------------------------------------

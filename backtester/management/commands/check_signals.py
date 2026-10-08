@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
-from backtester import signals
+from backtester import paper, signals
 
 
 class Command(BaseCommand):
@@ -15,3 +15,4 @@ class Command(BaseCommand):
             self.stdout.write("SIGNALS_ENABLED ist aus - nichts zu tun.")
             return
         self.stdout.write(str(signals.check_all(o["base_url"])))
+        self.stdout.write("Paper: " + str(paper.check_all()))

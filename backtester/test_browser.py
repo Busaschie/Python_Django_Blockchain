@@ -310,3 +310,39 @@ class NewStrategyBrowserTests(BrowserCase):
         self.run_synthetic(strategy="momentum", mode="split")
         self.page.wait_for_selector("#heatmap .plot-container", timeout=15000)
         self.assertEqual(self.js_errors, [])
+
+
+class AiBoxesBrowserTests(BrowserCase):
+    def test_strategy_in_words_prefills_form_without_starting(self):
+        self.login()
+        p = self.page
+        p.goto(self.url("/"))
+        p.fill("#nlbox textarea", "MACD 12 26 9 auf Ethereum, 4h")
+        p.click("#nlbox button:text('In Einstellungen übersetzen')")
+        p.wait_for_url("**/?plan=1*", wait_until="domcontentloaded")
+        self.assertIn("Verstanden als: MACD", p.inner_text("#nlbox"))
+        self.assertEqual(p.input_value("#id_strategy"), "macd")
+        self.assertEqual((p.input_value("#id_param_a"), p.input_value("#id_param_b"), p.input_value("#id_param_c")), ("12", "26", "9"))
+        self.assertEqual(p.input_value("#id_timeframe"), "4h")
+        self.assertTrue(p.locator("#chain-eth").is_checked())
+        self.assertEqual(BacktestRun.objects.filter(owner=self.user).count(), 0)         # nichts gestartet
+        p.fill("#nlbox textarea", "Wie wird das Wetter?")
+        p.click("#nlbox button:text('In Einstellungen übersetzen')")
+        p.wait_for_selector("#nlbox .err")
+        self.assertIn("keine Strategie erkannt", p.inner_text("#nlbox"))
+        self.assertEqual(self.js_errors, [])
+
+    def test_fixed_questions_have_no_free_text_and_answer_appears(self):
+        self.login()
+        self.run_synthetic()
+        p = self.page
+        p.wait_for_selector("#askbox")
+        self.assertEqual(p.locator("#askbox textarea, #askbox input[type=text]").count(), 0)
+        self.assertFalse(p.locator("#ask_period").is_visible())
+        p.select_option("#ask_q", "period")
+        self.assertTrue(p.locator("#ask_period").is_visible())
+        p.select_option("#ask_q", "costs")
+        p.click("#askbox button:text('Fragen')")
+        p.wait_for_selector("#askbox .askitem")
+        self.assertIn("Kosten", p.inner_text("#askbox .askitem"))
+        self.assertEqual(self.js_errors, [])

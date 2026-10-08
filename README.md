@@ -154,3 +154,16 @@ Knopf „Auswertung kommentieren“ (nur auf Knopfdruck, einmal je Lauf gespeich
 - **Strategien** (`strategies.py`): Bollinger-Bänder (Rückkehr zum Mittelwert), MACD, Donchian-Ausbruch, Momentum. Alle liefern wie bisher 1 = long / 0 = flat, rechnen nur mit Daten bis zur aktuellen Kerze und haben ein Raster für Train/Test und Walk-Forward sowie Achsen für die Parameter-Stabilität. Parameter-Belegung im Formular: Bollinger (Periode, Faktor in Zehnteln, 20 = 2,0), MACD (fast, slow, Signal), Donchian (Einstieg, Ausstieg), Momentum (Rückblick, Schwelle in %). Beim Wechsel der Strategie setzt das Formular passende Startwerte.
 - **Robustheit** (`montecarlo.py`): Der Zufallsvergleich läuft mit 5 Seeds (p-Wert = Median, Spanne wird angezeigt). Neu sind 95-%-Konfidenzintervalle für Sharpe (Block-Bootstrap der Kerzenrenditen), Ø Trade und Trefferquote. Liegt die Untergrenze nicht über 0, gilt der Vorteil als statistisch nicht gesichert (auch im PDF und im KI-Kommentar).
 - Tests: `test_strategies.py`, `test_confidence.py`, Browser-Tests `NewStrategyBrowserTests`.
+
+## Paper-Trading
+
+Ein virtuelles Konto führt das Signal eines Laufs mit Spielgeld aus (nur mit echten Kursen und `SIGNALS_ENABLED=1`; Start im Kasten „Aktuelles Signal“). Bei jeder Prüfung wird zum letzten bekannten Schlusskurs gekauft bzw. verkauft (ganzes Konto, Gebühr + Slippage wie im Lauf), jede Order steht im Journal. Der Abgleich rechnet dieselbe Strategie ab Start als Backtest und zeigt die Abweichung (≤ 1 Prozentpunkt = passend, ≤ 3 = leicht, sonst deutlich) samt Ursachen. Geprüft wird per Knopf und vom bestehenden Zeitplan (`/signale/pruefen/` bzw. `manage.py check_signals` prüft jetzt auch die Paper-Konten). `PAPER_MAX_PER_USER` (Standard 3) begrenzt aktive Konten. Modul `paper.py`, Seiten `views_paper.py`, Tests `test_paper.py`.
+
+## KI-Erweiterungen (ohne Chat)
+
+- **Zwei Läufe erklären** (Verlaufsliste: Häkchen setzen → „Zwei Läufe erklären“): Kennzahlen-Vergleich, unterschiedliche Einstellungen, Vergleichbarkeit.
+- **Nächste Variante** (Kasten unter dem Kommentar): Nachbarpunkt mit dem besten Plateau (Mittel der Sharpe-Werte im 3×3-Fenster ohne den Spitzenwert, mindestens 5 gültige Felder) aus der Parameter-Stabilität; „übernehmen“ füllt das Formular vor.
+- **Fragen zum Ergebnis**: feste Liste (schwächster/stärkster/bestimmter Zeitraum, größter Rückgang, gegen Buy & Hold, Belastbarkeit, Kosten); Zeiträume stammen aus den Daten des Laufs. Kein Freitext.
+- **Strategie in Worten**: ein Satz (max. 280 Zeichen, nur gewöhnliche Zeichen) → Strategie und Parameter. Erst ein regelbasierter Parser, nur bei Misserfolg die KI mit festem JSON-Schema; alle Werte laufen durch Whitelists und `BacktestForm`, die Anzeige „Verstanden als …“ entsteht nur aus geprüften Werten, Modelltext wird nie angezeigt, das Formular wird nur vorbelegt.
+- Für alle Antworten gilt: erst regelbasiert aus den berechneten Zahlen, die KI formuliert nur um, jede Zahl wird geprüft, sonst gilt der Regeltext. Ohne `GROQ_API_KEY` oder bei erreichtem Tageslimit gibt es den Regeltext. Antworten werden gespeichert (`AiResult`). Module `ai_extra.py`, `nl_strategy.py`, `views_ai.py`; Tests `test_ai_extra.py`.
+- Neu geprüft im Formular: SMA fast < slow, RSI low < high.

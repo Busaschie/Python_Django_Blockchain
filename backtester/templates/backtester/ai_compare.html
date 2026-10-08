@@ -1,0 +1,30 @@
+{% extends "backtester/base.html" %}
+{% block content %}
+<div class="box" id="comparebox">
+ <h2 class="lbl">Zwei Läufe erklärt <button type="button" class="tip" data-tip="{{ ui_tips.ai_compare }}" aria-label="Erklärung: Läufe erklären">i</button></h2>
+ <p class="small"><a href="{% url 'index' %}">← zurück</a></p>
+ <table>
+  <tr><th></th><th>Lauf A</th><th>Lauf B</th></tr>
+  <tr><td>Auswertung</td><td><a href="{% url 'detail' a.pk %}">{{ a.strategy_label }} {{ a.symbol }} {{ a.timeframe }}</a></td><td><a href="{% url 'detail' b.pk %}">{{ b.strategy_label }} {{ b.symbol }} {{ b.timeframe }}</a></td></tr>
+  <tr><td>Modus · Zeitraum</td><td>{{ a.mode_label }} · {{ a.period_label }}</td><td>{{ b.mode_label }} · {{ b.period_label }}</td></tr>
+  {% for name, r in facts.kennzahlen_vergleich.items %}
+  <tr><td>{{ name }}</td><td>{{ r.lauf_a }}</td><td>{{ r.lauf_b }}</td></tr>
+  {% endfor %}
+ </table>
+ {% if not facts.direkt_vergleichbar %}<p class="err small">Chain, Zeitfenster oder Zeitraum unterscheiden sich: die Kennzahlen sind nur eingeschränkt vergleichbar.</p>{% endif %}
+ {% if res %}
+  <h3>Erklärung</h3>
+  <p>{{ res.payload.zusammenfassung }}</p>
+  {% if res.payload.unterschiede %}<ul class="aiul">{% for x in res.payload.unterschiede %}<li>{{ x }}</li>{% endfor %}</ul>{% endif %}
+  <p><strong>{{ res.payload.fazit }}</strong></p>
+  <p class="small muted">{% if res.source != "regeln" %}Formuliert mit {{ res.source|cut:"groq:" }}{% else %}Regelbasiert{% endif %}, nur aus den berechneten Zahlen beider Läufe. Keine Anlageberatung.{% if res.payload.note %} <span class="err">{{ res.payload.note }}</span>{% endif %}</p>
+ {% else %}
+  <form method="post" action="{% url 'ai_compare' %}">{% csrf_token %}
+   <input type="hidden" name="run" value="{{ a.pk }}"><input type="hidden" name="run" value="{{ b.pk }}">
+   <button type="submit">Unterschiede erklären</button>
+   <span class="small muted">Heute noch {{ ai_left }} von {{ ai_limit }} KI-Antworten; ohne KI gibt es den regelbasierten Text.</span>
+  </form>
+ {% endif %}
+</div>
+{% include "backtester/_tips.html" %}
+{% endblock %}

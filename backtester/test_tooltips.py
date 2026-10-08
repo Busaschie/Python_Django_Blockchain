@@ -31,7 +31,7 @@ class TooltipContentTests(TestCase):
         self.assertEqual(set(SIZE_TIPS), {"fixed", "vol"})
 
     def test_all_ui_tips_present(self):
-        self.assertEqual(set(UI_TIPS), {"chain", "run", "compare_chains", "compare_strategies", "montecarlo", "plausibility", "regimes", "costs", "ai", "stability", "signal", "share", "templates", "tags", "report"})
+        self.assertEqual(set(UI_TIPS), {"chain", "run", "compare_chains", "compare_strategies", "montecarlo", "plausibility", "regimes", "costs", "ai", "stability", "signal", "share", "templates", "tags", "report", "nl", "suggest", "ask", "ai_compare", "paper", "paper_reconcile", "paper_journal"})
 
 
 class TooltipRenderTests(TestCase):
@@ -81,7 +81,7 @@ class TooltipRenderTests(TestCase):
 
         c = Collect()
         c.feed(self.html)
-        self.assertEqual(len(c.tips), len(HELP) + 1 + 2)  # alle Felder + Blockchain-Auswahl + Vorlagen + Bericht
+        self.assertEqual(len(c.tips), len(HELP) + 1 + 3)  # alle Felder + Blockchain-Auswahl + Vorlagen + Bericht + Strategie in Worten
         for a in c.tips:
             self.assertTrue(a.get("data-tip") and len(a["data-tip"]) > 40, a)
             self.assertTrue(a.get("aria-label", "").startswith("Erklärung: "), a)

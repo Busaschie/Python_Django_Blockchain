@@ -185,3 +185,85 @@ class AiCall(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     model = models.CharField(max_length=60, blank=True, default="")
     ok = models.BooleanField(default=False)
+
+
+class PaperAccount(models.Model):
+    """Virtuelles Konto, das das Signal einer Strategie mit Spielgeld ausfuehrt (Paper-Trading)."""
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="paper_accounts")
+    run = models.ForeignKey("BacktestRun", null=True, blank=True, on_delete=models.SET_NULL, related_name="paper_accounts")
+    name = models.CharField(max_length=80)
+    chain = models.CharField(max_length=10)
+    symbol = models.CharField(max_length=20)
+    timeframe = models.CharField(max_length=5)
+    source = models.CharField(max_length=10)
+    exchange = models.CharField(max_length=20, blank=True, default="")
+    strategy = models.CharField(max_length=30)
+    params = models.JSONField(default=dict)
+    cost = models.FloatField(default=0.001)            # Gebuehr + Slippage je Seite
+    execution = models.CharField(max_length=10, default="close")
+    start_capital = models.FloatField(default=10_000)
+    cash = models.FloatField(default=10_000)
+    units = models.FloatField(default=0.0)
+    entry_price = models.FloatField(null=True, blank=True)
+    start_candle = models.CharField(max_length=40, blank=True, default="")   # Kerze, ab der gehandelt wird
+    last_candle = models.CharField(max_length=40, blank=True, default="")
+    last_price = models.FloatField(null=True, blank=True)
+    last_checked = models.DateTimeField(null=True, blank=True)
+    equity_log = models.JSONField(default=list)       # [[Kerze, Kontowert, Kurs], ...]
+    active = models.BooleanField(default=True)
+    error = models.CharField(max_length=200, blank=True, default="")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    @property
+    def strategy_label(self):
+        return LABELS.get(self.strategy, self.strategy)
+
+    @property
+    def position(self):
+        return 1 if self.units > 0 else 0
+
+    def equity(self, price=None):
+        price = price if price is not None else self.last_price
+        return self.cash + self.units * (price or 0.0)
+
+    @property
+    def return_pct(self):
+        return round((self.equity() / self.start_capital - 1) * 100, 2) if self.start_capital else 0.0
+
+    def __str__(self):
+        return self.name
+
+
+class PaperEntry(models.Model):
+    """Journal-Eintrag: eine virtuelle Order."""
+    account = models.ForeignKey(PaperAccount, on_delete=models.CASCADE, related_name="entries")
+    created_at = models.DateTimeField(auto_now_add=True)
+    candle = models.CharField(max_length=40)           # Signalkerze
+    side = models.CharField(max_length=4)              # buy / sell
+    price = models.FloatField()
+    units = models.FloatField()
+    cost_paid = models.FloatField(default=0.0)
+    equity_after = models.FloatField()
+    ret_pct = models.FloatField(null=True, blank=True)  # nur bei sell: Netto-Rendite des Trades
+
+    class Meta:
+        ordering = ["pk"]
+
+
+class AiResult(models.Model):
+    """Gespeicherte KI-/Regel-Antwort: Laufvergleich, naechste Variante, Frage zum Ergebnis."""
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="ai_results")
+    kind = models.CharField(max_length=10)              # compare / suggest / ask
+    run = models.ForeignKey("BacktestRun", on_delete=models.CASCADE, related_name="ai_results")
+    run2 = models.ForeignKey("BacktestRun", null=True, blank=True, on_delete=models.CASCADE, related_name="+")
+    key = models.CharField(max_length=40, blank=True, default="")
+    payload = models.JSONField(default=dict)
+    source = models.CharField(max_length=40, default="regeln")
+    created_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        constraints = [models.UniqueConstraint(fields=["owner", "kind", "run", "run2", "key"], name="uniq_ai_result")]

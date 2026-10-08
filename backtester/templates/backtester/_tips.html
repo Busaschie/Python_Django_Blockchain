@@ -1,0 +1,39 @@
+<script>
+ (function () {
+   const bubble = document.createElement("div");
+   bubble.id = "tip"; bubble.setAttribute("role", "tooltip"); document.body.appendChild(bubble);
+   let current = null;
+   function place(el) {
+     const r = el.getBoundingClientRect();
+     bubble.style.maxWidth = Math.min(320, window.innerWidth - 16) + "px";
+     bubble.style.left = "0px"; bubble.style.top = "0px";
+     const w = bubble.offsetWidth, h = bubble.offsetHeight;
+     const left = Math.max(8, Math.min(r.left + r.width / 2 - w / 2, window.innerWidth - w - 8));
+     let top = r.bottom + 8;
+     if (top + h > window.innerHeight - 8 && r.top - h - 8 > 8) top = r.top - h - 8;  // nach oben ausweichen
+     bubble.style.left = (left + window.scrollX) + "px"; bubble.style.top = (top + window.scrollY) + "px";
+   }
+   function show(el) {
+     const text = el.getAttribute("data-tip");
+     if (!text) return;
+     current = el; bubble.textContent = text; bubble.style.display = "block"; place(el);
+   }
+   function hide() { bubble.style.display = "none"; current = null; }
+   document.addEventListener("pointerover", e => {
+     if (e.pointerType !== "mouse") return;
+     const el = e.target.closest("[data-tip]");
+     if (el) show(el); else hide();
+   });
+   document.addEventListener("focusin", e => { const el = e.target.closest("[data-tip]"); if (el) show(el); });
+   document.addEventListener("focusout", hide);
+   document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+   document.addEventListener("click", e => {
+     const el = e.target.closest(".tip");
+     if (!el) { if (!e.target.closest("[data-tip]")) hide(); return; }
+     e.preventDefault();
+     if (e.pointerType === "mouse") show(el); else if (current === el) hide(); else show(el);  // Touch/Tastatur: umschalten
+   });
+   window.addEventListener("scroll", () => current && place(current), true);
+   window.addEventListener("resize", hide);
+ })();
+</script>

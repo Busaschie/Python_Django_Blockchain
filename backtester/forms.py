@@ -118,6 +118,23 @@ UI_TIPS = {
     "stability": "Rechnet die Strategie mit leicht verschobenen Parametern (Raster um deinen Wert, ohne neue Optimierung). "
                  "Liegt dein Wert auf einem Plateau guter Nachbarn, ist das Ergebnis robust; ist er eine einzelne Spitze, "
                  "spricht das für Überanpassung. Beim Train/Test-Split zählt die Testphase.",
+    "nl": "Beschreibe eine Regel in einem Satz, z. B. „SMA 10 und 40 auf Bitcoin, täglich“. Die App erkennt Strategie, Parameter, "
+          "Zeitfenster, Chain und Stops und füllt das Formular vor. Es ist kein Chat: Es kommen nur Einstellungen heraus, alle "
+          "Werte werden wie im Formular geprüft, und der Backtest startet erst, wenn du ihn startest.",
+    "suggest": "Schlägt aus der Parameter-Stabilität dieses Laufs eine Nachbarvariante mit besserem Plateau vor. Es werden keine "
+               "neuen Kurse berechnet; ob die Variante hält, zeigt erst ein neuer Lauf (am besten Walk-Forward).",
+    "ask": "Vorgegebene Fragen zum Ergebnis, z. B. warum ein Zeitraum schwach war. Die Antwort entsteht nur aus den "
+           "berechneten Zahlen dieses Laufs; jede Zahl wird geprüft. Freie Fragen gibt es bewusst nicht.",
+    "ai_compare": "Kreuze genau zwei fertige Läufe in der Liste an. Die Erklärung nennt, wo welcher Lauf besser ist und welche "
+                  "Einstellungen sich unterscheiden.",
+    "paper": "Paper-Trading: Ein virtuelles Konto führt das Signal der Strategie mit Spielgeld aus (immer das ganze Konto, "
+             "Gebühr und Slippage wie im Backtest) und schreibt jede Order ins Journal. So siehst du über die Zeit, ob "
+             "sich die Strategie live so verhält wie im Backtest. Es werden keine echten Orders erteilt.",
+    "paper_reconcile": "Dieselbe Strategie wird auf denselben Kerzen ab dem Start als normaler Backtest gerechnet und mit dem "
+                       "virtuellen Konto verglichen. Bis 1 Prozentpunkt Abweichung gilt als passend, bis 3 als leicht abweichend, "
+                       "darüber als deutlich. Ursachen stehen darunter.",
+    "paper_journal": "Jede virtuelle Order mit Signalkerze, Kurs, Menge, bezahlten Kosten, Kontowert danach und der "
+                     "Netto-Rendite des Trades beim Verkauf.",
     "signal": "Zeigt, was die Strategie mit den Parametern dieses Laufs auf den aktuellen Kursen anzeigt (long = investiert, "
               "flat = nicht investiert). Optional eine Mail bei jedem Wechsel. Stops und Positionsgröße sind darin nicht "
               "berücksichtigt. Keine Anlageberatung.",
@@ -218,6 +235,10 @@ class BacktestForm(forms.Form):
                 self.add_error("param_a", "Parameter 1 muss mindestens 2 sein.")
             if st == "bollinger" and not 1 <= b <= 50:
                 self.add_error("param_b", "Der Band-Faktor liegt zwischen 1 und 50 (Zehntel, 20 = 2,0).")
+            if st in ("sma_cross", "combo") and not a < b:
+                self.add_error("param_b", "SMA slow muss größer als SMA fast sein.")
+            if st == "rsi" and c is not None and not b < c:
+                self.add_error("param_c", "RSI high (Verkaufsschwelle) muss über RSI low (Kaufschwelle) liegen.")
             if st == "macd" and not a < b:
                 self.add_error("param_b", "MACD slow muss größer als fast sein.")
             if st == "macd" and c is not None and c < 1:
