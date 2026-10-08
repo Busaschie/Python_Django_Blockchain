@@ -1,3 +1,4 @@
+import secrets
 import uuid
 from collections import Counter
 from datetime import timedelta
@@ -6,6 +7,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_not_required
 from django.http import Http404, HttpResponse, JsonResponse
+from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 from django.shortcuts import get_object_or_404, redirect, render
@@ -14,17 +16,56 @@ from django.utils import timezone
 from . import ai, export, jobs, signals
 from .chains import CHAINS
 from .forms import PARAM_TIPS, SIZE_TIPS, UI_TIPS, BacktestForm
-from .models import BacktestRun, ExchangeBlock
+from .models import BacktestRun, ExchangeBlock, RunTemplate
 from .strategies import STRATEGIES, default_inputs, params_from_inputs
 
 STALE_AFTER = timedelta(minutes=15)
 
 
-def _history(user):
-    """Gelaufene Auswertungen, gegliedert nach Chain."""
-    return [{"key": k, "name": m["name"], "symbol": m["symbol"],
-             "total": BacktestRun.objects.filter(owner=user, chain=k).count(),
-             "runs": BacktestRun.objects.filter(owner=user, chain=k)[:20]} for k, m in CHAINS.items()]
+def _history(user, tag="", fav=False):
+    """Gelaufene Auswertungen, gegliedert nach Chain; optional nur mit Tag und/oder nur Favoriten."""
+    def qs(chain):
+        q = BacktestRun.objects.filter(owner=user, chain=chain)
+        if tag:
+            q = q.filter(tags__icontains=f"|{tag}|")
+        return q.filter(favorite=True) if fav else q
+    return [{"key": k, "name": m["name"], "symbol": m["symbol"], "total": qs(k).count(), "runs": qs(k)[:20]}
+            for k, m in CHAINS.items()]
+
+
+def _all_tags(user) -> list:
+    found = set()
+    for t in BacktestRun.objects.filter(owner=user).exclude(tags="").values_list("tags", flat=True):
+        found.update(x for x in t.split("|") if x)
+    return sorted(found, key=str.lower)
+
+
+MAX_TAGS, MAX_TAG_LEN, MAX_TEMPLATES, MAX_REPORT_RUNS = 5, 24, 20, export.MAX_REPORT_RUNS
+
+
+def parse_tags(text: str) -> str:
+    """"BTC, test ,Test" -> "|BTC|test|": kurze Stichworte, ohne Dopplungen (Gross-/Kleinschreibung egal), hoechstens 5."""
+    seen, out = set(), []
+    for raw in (text or "").replace("|", ",").split(","):
+        tag = " ".join(raw.split())[:MAX_TAG_LEN]
+        if tag and tag.lower() not in seen:
+            seen.add(tag.lower())
+            out.append(tag)
+    return "|" + "|".join(out[:MAX_TAGS]) + "|" if out else ""
+
+
+def _template_job(d: dict) -> dict:
+    """Formularwerte als Vorlage: Zeitraum als Laenge in Tagen, nur JSON-faehige Werte."""
+    job = {k: v for k, v in d.items() if k not in ("start_date", "end_date") and v is not None}
+    job["period_days"] = (d["end_date"] - d["start_date"]).days + 1
+    return job
+
+
+def _template_initial(t: RunTemplate) -> dict:
+    j = dict(t.job)
+    days = max(1, int(j.pop("period_days", 365)))
+    today = timezone.localdate()
+    return {**j, "start_date": today - timedelta(days=days - 1), "end_date": today}
 
 
 def _expire_stale():
@@ -97,6 +138,17 @@ def _job_for_strategy(d: dict, strategy: str) -> dict:
     return job
 
 
+def _exit_reasons(run):
+    if not (run and run.status == "done"):
+        return []
+    counts = Counter(t.get("reason", "Signal") for t in run.curves.get("trades", []))
+    return [(r, counts[r]) for r in ("Signal", "Stop-Loss", "Trailing-Stop", "Take-Profit", "offen") if counts.get(r)]
+
+
+def json_clean(job: dict) -> dict:
+    return jobs.json_safe(job)
+
+
 def dashboard(request, pk=None, batch=None):
     _expire_stale()
     run = get_object_or_404(BacktestRun, pk=pk, owner=request.user) if pk else None
@@ -111,7 +163,19 @@ def dashboard(request, pk=None, batch=None):
 
     if request.method == "POST":
         form = BacktestForm(request.POST)
-        if form.is_valid():
+        if form.is_valid() and "save_template" in request.POST:
+            name = " ".join(request.POST.get("template_name", "").split())[:60]
+            if not name:
+                messages.error(request, "Bitte einen Namen für die Vorlage eingeben.")
+            elif (not RunTemplate.objects.filter(owner=request.user, name=name).exists()
+                  and RunTemplate.objects.filter(owner=request.user).count() >= MAX_TEMPLATES):
+                messages.error(request, f"Höchstens {MAX_TEMPLATES} Vorlagen. Lösche zuerst eine andere.")
+            else:
+                tpl, created = RunTemplate.objects.update_or_create(
+                    owner=request.user, name=name, defaults={"job": json_clean(_template_job(form.cleaned_data))})
+                messages.success(request, f"Vorlage „{name}“ {'gespeichert' if created else 'aktualisiert'}.")
+                return redirect(f"{reverse('index')}?vorlage={tpl.pk}")
+        elif form.is_valid():
             d = form.cleaned_data
             by_chain = "compare" in request.POST               # gleiche Einstellungen auf allen drei Chains
             by_strategy = "compare_strategies" in request.POST  # gleiche Einstellungen mit allen Strategien
@@ -138,18 +202,24 @@ def dashboard(request, pk=None, batch=None):
             return redirect("compare", batch=bid) if compare else redirect("detail", pk=created[0].pk)
     else:
         first = run or (batch_runs[0] if batch_runs else None)
-        form = BacktestForm(initial=_initial(first) if first else None)
+        if first:
+            initial = _initial(first)
+        elif request.GET.get("vorlage", "").isdigit():
+            initial = _template_initial(get_object_or_404(RunTemplate, pk=int(request.GET["vorlage"]), owner=request.user))
+        else:
+            initial = None
+        form = BacktestForm(initial=initial)
 
-    exit_reasons = []
-    if run and run.status == "done":
-        counts = Counter(t.get("reason", "Signal") for t in run.curves.get("trades", []))
-        exit_reasons = [(r, counts[r]) for r in ("Signal", "Stop-Loss", "Trailing-Stop", "Take-Profit", "offen")
-                        if counts.get(r)]
+    exit_reasons = _exit_reasons(run)
+    tag_filter, fav_filter = request.GET.get("tag", "").strip()[:MAX_TAG_LEN], request.GET.get("fav") == "1"
     shown = [run] if run else (batch_runs or [])
     compare_kind = _compare_kind(batch_runs) if batch_runs else ""
     compare_data = _compare_payload(batch_runs, compare_kind) if batch_runs else {}
     return render(request, "backtester/dashboard.html", {
-        "form": form, "run": run, "groups": _history(request.user),
+        "form": form, "run": run, "groups": _history(request.user, tag_filter, fav_filter),
+        "all_tags": _all_tags(request.user), "tag_filter": tag_filter, "fav_filter": fav_filter,
+        "templates": RunTemplate.objects.filter(owner=request.user), "template_max": MAX_TEMPLATES,
+        "share_url": request.build_absolute_uri(reverse("shared", args=[run.share_token])) if run and run.share_token else "",
         "blocks": ExchangeBlock.objects.filter(until__gt=timezone.now()),
         "run_done": bool(run and run.status == "done"), "exit_reasons": exit_reasons,
         "batch_runs": batch_runs, "compare_data": compare_data, "compare_kind": compare_kind,
@@ -227,9 +297,9 @@ def signal_refresh(request, pk):
     try:
         st = signals.refresh(run)
         if not st.get("ok", True):
-            messages.error(request, "Aktuelles Signal nicht berechenbar: " + st["reason"])
+            messages.error(request, "Aktuelles Signal nicht berechenbar: " + st["reason"], extra_tags="signal")
     except Exception as exc:  # noqa: BLE001  (Börse nicht erreichbar, Sperre, ...)
-        messages.error(request, "Aktuelles Signal nicht berechenbar: " + str(exc)[:200])
+        messages.error(request, "Aktuelles Signal nicht berechenbar: " + str(exc)[:200], extra_tags="signal")
     return redirect("detail", pk=run.pk)
 
 
@@ -239,23 +309,23 @@ def signal_toggle(request, pk):
     run = _done_run(request, pk)
     if run.signal_alert:
         run.signal_alert = False
-        messages.success(request, "Signal-Mail ausgeschaltet.")
+        messages.success(request, "Signal-Mail ausgeschaltet.", extra_tags="signal")
     elif not request.user.email:
-        messages.error(request, "Für diesen Benutzer ist keine E-Mail-Adresse hinterlegt.")
+        messages.error(request, "Für diesen Benutzer ist keine E-Mail-Adresse hinterlegt.", extra_tags="signal")
     elif run.source == "synthetic":
-        messages.error(request, "Bei synthetischen Daten gibt es kein aktuelles Signal.")
+        messages.error(request, "Bei synthetischen Daten gibt es kein aktuelles Signal.", extra_tags="signal")
     elif BacktestRun.objects.filter(owner=request.user, signal_alert=True).count() >= settings.SIGNAL_MAX_PER_USER:
-        messages.error(request, f"Höchstens {settings.SIGNAL_MAX_PER_USER} Läufe mit Signal-Mail gleichzeitig.")
+        messages.error(request, f"Höchstens {settings.SIGNAL_MAX_PER_USER} Läufe mit Signal-Mail gleichzeitig.", extra_tags="signal")
     else:
         try:
             run.signal_state = signals.current(run)   # Ausgangszustand: erst ein WECHSEL löst eine Mail aus
             if not run.signal_state.get("ok"):
                 raise ValueError(run.signal_state.get("reason", "nicht berechenbar"))
             run.signal_alert = True
-            messages.success(request, "Signal-Mail eingeschaltet: Du bekommst eine Mail, sobald sich das Signal ändert.")
+            messages.success(request, "Signal-Mail eingeschaltet: Du bekommst eine Mail, sobald sich das Signal ändert.", extra_tags="signal")
         except Exception as exc:  # noqa: BLE001
             run.signal_state = {}
-            messages.error(request, "Konnte nicht eingeschaltet werden: " + str(exc)[:200])
+            messages.error(request, "Konnte nicht eingeschaltet werden: " + str(exc)[:200], extra_tags="signal")
     run.save(update_fields=["signal_alert", "signal_state"])
     return redirect("detail", pk=run.pk)
 
@@ -271,3 +341,104 @@ def signal_check(request):
     if not hmac.compare_digest(given.encode(), token.encode()):
         return JsonResponse({"error": "unauthorized"}, status=403)
     return JsonResponse(signals.check_all(f"{request.scheme}://{request.get_host()}"))
+
+
+# --------------------------------------------------------------------------------------
+# Teilen, Bericht, Favoriten, Tags, Vorlagen
+# --------------------------------------------------------------------------------------
+def _back(request, pk=None):
+    """Zurueck zur Seite, von der die Aktion kam (nur eigene Adressen), sonst zum Lauf bzw. zur Startseite."""
+    nxt = request.POST.get("next", "")
+    if nxt and url_has_allowed_host_and_scheme(nxt, request.get_host()):
+        return redirect(nxt)
+    return redirect("detail", pk=pk) if pk else redirect("index")
+
+
+@require_POST
+def share_toggle(request, pk):
+    run = _done_run(request, pk)
+    action = request.POST.get("action")
+    if action == "off":
+        run.share_token = ""
+        messages.success(request, "Freigabe beendet: Der Link funktioniert nicht mehr.")
+    elif action == "renew" or (action == "on" and not run.share_token):
+        run.share_token = secrets.token_urlsafe(18)
+        messages.success(request, "Öffentlicher Link erzeugt." if action == "on" else "Neuer Link erzeugt, der alte funktioniert nicht mehr.")
+    run.save(update_fields=["share_token"])
+    return redirect("detail", pk=run.pk)
+
+
+def _shared_run(token):
+    if len(token) < 20:
+        raise Http404
+    return get_object_or_404(BacktestRun, share_token=token, status="done")
+
+
+def _public(resp):
+    resp["X-Robots-Tag"] = "noindex, nofollow, noarchive"
+    resp["Referrer-Policy"] = "no-referrer"
+    resp["Cache-Control"] = "private, max-age=0, no-cache"
+    return resp
+
+
+@login_not_required
+def shared(request, token):
+    """Nur-Lesen-Ansicht einer freigegebenen Auswertung (ohne Anmeldung, ohne Namen und E-Mail des Besitzers)."""
+    run = _shared_run(token)
+    return _public(render(request, "backtester/dashboard.html", {
+        "shared": True, "run": run, "run_done": True, "exit_reasons": _exit_reasons(run), "pending_ids": "",
+        "tip_data": {"params": PARAM_TIPS, "size": SIZE_TIPS}, "ui_tips": UI_TIPS, "signals_enabled": False,
+        "groups": [], "blocks": [], "batch_runs": None, "form": None, "chains": []}))
+
+
+@login_not_required
+def shared_trades(request, token):
+    run = _shared_run(token)
+    return _public(_download(export.trades_csv(run), "text/csv; charset=utf-8", "trades_" + _fname(run, "csv")))
+
+
+@login_not_required
+def shared_pdf(request, token):
+    run = _shared_run(token)
+    return _public(_download(export.summary_pdf(run), "application/pdf", "auswertung_" + _fname(run, "pdf")))
+
+
+def export_report(request):
+    """PDF-Bericht aus mehreren eigenen, fertigen Laeufen (?run=1&run=2 oder ?batch=<Vergleich>)."""
+    done = BacktestRun.objects.filter(owner=request.user, status="done")
+    batch = request.GET.get("batch", "")
+    if batch:
+        found = list(done.filter(batch=batch))
+        order, names = list(CHAINS), list(STRATEGIES)
+        runs = sorted(found, key=lambda r: (order.index(r.chain), names.index(r.strategy)))
+    else:
+        ids = list(dict.fromkeys(int(x) for x in request.GET.getlist("run") if x.isdigit()))[:MAX_REPORT_RUNS]
+        by_pk = {r.pk: r for r in done.filter(pk__in=ids)}
+        runs = [by_pk[i] for i in ids if i in by_pk]
+    if not runs:
+        messages.error(request, "Bitte links in der Liste mindestens einen fertigen Lauf ankreuzen.")
+        return redirect("index")
+    return _download(export.report_pdf(runs), "application/pdf", f"bericht_{len(runs)}_laeufe.pdf")
+
+
+@require_POST
+def favorite_toggle(request, pk):
+    run = get_object_or_404(BacktestRun, pk=pk, owner=request.user)
+    run.favorite = not run.favorite
+    run.save(update_fields=["favorite"])
+    return _back(request, pk)
+
+
+@require_POST
+def tags_set(request, pk):
+    run = get_object_or_404(BacktestRun, pk=pk, owner=request.user)
+    run.tags = parse_tags(request.POST.get("tags", ""))
+    run.save(update_fields=["tags"])
+    return _back(request, pk)
+
+
+@require_POST
+def template_delete(request, pk):
+    get_object_or_404(RunTemplate, pk=pk, owner=request.user).delete()
+    messages.success(request, "Vorlage gelöscht.")
+    return redirect("index")

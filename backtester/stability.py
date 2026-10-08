@@ -7,7 +7,7 @@ ueberall die Testphase; bei Walk-Forward wechseln die Parameter je Fold, dort is
 from statistics import median
 
 from .fmt import de
-from .sensitivity import _metrics_at
+from .sensitivity import metrics_many
 
 FACTORS = (0.6, 0.8, 1.0, 1.25, 1.5)
 
@@ -40,17 +40,12 @@ def analyze(df, func, params, strategy, kind, validation, fee, ppy, execution, r
         return {"ok": False, "reason": "für diese Strategie nicht vorgesehen"}
     xn, xs, yn, ys, build = ax
     cx, cy = int(params[xn]), int(params[yn])
-    ret, shp = [], []
-    for y in ys:
-        rr, ss = [], []
-        for x in xs:
-            p = build(x, y)
-            if p is None:
-                rr.append(None); ss.append(None)
-                continue
-            m = _metrics_at(df, func, p, kind, validation, fee, ppy, execution, risk)
-            rr.append(m["total_return_pct"]); ss.append(m["sharpe"])
-        ret.append(rr); shp.append(ss)
+    cells = [(j, i, build(x, y)) for j, y in enumerate(ys) for i, x in enumerate(xs)]
+    valid = [c for c in cells if c[2] is not None]
+    ms = metrics_many(df, func, [c[2] for c in valid], kind, validation, fee, ppy, execution, risk)
+    got = {(j, i): m for (j, i, _), m in zip(valid, ms)}
+    ret = [[got[(j, i)]["total_return_pct"] if (j, i) in got else None for i in range(len(xs))] for j in range(len(ys))]
+    shp = [[got[(j, i)]["sharpe"] if (j, i) in got else None for i in range(len(xs))] for j in range(len(ys))]
     if cx not in xs or cy not in ys or ret[ys.index(cy)][xs.index(cx)] is None:
         return {"ok": False, "reason": "gewählter Parameterpunkt liegt nicht im Raster"}
     ix, iy = xs.index(cx), ys.index(cy)

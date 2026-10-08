@@ -39,9 +39,18 @@ class BacktestRun(models.Model):
     # Aktuelles Signal: letzter Stand (position 1/0, seit, Kurs, geprueft) und Wunsch nach Mail bei Wechsel
     signal_alert = models.BooleanField(default=False)
     signal_state = models.JSONField(default=dict, blank=True)
+    # Teilen: leer = nicht geteilt; sonst ist die Auswertung ueber /geteilt/<Token>/ ohne Anmeldung lesbar
+    share_token = models.CharField(max_length=40, blank=True, default="", db_index=True)
+    # Ordnung: Favorit und Tags (als "|a|b|" gespeichert, damit sich per Textsuche exakt filtern laesst)
+    favorite = models.BooleanField(default=False)
+    tags = models.CharField(max_length=200, blank=True, default="")
 
     class Meta:
         ordering = ["-created_at"]
+
+    @property
+    def tag_list(self):
+        return [t for t in self.tags.split("|") if t]
 
     @property
     def strategy_label(self):
@@ -102,6 +111,28 @@ class BacktestRun(models.Model):
 
     def __str__(self):
         return f"{self.strategy_label} {self.symbol} {self.timeframe}"
+
+
+class RunTemplate(models.Model):
+    """Gespeicherte Lieblingskonfiguration: alle Formularwerte, der Zeitraum als Laenge in Tagen (bis heute)."""
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="run_templates")
+    name = models.CharField(max_length=60)
+    job = models.JSONField(default=dict)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["name"]
+        constraints = [models.UniqueConstraint(fields=["owner", "name"], name="uniq_template_name_per_owner")]
+
+    @property
+    def summary(self):
+        from .strategies import LABELS
+        j = self.job or {}
+        return " · ".join(str(x) for x in (LABELS.get(j.get("strategy"), j.get("strategy")), j.get("timeframe"),
+                                           {"single": "Einzellauf", "split": "Train/Test", "walkforward": "Walk-Forward"}.get(j.get("mode"))) if x)
+
+    def __str__(self):
+        return self.name
 
 
 class Candle(models.Model):

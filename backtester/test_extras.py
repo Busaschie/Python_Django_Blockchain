@@ -9,7 +9,7 @@ from django.core import mail
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
-from . import export, jobs, signals, stability
+from . import export, jobs, perf, signals, stability
 from .engine import Risk
 from .models import BacktestRun
 from .strategies import STRATEGIES, default_inputs
@@ -24,6 +24,7 @@ def computed_run(mode="single", strat="sma_cross", owner=None, **extra):
     run.created_at = datetime(2026, 1, 1)
     run.job = {**dict(chain="btc", timeframe="1d", execution="open", fee=0.001, slippage=0.0005, source="ccxt", mode=mode,
                       strategy=strat, days=900, train_frac=70, wf_folds=5, wf_train_mult=3), **default_inputs(strat), **extra}
+    perf.clear_all()   # der Kurs-Cache kennt die Test-Attrappe nicht: nie Daten eines anderen Tests wiederverwenden
     with mock.patch.object(jobs, "fetch_ohlcv", return_value=(df, {"symbol": "BTC/USDT", "note": ""})):
         jobs.compute(run)
     run.execution, run.source = "open", "ccxt"

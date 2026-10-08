@@ -1,6 +1,10 @@
 {% extends "backtester/base.html" %}
 {% block content %}
-
+{% for m in messages %}{% if "signal" not in m.extra_tags %}<p class="box small {% if m.tags == 'error' %}err{% else %}good{% endif %}" role="status">{{ m }}</p>{% endif %}{% endfor %}
+{% if shared %}
+<div class="box" id="sharedbanner"><strong>Geteilte Auswertung (nur Lesen).</strong>
+ <span class="small">Diese Seite wurde von einem Nutzer des Trading Backtesters freigegeben. Einstellungen, Kennzahlen und Diagramme sind sichtbar, persönliche Daten nicht. Ein Backtest bildet nur die Vergangenheit ab und ist keine Anlageberatung.</span></div>
+{% else %}
 <nav class="chains" aria-label="Blockchain wählen">
  {% for c in chains %}
   <input type="radio" id="chain-{{ c.key }}" name="chain" value="{{ c.key }}" form="bt-form"
@@ -10,11 +14,13 @@
  <button type="button" class="tip" data-tip="{{ ui_tips.chain }}" aria-label="Erklärung: Blockchain">i</button>
 </nav>
 {{ form.chain.errors }}
+{% endif %}
 
-<div class="cols">
+<div class="cols{% if shared %} shared{% endif %}">
 
  <!-- Spalte 1: Einstellungen + Kennzahlen -->
  <section>
+  {% if not shared %}
   <div class="box">
    <h2>Einstellungen</h2>
    {% for b in blocks %}
@@ -36,10 +42,39 @@
    </form>
   </div>
 
+  <div class="box" id="tplbox">
+   <h3 class="lbl">Vorlagen <button type="button" class="tip" data-tip="{{ ui_tips.templates }}" aria-label="Erklärung: Vorlagen">i</button></h3>
+   {% if templates %}
+   <ul class="tpl">{% for t in templates %}
+    <li><a href="{% url 'index' %}?vorlage={{ t.pk }}">{{ t.name }}</a> <span class="small muted">{{ t.summary }}</span>
+     <form method="post" action="{% url 'template_delete' t.pk %}" onsubmit="return confirm('Diese Vorlage wirklich löschen?')">{% csrf_token %}
+      <button type="submit" class="del" title="Vorlage löschen" aria-label="Vorlage {{ t.name }} löschen">×</button></form></li>
+   {% endfor %}</ul>
+   {% else %}<p class="small muted">Noch keine Vorlagen. Stelle oben eine Konfiguration ein und speichere sie hier.</p>{% endif %}
+   <div class="tplsave">
+    <input type="text" id="template_name" name="template_name" form="bt-form" maxlength="60" placeholder="Name der Vorlage" aria-label="Name der Vorlage">
+    <button type="submit" name="save_template" value="1" form="bt-form" class="secondary" id="save_template">Einstellungen speichern</button>
+   </div>
+   <p class="small muted">Gespeichert werden alle Werte des Formulars; der Zeitraum als Länge in Tagen (bis heute). Gleicher Name überschreibt, höchstens {{ template_max }} Vorlagen.</p>
+  </div>
+  {% endif %}
+
   {% if run_done %}
   <div class="box">
    <h2>{{ run.get_chain_display }} · {{ run.strategy_label }} · {{ run.timeframe }}</h2>
+   {% if shared %}
+   <p class="small" style="margin:.2rem 0 .5rem">Export: <a href="{% url 'shared_trades' run.share_token %}">Trades (CSV)</a> · <a href="{% url 'shared_pdf' run.share_token %}">Zusammenfassung (PDF)</a></p>
+   {% else %}
    <p class="small" style="margin:.2rem 0 .5rem">Export: <a href="{% url 'export_trades' run.pk %}">Trades (CSV)</a> · <a href="{% url 'export_pdf' run.pk %}">Zusammenfassung (PDF)</a></p>
+   <div class="runmeta">
+    <form method="post" action="{% url 'favorite_toggle' run.pk %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
+     <button type="submit" class="star{% if run.favorite %} on{% endif %}" aria-pressed="{% if run.favorite %}true{% else %}false{% endif %}" title="{% if run.favorite %}Favorit entfernen{% else %}Als Favorit markieren{% endif %}">{% if run.favorite %}★{% else %}☆{% endif %}</button></form>
+    <form method="post" action="{% url 'tags_set' run.pk %}" class="tagform">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
+     <input type="text" name="tags" value="{{ run.tag_list|join:', ' }}" maxlength="120" placeholder="Tags, mit Komma getrennt" aria-label="Tags">
+     <button type="submit" class="secondary">Tags speichern</button>
+     <button type="button" class="tip" data-tip="{{ ui_tips.tags }}" aria-label="Erklärung: Tags und Favoriten">i</button></form>
+   </div>
+   {% endif %}
    <p class="small">{{ run.mode_label }} · {{ run.period_label }} · {% if run.source == "ccxt" %}Börse {{ run.exchange_label }} ({{ run.symbol }}) · {% endif %}Gebühr {{ run.fee }} · Slippage {{ run.slippage }} · Ausführung: {{ run.execution_label }} · Quelle: {{ run.source }}<br>
     Parameter{% if run.validation.kind %} (zuletzt gewählt){% endif %}: {{ run.params }}
     {% if run.risk_label %}<br>Risiko: {{ run.risk_label }}{% endif %}
@@ -107,6 +142,23 @@
    <p class="small">Stark schwankende Parameter über die Folds deuten auf eine instabile Strategie hin.</p>
   </div>
   {% endif %}
+
+  {% if not shared %}
+  <div class="box" id="sharebox">
+   <h3 class="lbl">Teilen <button type="button" class="tip" data-tip="{{ ui_tips.share }}" aria-label="Erklärung: Teilen">i</button></h3>
+   {% if run.share_token %}
+   <p class="small">Jeder mit diesem Link kann die Auswertung lesen, ohne Anmeldung:</p>
+   <input type="text" id="shareurl" class="shareurl" readonly value="{{ share_url }}" aria-label="Öffentlicher Link" onfocus="this.select()">
+   <button type="button" class="secondary" id="sharecopy">Link kopieren</button>
+   <form method="post" action="{% url 'share_toggle' run.pk %}" style="display:inline">{% csrf_token %}
+    <button type="submit" name="action" value="off" class="secondary">Freigabe beenden</button>
+    <button type="submit" name="action" value="renew" class="secondary" title="Der alte Link funktioniert danach nicht mehr">Neuen Link erzeugen</button></form>
+   {% else %}
+   <p class="small muted">Nicht geteilt. Mit einem Link kann jemand die Auswertung nur ansehen (Kennzahlen, Diagramme, Trades, PDF). Dein Name und deine E-Mail sind nicht sichtbar, die Freigabe lässt sich jederzeit beenden.</p>
+   <form method="post" action="{% url 'share_toggle' run.pk %}">{% csrf_token %}<button type="submit" name="action" value="on">Öffentlichen Link erzeugen</button></form>
+   {% endif %}
+  </div>
+  {% endif %}
   {% endif %}
 
   {% if run and not run_done %}
@@ -137,6 +189,7 @@
     {% if batch_runs.0.source == "ccxt" %} · Börse {{ batch_runs.0.exchange_label }}{% endif %}<br>
     Kennzahlen: Gesamtzeitraum bzw. Testphase / Out-of-Sample, je nach Modus.</p>
    {% endif %}
+   <p class="small"><a href="{% url 'export_report' %}?batch={{ batch_runs.0.batch }}">Bericht aller Läufe (PDF)</a></p>
    <div class="scroll"><table>
     <tr><th>{% if compare_kind == "strategy" %}Strategie{% else %}Chain{% endif %}</th><th>Rendite %</th><th>B&amp;H %</th><th>Max DD %</th><th>Sharpe</th><th>Trades</th><th>CAGR %</th><th>Zeit im Markt %</th></tr>
     {% for r in batch_runs %}
@@ -160,6 +213,7 @@
  <!-- Spalte 2: Charts + Trades -->
  <section>
   {% if run_done %}
+  {% if not shared or run.ai_comment.zusammenfassung %}
   <div class="box" id="aibox">
    <h3 class="lbl">Kommentar zur Auswertung <button type="button" class="tip" data-tip="{{ ui_tips.ai }}" aria-label="Erklärung: Kommentar">i</button></h3>
    {% with ac=run.ai_comment %}{% if ac.zusammenfassung %}
@@ -169,13 +223,14 @@
    {% if ac.naechste_schritte %}<h4>Nächste Schritte zum Testen</h4><ul class="aiul">{% for x in ac.naechste_schritte %}<li>{{ x }}</li>{% endfor %}</ul>{% endif %}
    <p class="small muted">{% if run.ai_source != "regeln" %}Erstellt mit {{ run.ai_source|cut:"groq:" }}{% else %}Regelbasiert erstellt{% endif %} · automatische Auswertungshilfe, keine Anlageberatung. Alle Aussagen beziehen sich auf vergangene Daten.{% if ac.note %} <span class="err">{{ ac.note }}</span>{% endif %}</p>
    {% endif %}{% endwith %}
-   {% if not run.ai_comment.zusammenfassung or run.ai_source == "regeln" %}
+   {% if not shared and not run.ai_comment.zusammenfassung or not shared and run.ai_source == "regeln" %}
    <form method="post" action="{% url 'ai_comment' run.pk %}">{% csrf_token %}
     <button type="submit" {% if ai_left <= 0 and run.ai_source == "regeln" %}disabled{% endif %}>{% if run.ai_source == "regeln" %}Mit KI neu erstellen{% else %}Auswertung kommentieren{% endif %}</button>
     <span class="small muted">Heute noch {{ ai_left }} von {{ ai_limit }} KI-Kommentaren.</span>
    </form>
    {% endif %}
   </div>
+  {% endif %}
   {% with pl=run.curves.plaus %}{% if pl %}
   <div class="box plaus" id="plausbox">
    <h3><span class="dot lv-{{ pl.level }}"></span>Plausibilität: {% if pl.level == "ok" %}in Ordnung{% elif pl.level == "warn" %}mit Hinweisen{% else %}Probleme{% endif %}
@@ -302,28 +357,45 @@
  </section>
 
  <!-- Spalte 3: gelaufene Auswertungen je Chain -->
+ {% if not shared %}
  <aside class="box hist">
   <h2>Gelaufene Auswertungen</h2>
+  <form method="get" action="{{ request.path }}" class="histfilter">
+   <select name="tag" aria-label="Nach Tag filtern"><option value="">Alle Tags</option>{% for t in all_tags %}<option value="{{ t }}" {% if t == tag_filter %}selected{% endif %}>{{ t }}</option>{% endfor %}</select>
+   <label><input type="checkbox" name="fav" value="1" {% if fav_filter %}checked{% endif %}> nur ★</label>
+   <button type="submit" class="secondary">Filtern</button>
+   {% if tag_filter or fav_filter %}<a class="small" href="{{ request.path }}">zurücksetzen</a>{% endif %}
+  </form>
+  <form method="get" action="{% url 'export_report' %}" id="reportform" class="histfilter">
+   <button type="submit" class="secondary">Bericht aus Auswahl (PDF)</button>
+   <button type="button" class="tip" data-tip="{{ ui_tips.report }}" aria-label="Erklärung: Bericht">i</button>
+  </form>
   {% for g in groups %}
   <div class="grp">
    <h4>{{ g.name }} <small>{{ g.symbol }} · {{ g.total }} Läufe</small></h4>
    <ul>
     {% for r in g.runs %}
     <li {% if r.pk == run.pk or r.batch and r.batch == batch_runs.0.batch %}class="cur"{% endif %}>
+     {% if r.status == "done" %}<input type="checkbox" class="rsel" name="run" value="{{ r.pk }}" form="reportform" aria-label="Für Bericht auswählen">{% endif %}
      <form method="post" action="{% url 'delete' r.pk %}" class="delform" onsubmit="return confirm('Diese Auswertung wirklich löschen?')">{% csrf_token %}
       <input type="hidden" name="next" value="{{ request.path }}">
       <button type="submit" class="del" title="Auswertung löschen" aria-label="Auswertung löschen">×</button></form>
+     <form method="post" action="{% url 'favorite_toggle' r.pk %}" class="starform">{% csrf_token %}
+      <input type="hidden" name="next" value="{{ request.get_full_path }}">
+      <button type="submit" class="star{% if r.favorite %} on{% endif %}" aria-pressed="{% if r.favorite %}true{% else %}false{% endif %}" title="{% if r.favorite %}Favorit entfernen{% else %}Als Favorit markieren{% endif %}">{% if r.favorite %}★{% else %}☆{% endif %}</button></form>
      <a href="{% url 'detail' r.pk %}">{{ r.strategy_label }} · {{ r.timeframe }} · {{ r.mode_label }}</a>
+     {% if r.tag_list %}<span class="tags">{% for t in r.tag_list %}<a class="tag" href="{{ request.path }}?tag={{ t|urlencode }}">{{ t }}</a>{% endfor %}</span>{% endif %}
      {% if r.status == "done" %}<span class="small">{{ r.created_at|date:"d.m. H:i" }} · {{ r.source_label }} · {{ r.metrics.total_return_pct }} % (B&amp;H {{ r.metrics.buyhold_return_pct }} %)</span>
      {% elif r.status == "error" %}<span class="small err">{{ r.created_at|date:"d.m. H:i" }} · {{ r.source_label }} · ⚠ Fehler</span>
      {% else %}<span class="small">{{ r.created_at|date:"d.m. H:i" }} · {{ r.source_label }} · ⏳ {{ r.status_label }} …</span>{% endif %}
      {% if r.batch %}<a class="small" href="{% url 'compare' r.batch %}">Vergleich ansehen</a>{% endif %}
     </li>
-    {% empty %}<li class="muted small">Noch keine Läufe.</li>{% endfor %}
+    {% empty %}<li class="muted small">{% if tag_filter or fav_filter %}Keine Treffer.{% else %}Noch keine Läufe.{% endif %}</li>{% endfor %}
    </ul>
   </div>
   {% endfor %}
  </aside>
+ {% endif %}
 </div>
 
 <!-- Legende -->
@@ -424,6 +496,10 @@
   <h3>Läufe und Vergleich</h3>
   <dl>
    <div class="term"><dt>Hintergrund-Berechnung, Status</dt><dd>Jeder Backtest läuft im Hintergrund, die Seite bleibt bedienbar und aktualisiert sich selbst. Status: wartet (in der Warteschlange), läuft, fertig oder Fehler (mit Begründung, z. B. Börse nicht erreichbar).</dd></div>
+   <div class="term"><dt>Teilen (öffentlicher Link)</dt><dd>Zu jeder fertigen Auswertung lässt sich ein Link erzeugen, den jeder ohne Anmeldung nur lesen kann (Kennzahlen, Diagramme, Trades, PDF). Name und E-Mail sind nicht sichtbar. „Freigabe beenden“ macht den Link ungültig, „Neuen Link erzeugen“ ersetzt ihn.</dd></div>
+   <div class="term"><dt>PDF-Bericht aus mehreren Läufen</dt><dd>Läufe in der Liste rechts ankreuzen (höchstens 8) oder auf der Vergleichsseite „Bericht aller Läufe“ wählen: Übersichtstabelle, gemeinsames Diagramm (Start = 100) und danach je Lauf die Einzelauswertung.</dd></div>
+   <div class="term"><dt>Vorlagen</dt><dd>Speichert alle Werte des Formulars unter einem Namen, damit sich eine Lieblingskonfiguration mit einem Klick wieder laden lässt. Der Zeitraum wird als Länge in Tagen gespeichert und bei jedem Laden bis heute gerechnet.</dd></div>
+   <div class="term"><dt>Favoriten und Tags</dt><dd>Mit dem Stern markierst du wichtige Läufe, mit Tags (z. B. „btc“, „konservativ“) ordnest du sie. Die Liste rechts lässt sich nach Tag und nach Favoriten filtern.</dd></div>
    <div class="term"><dt>Chain-Vergleich</dt><dd>Startet dieselben Einstellungen auf Bitcoin, Solana und Ethereum. Die Tabelle zeigt die Kennzahlen nebeneinander, der Chart die Equity-Kurven.</dd></div>
    <div class="term"><dt>Normiert (Start = 100)</dt><dd>Alle Kurven werden auf den Startwert 100 umgerechnet, damit Chains mit sehr unterschiedlichen Kursniveaus vergleichbar sind. Eine Linie bei 120 heißt +20 % seit Beginn.</dd></div>
    <div class="term"><dt>Strategie-Vergleich</dt><dd>Startet SMA-Crossover, RSI und Kombiniert mit denselben Einstellungen (Chain, Zeitraum, Kosten, Risiko, Ausführung) und zeigt Kennzahlen und Equity-Kurven gemeinsam, dazu einmal Buy &amp; Hold. Im Einzellauf gelten die Standardparameter jeder Strategie. Bei Train/Test-Split und Walk-Forward wählt die Grid-Search die Parameter je Strategie, und der Chart zeigt nur Testphase bzw. Out-of-Sample (alle Kurven starten dort bei 100). Nur dort ist der Vergleich fair: Wer im Training vorn liegt, ist oft nur überangepasst.</dd></div>
@@ -476,6 +552,7 @@
    window.addEventListener("resize", hide);
  })();
 </script>
+{% if not shared %}
 <script>
  // Felder je Modus/Strategie ein- und ausblenden, Parameter-Beschriftungen und Erklärungen anpassen
  (function () {
@@ -518,8 +595,25 @@
    f.elements["source"].addEventListener("change", sync);
    f.elements["size_mode"].addEventListener("change", sync);
    sync();
+   // Enter im Namensfeld der Vorlage speichert die Vorlage, startet aber keinen Backtest
+   const tn = document.getElementById("template_name");
+   if (tn) tn.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); document.getElementById("save_template").click(); } });
  })();
 </script>
+<script>
+ // Freigabe-Link kopieren
+ (function () {
+   const b = document.getElementById("sharecopy"), i = document.getElementById("shareurl");
+   if (!b || !i) return;
+   b.addEventListener("click", () => {
+     i.select();
+     const done = () => { b.textContent = "Kopiert ✓"; setTimeout(() => { b.textContent = "Link kopieren"; }, 2000); };
+     if (navigator.clipboard) navigator.clipboard.writeText(i.value).then(done, () => { document.execCommand("copy"); done(); });
+     else { document.execCommand("copy"); done(); }
+   });
+ })();
+</script>
+{% endif %}
 
 {% if run_done %}
 {{ run.curves|json_script:"curves" }}

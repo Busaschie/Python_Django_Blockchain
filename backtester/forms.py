@@ -110,6 +110,15 @@ UI_TIPS = {
     "ai": "Erklärt das Ergebnis in Klartext und schlägt nächste Tests vor. Entsteht nur auf Knopfdruck, wird je Lauf einmal "
           "gespeichert und zählt zum Tageslimit. Die KI bekommt nur Kennzahlen, rechnet nichts selbst und jede genannte "
           "Zahl wird gegen die berechneten Werte geprüft. Keine Anlageberatung.",
+    "share": "Erzeugt einen Link, mit dem jeder diese Auswertung ohne Anmeldung nur lesen kann (Kennzahlen, Diagramme, "
+             "Trades, PDF). Name und E-Mail sind nicht sichtbar. Die Freigabe lässt sich jederzeit beenden, dann "
+             "funktioniert der Link nicht mehr.",
+    "templates": "Speichert alle Werte des Formulars unter einem Namen, damit du eine Lieblingskonfiguration mit einem Klick "
+                 "wieder laden kannst. Der Zeitraum wird als Länge in Tagen bis heute gespeichert.",
+    "tags": "Ordne Läufe mit kurzen Stichworten (mit Komma getrennt, höchstens 5) und markiere wichtige Läufe mit dem Stern. "
+            "Die Liste rechts lässt sich danach nach Tag und nach Favoriten filtern.",
+    "report": "Kreuze links an den Läufen Häkchen an (höchstens 8) und erzeuge daraus ein PDF mit Übersichtstabelle, "
+              "gemeinsamem Diagramm und der Einzelauswertung je Lauf.",
     "compare_strategies": "Startet dieselben Einstellungen mit SMA-Crossover, RSI und Kombiniert auf der gewählten "
                           "Chain und zeigt die Ergebnisse nebeneinander. Im Einzellauf gelten Standardparameter.",
 }

@@ -4,25 +4,8 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d8010543-1eed-4775-a043-da519baf32cf" name="Changes" comment="Speere Datenschutz Impressum">
-      <change afterPath="$PROJECT_DIR$/backtester/export.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backtester/management/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backtester/management/commands/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backtester/management/commands/check_signals.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backtester/migrations/0010_signal_alert.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backtester/signals.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backtester/stability.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backtester/test_extras.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtester/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/forms.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtester/jobs.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/jobs.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtester/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtester/templates/backtester/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/templates/backtester/dashboard.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtester/test_tooltips.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/test_tooltips.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtester/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backtester/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/config/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+    <list default="true" id="d8010543-1eed-4775-a043-da519baf32cf" name="Changes" comment="Neu functions">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -50,22 +33,22 @@
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
       <entry key="MS100" value="1.0" />
-      <entry key="MS500" value="1.0000013186431957" />
-      <entry key="S2" value="1.071872344566049" />
-      <entry key="S5" value="1.8366076418449917" />
-      <entry key="S10" value="3.011030126998725" />
-      <entry key="S30" value="4.676843881059106" />
-      <entry key="S60" value="5.285659123032766" />
-      <entry key="M2" value="5.628560092534205" />
-      <entry key="M5" value="5.864262183366063" />
-      <entry key="M10" value="6.0635435374905144" />
-      <entry key="M15" value="6.296935645199988" />
-      <entry key="M30" value="7.395960624684783" />
-      <entry key="H1" value="10.680266068933182" />
-      <entry key="H2" value="17.2156280818866" />
-      <entry key="H4" value="25.51657195304887" />
-      <entry key="D1" value="39.69916590546522" />
-      <entry key="W1" value="43.344662858381724" />
+      <entry key="MS500" value="1.0" />
+      <entry key="S2" value="1.0" />
+      <entry key="S5" value="1.0" />
+      <entry key="S10" value="1.0" />
+      <entry key="S30" value="1.0000122822067985" />
+      <entry key="S60" value="1.0128905752176507" />
+      <entry key="M2" value="1.4673433776541076" />
+      <entry key="M5" value="5.152745765945357" />
+      <entry key="M10" value="9.668621125716983" />
+      <entry key="M15" value="12.218025966949272" />
+      <entry key="M30" value="16.36583937811301" />
+      <entry key="H1" value="21.361803155812286" />
+      <entry key="H2" value="29.026897016473537" />
+      <entry key="H4" value="38.94280443492316" />
+      <entry key="D1" value="57.180806243473484" />
+      <entry key="W1" value="62.105504075780594" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -87,23 +70,23 @@
       <entry key="W1" value="0.0" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.1148432903461547E-28" />
-      <entry key="MS500" value="3.316750220166112E-6" />
-      <entry key="S2" value="0.09380774067078072" />
-      <entry key="S5" value="1.0296549966182111" />
-      <entry key="S10" value="2.442064267426338" />
-      <entry key="S30" value="4.429232764601136" />
-      <entry key="S60" value="5.152650242831373" />
-      <entry key="M2" value="5.559574613246596" />
-      <entry key="M5" value="5.836046982241139" />
-      <entry key="M10" value="6.049327485033444" />
-      <entry key="M15" value="6.28743190561331" />
-      <entry key="M30" value="7.391178885805817" />
-      <entry key="H1" value="10.67774475800814" />
-      <entry key="H2" value="17.214112236763388" />
-      <entry key="H4" value="25.515606833445094" />
-      <entry key="D1" value="39.69894099067936" />
-      <entry key="W1" value="43.34462834219573" />
+      <entry key="MS100" value="0.0022748702860712023" />
+      <entry key="MS500" value="0.2960679029634081" />
+      <entry key="S2" value="0.7376457285414196" />
+      <entry key="S5" value="0.8853992153391853" />
+      <entry key="S10" value="0.9409565427474242" />
+      <entry key="S30" value="0.9799305470322774" />
+      <entry key="S60" value="1.0027951810256894" />
+      <entry key="M2" value="1.4622175322021536" />
+      <entry key="M5" value="5.150476921746478" />
+      <entry key="M10" value="9.667282200701937" />
+      <entry key="M15" value="12.216852070374408" />
+      <entry key="M30" value="16.364538684508837" />
+      <entry key="H1" value="21.360508994242235" />
+      <entry key="H2" value="29.025794165822195" />
+      <entry key="H4" value="38.94196604885126" />
+      <entry key="D1" value="57.18057872828043" />
+      <entry key="W1" value="62.10546821110777" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -115,27 +98,35 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.OpenDjangoStructureViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
-    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
-    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;python.packages.toolwindow.project.migrated.to.right.top.v2&quot;: &quot;true&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
-    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.OpenDjangoStructureViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
+    "git-widget-placeholder": "main",
+    "junie.onboarding.icon.badge.shown": "true",
+    "last_opened_file_path": "C:/Users/Nobody-42/Documents/Work/Python Blockchain/Projekt_Live",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.jshint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.jshint": "",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "python.packages.toolwindow.project.migrated.to.right.top.v2": "true",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "to.speed.mode.migration.done": "true"
   }
-}</component>
+}]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\Nobody-42\Documents\Work\Python Blockchain\Projekt_Live\zip" />
+    </key>
+  </component>
   <component name="RunManager">
     <configuration name="Projekt_Live" type="Python.DjangoServer" factoryName="Django server">
       <module name="Projekt_Live" />
@@ -181,7 +172,9 @@
       <workItem from="1791181413299" duration="11369000" />
       <workItem from="1791267449231" duration="1835000" />
       <workItem from="1791271946884" duration="667000" />
-      <workItem from="1791272686745" duration="7319000" />
+      <workItem from="1791272686745" duration="8564000" />
+      <workItem from="1791352737110" duration="2085000" />
+      <workItem from="1791427922834" duration="2227000" />
     </task>
     <task id="LOCAL-00001" summary="Backtest Manuell">
       <option name="closed" value="true" />
@@ -335,11 +328,38 @@
       <option name="project" value="LOCAL" />
       <updated>1791285674857</updated>
     </task>
-    <option name="localTasksCounter" value="20" />
+    <task id="LOCAL-00020" summary="Mails CSV PDF">
+      <option name="closed" value="true" />
+      <created>1791289595337</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1791289595337</updated>
+    </task>
+    <task id="LOCAL-00021" summary="Neu functions">
+      <option name="closed" value="true" />
+      <created>1791432833964</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1791432833964</updated>
+    </task>
+    <option name="localTasksCounter" value="22" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Backtest Manuell" />
@@ -361,6 +381,8 @@
     <MESSAGE value="User Konto" />
     <MESSAGE value="User Konto 2" />
     <MESSAGE value="Speere Datenschutz Impressum" />
-    <option name="LAST_COMMIT_MESSAGE" value="Speere Datenschutz Impressum" />
+    <MESSAGE value="Mails CSV PDF" />
+    <MESSAGE value="Neu functions" />
+    <option name="LAST_COMMIT_MESSAGE" value="Neu functions" />
   </component>
 </project>

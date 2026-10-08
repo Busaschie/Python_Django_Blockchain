@@ -27,7 +27,8 @@
 
  /* Drei Spalten */
  .cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr) 300px;gap:1rem;align-items:start}
- @media (max-width:1150px){.cols{grid-template-columns:minmax(0,1fr)}}
+ .cols.shared{grid-template-columns:minmax(0,1fr) minmax(0,1.3fr)}
+ @media (max-width:1150px){.cols,.cols.shared{grid-template-columns:minmax(0,1fr)}}
  .box{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:.9rem 1rem;margin-bottom:1rem}
  .scroll{overflow-x:auto}
  table{border-collapse:collapse;width:100%} td,th{padding:.28rem .5rem;border-bottom:1px solid var(--line);text-align:left;font-size:.9rem}
@@ -66,6 +67,26 @@
  .plaus li .dot{width:.6rem;height:.6rem;position:relative;top:.05rem} .plaus li span.d{color:var(--muted)}
  .hist li.cur{background:var(--sel);border-left-color:var(--accent)}
  .hist li + li{border-top:1px solid var(--line)}
+
+ /* Favoriten, Tags, Vorlagen, Teilen */
+ .hist li{padding-left:1.7rem} .rsel{position:absolute;left:.4rem;top:.55rem;margin:0;width:auto}
+ .starform{position:absolute;top:.2rem;right:1.55rem;margin:0}
+ button.star{background:none;border:0;color:var(--muted);font:1.05rem/1 system-ui,sans-serif;padding:.1rem .3rem;margin:0;border-radius:4px}
+ button.star.on{color:#f5c542} button.star:hover,button.star:focus-visible{background:var(--sel);outline:none}
+ .hist li a:first-of-type{padding-right:3.2rem}
+ .tags{display:flex;flex-wrap:wrap;gap:.25rem;margin:.15rem 0} a.tag{display:inline-block !important;padding:.02rem .45rem !important;border:1px solid var(--line);border-radius:999px;font-size:.74rem;font-weight:400;color:var(--muted);text-decoration:none}
+ a.tag:hover{border-color:var(--accent);color:var(--link)}
+ .histfilter{display:flex;flex-wrap:wrap;gap:.4rem;align-items:center;margin:.3rem 0 .6rem;font-size:.85rem}
+ .histfilter select{padding:.25rem .4rem;border:1px solid var(--line);border-radius:6px;background:var(--field);color:var(--ink);font:inherit;max-width:9rem}
+ .histfilter button{margin:0;padding:.3rem .7rem} .histfilter label{display:flex;align-items:center;gap:.25rem}
+ .runmeta{display:flex;flex-wrap:wrap;align-items:center;gap:.4rem;margin:.2rem 0 .6rem} .runmeta form{margin:0}
+ .runmeta button.star{font-size:1.4rem;padding:.15rem .4rem;border:1px solid var(--line)}
+ .tagform{display:flex;flex-wrap:wrap;align-items:center;gap:.3rem;flex:1;min-width:12rem} .tagform input[type=text]{flex:1;min-width:8rem;padding:.35rem .5rem;border:1px solid var(--line);border-radius:6px;background:var(--field);color:var(--ink);font:inherit}
+ .tagform button{margin:0;padding:.35rem .7rem}
+ ul.tpl{list-style:none;margin:.2rem 0 .6rem;padding:0} ul.tpl li{position:relative;padding:.3rem 1.8rem .3rem 0;border-bottom:1px solid var(--line)} ul.tpl li form{position:absolute;top:.15rem;right:0;margin:0}
+ .tplsave{display:flex;flex-wrap:wrap;gap:.4rem;align-items:center} .tplsave input{flex:1;min-width:9rem;padding:.4rem .5rem;border:1px solid var(--line);border-radius:6px;background:var(--field);color:var(--ink);font:inherit} .tplsave button{margin:0}
+ .shareurl{width:100%;padding:.4rem .5rem;border:1px solid var(--line);border-radius:6px;background:var(--field);color:var(--ink);font:inherit;margin:.2rem 0}
+ #sharebox button,#sharebox form{margin-top:.3rem}
 
  /* Legende */
  #legende{margin-top:1.5rem}

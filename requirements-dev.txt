@@ -1,2 +1,7 @@
-# Nur für den Abgleich mit einer unabhängigen Bibliothek (tools/crosscheck_backtestingpy.py)
+# Nur für Entwicklung und CI (nicht für den Betrieb auf Render)
+# Abgleich mit einer unabhängigen Bibliothek (tools/crosscheck_backtestingpy.py)
 backtesting
+# Browser-Tests der Oberfläche (backtester/test_browser.py); danach einmalig: playwright install chromium
+playwright>=1.45
+# liefert plotly.js lokal, damit die Browser-Tests nicht vom CDN abhängen
+plotly>=5

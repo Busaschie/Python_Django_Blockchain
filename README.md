@@ -117,3 +117,34 @@ Knopf „Auswertung kommentieren“ (nur auf Knopfdruck, einmal je Lauf gespeich
   - Box „Aktuelles Signal“ je Lauf: Knopf „Jetzt prüfen“ (long/flat, seit wann, Kurs) und „Mail bei Signal-Wechsel einschalten“ (je Benutzer höchstens `SIGNAL_MAX_PER_USER`, Standard 5).
   - Mails entstehen nur, wenn ein Zeitplan die Prüfung auslöst. Render Free hat keinen Cron: `SIGNAL_CRON_TOKEN=<langes Geheimnis>` setzen und `https://<deine-app>/signale/pruefen/` mit Header `Authorization: Bearer <Token>` (oder `?token=<Token>`) regelmäßig aufrufen, z. B. per cron-job.org (bei 1d-Läufen genügt 1× täglich kurz nach 02:00 Uhr deutscher Zeit, bei 1h/4h stündlich bzw. alle 4 h). Alternativ ein Render Cron Job mit `python manage.py check_signals --base-url https://<deine-app>`.
   - Mails gehen nur bei einem **Wechsel** (long ↔ flat); beim Einschalten wird der aktuelle Zustand als Ausgangspunkt gespeichert. Stops/Positionsgröße sind im Signal nicht berücksichtigt.
+
+## Tests, Browser-Tests und CI
+- `python manage.py test` führt alle Tests aus (Rechenkern, Plausibilität, Konto, Export, Signale, Teilen/Vorlagen, Performance).
+- **Browser-Tests** (`backtester/test_browser.py`) steuern die echte Oberfläche mit Playwright und Chromium gegen einen Testserver:
+  Login, 3-Spalten-Layout, schmale Anzeige ohne Seitwärts-Scrollen, Legende unten, Tooltips, kompletter Lauf mit Diagrammen,
+  Export-Downloads, Konto-Seite, Teilen-Link, Favoriten/Tags/Filter, Vorlagen, PDF-Bericht. Einmalig einrichten:
+  `pip install -r requirements-dev.txt && playwright install chromium`. Ohne Playwright werden sie übersprungen; mit
+  `REQUIRE_BROWSER_TESTS=1` ist ein fehlender Browser ein Fehler (so läuft es in der CI).
+- **CI** (`.github/workflows/ci.yml`): GitHub Actions führt bei jedem Push und Pull Request `manage.py check`,
+  `makemigrations --check` (Modelländerung ohne Migration fällt auf) und alle Tests inklusive Browser-Tests aus.
+
+## Performance: Zwischenspeicher und paralleles Rechnen
+- `backtester/perf.py`: kleine Zwischenspeicher im Arbeitsspeicher (Kursdaten 10 Min., Grid-Search und Kennzahlen je Parameterpunkt
+  1 Std.). Der Schlüssel enthält alle Eingaben und einen Fingerabdruck der Kursdaten, ein Treffer liefert also exakt dieselbe Zahl.
+  Wiederholte oder ähnliche Läufe (z. B. Vergleichsläufe, erneutes Starten mit denselben Werten) sind dadurch fast sofort fertig
+  (Messung: Walk-Forward + Split + Stabilität mit Stops 10,4 s kalt, 0,5 s wiederholt).
+- **Paralleles Rechnen** ist optional: `PARALLEL_WORKERS=<n>` (Standard 1 = aus). Die Simulation mit Stops ist reines Python und
+  läuft deshalb in einem Prozess-Pool (Grid-Search und Parameter-Stabilität). Gemessen auf 2 Kernen ca. 1,7× schneller bei identischen
+  Ergebnissen; schlägt der Pool fehl, rechnet die App seriell weiter. Jeder Worker braucht ca. 100 MB Arbeitsspeicher, deshalb auf
+  Render Free (512 MB, wenig CPU) aus lassen und nur bei einem größeren Plan einschalten.
+
+## Teilen, PDF-Bericht, Favoriten, Tags, Vorlagen
+- **Teilen:** Im Dashboard „Öffentlichen Link erzeugen“. Der Link `/geteilt/<Token>/` zeigt die Auswertung ohne Anmeldung nur lesend
+  (Kennzahlen, Diagramme, Trades, CSV/PDF), ohne Namen und E-Mail des Besitzers, mit `noindex`. „Freigabe beenden“ und „Neuen Link
+  erzeugen“ machen den alten Link ungültig; beim Löschen des Laufs oder Kontos verschwindet er ebenfalls.
+- **PDF-Bericht:** Läufe in der Liste rechts ankreuzen (höchstens 8) und „Bericht aus Auswahl (PDF)“, oder auf der Vergleichsseite
+  „Bericht aller Läufe“. Übersichtstabelle, gemeinsames Diagramm (Start = 100), danach je Lauf die Einzelauswertung. Das Einzel-PDF
+  hat ein neues Layout (Kopf- und Fußzeile, Kennzahl-Kacheln, farbige Ampeln und Stabilitäts-Raster).
+- **Favoriten und Tags:** Stern und bis zu 5 Tags je Lauf; die Liste rechts filtert nach Tag und nach Favoriten.
+- **Vorlagen:** Alle Formularwerte unter einem Namen speichern (höchstens 20 je Nutzer), mit einem Klick wieder laden; der Zeitraum
+  wird als Länge in Tagen gespeichert und beim Laden bis heute gerechnet.

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import BacktestRun, ExchangeBlock
+from .models import BacktestRun, ExchangeBlock, RunTemplate
 
 
 @admin.register(BacktestRun)
@@ -12,3 +12,4 @@ class BacktestRunAdmin(admin.ModelAdmin):
 
 
 admin.site.register(ExchangeBlock)
+admin.site.register(RunTemplate)

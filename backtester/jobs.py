@@ -8,7 +8,7 @@ from datetime import date, timedelta
 
 from django.db import connection
 
-from . import indicators, montecarlo, plausibility, regimes, sensitivity, stability
+from . import indicators, montecarlo, perf, plausibility, regimes, sensitivity, stability
 from .chains import CHAINS
 from .data import PERIODS_PER_YEAR, fetch_ohlcv
 from .engine import Risk, run_backtest
@@ -32,6 +32,19 @@ def json_safe(obj):
     return obj
 
 
+def cached_ohlcv(symbol, timeframe, start, end, source, exchange):
+    """Kursdaten mit kurzem Zwischenspeicher (10 Min.): Vergleichslaeufe und Wiederholungen laden nicht neu.
+    Nur vollstaendige Daten ohne Hinweis (z. B. Teildaten wegen Boersensperre) werden gemerkt."""
+    key = (symbol, timeframe, start, end, source, exchange)
+    hit = perf.ohlcv_cache.get(key)
+    if hit is not None:
+        return hit
+    df, info = fetch_ohlcv(symbol, timeframe, start, end, source, exchange)
+    if not info.get("note"):
+        perf.ohlcv_cache.set(key, (df, info))
+    return df, info
+
+
 def submit(pk: int) -> None:
     _executor.submit(_run, pk)
 
@@ -46,8 +59,8 @@ def compute(run) -> None:
     else:  # Job aus einer älteren Version: Zeitraum aus Anzahl Tage
         end = run.created_at.date()
         start = end - timedelta(days=j["days"])
-    df, info = fetch_ohlcv(CHAINS[run.chain]["symbol"], j["timeframe"], start, end,
-                           j["source"], j.get("exchange", "binance"))
+    df, info = cached_ohlcv(CHAINS[run.chain]["symbol"], j["timeframe"], start, end,
+                            j["source"], j.get("exchange", "binance"))
     risk = Risk.from_inputs(j.get("stop_loss"), j.get("take_profit"), j.get("trailing_stop"),
                             j.get("size_mode", "full"), j.get("size_value"))
     if j["mode"] == "split":

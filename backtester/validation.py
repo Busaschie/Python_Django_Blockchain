@@ -8,30 +8,47 @@ Risiko-Einstellungen (Stops, Positionsgroesse) sind fest vorgegeben und nicht Te
 """
 import pandas as pd
 
+from . import perf
 from .engine import make_curves, run_sim, summarize
 from .strategies import GRIDS, STRATEGIES
 
 
+def _eval_cells(train, strategy, fee, ppy, execution, risk, cells):
+    """Sharpe fuer eine Liste von Parameterpunkten (Modulebene, damit der Prozess-Pool sie ausfuehren kann)."""
+    func, _ = STRATEGIES[strategy]
+    return [run_sim(train, func(train, **params), fee, execution, risk, ppy).metrics(ppy)[0]["sharpe"]
+            for _, _, params in cells]
+
+
 def _grid_search(train: pd.DataFrame, strategy: str, fee: float, ppy: int, execution: str, risk=None,
                  fixed=None):
-    func, _ = STRATEGIES[strategy]
+    key = ("grid", perf.fingerprint(train), strategy, fee, ppy, execution, repr(risk), perf.digest(fixed or {}))
+    hit = perf.grid_cache.get(key)
+    if hit is not None:
+        return hit
     grid = GRIDS[strategy]
     (x_name, xs), (y_name, ys) = grid["x"], grid["y"]
     z = [[None] * len(xs) for _ in ys]  # Sharpe je Kombination (None = ungueltig)
-    best = None
+    cells = []
     for j, yv in enumerate(ys):
         for i, xv in enumerate(xs):
             params = grid["build"](xv, yv)
-            if params is None:
-                continue
-            params = {**(fixed or {}), **params}  # feste Parameter (z. B. RSI-Teil der Kombi-Strategie)
-            sim = run_sim(train, func(train, **params), fee, execution, risk, ppy)
-            m, _, _ = sim.metrics(ppy)
-            z[j][i] = m["sharpe"]
-            if best is None or m["sharpe"] > best[0]:
-                best = (m["sharpe"], params)
+            if params is not None:
+                cells.append((i, j, {**(fixed or {}), **params}))  # feste Parameter (z. B. RSI-Teil der Kombi)
+    sharpes = None
+    if risk is not None and risk.active:    # nur die langsame Kerze-fuer-Kerze-Simulation lohnt den Pool
+        sharpes = perf.parallel_map(_eval_cells, (train, strategy, fee, ppy, execution, risk), cells)
+    if sharpes is None:
+        sharpes = _eval_cells(train, strategy, fee, ppy, execution, risk, cells)
+    best = None
+    for (i, j, params), sharpe in zip(cells, sharpes):   # feste Reihenfolge: bei Gleichstand gewinnt der erste
+        z[j][i] = sharpe
+        if best is None or sharpe > best[0]:
+            best = (sharpe, params)
     heat = {"x_name": x_name, "x": xs, "y_name": y_name, "y": ys, "z": z}
-    return best[1], best[0], heat
+    result = (best[1], best[0], heat)
+    perf.grid_cache.set(key, result)
+    return result
 
 
 def _txt(params: dict) -> str:

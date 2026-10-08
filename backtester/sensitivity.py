@@ -4,6 +4,7 @@ Die Parameter bleiben fest (keine neue Optimierung), nur die Kosten aendern sich
 wieder nur die Testphase, bei Walk-Forward werden die je Fold gewaehlten Parameter erneut gerechnet."""
 import pandas as pd
 
+from . import perf
 from .fmt import de
 from .engine import run_sim, summarize
 
@@ -15,7 +16,7 @@ def _row(m: dict, mult: float, fee: float) -> dict:
             "max_drawdown_pct": m["max_drawdown_pct"], "sharpe": m["sharpe"], "trades": m["trades"]}
 
 
-def _metrics_at(df, func, params, kind, validation, fee, ppy, execution, risk):
+def _metrics_uncached(df, func, params, kind, validation, fee, ppy, execution, risk):
     if kind == "walkforward":
         folds, n_folds, mult = validation["folds"], validation["n_folds"], validation["train_mult"]
         T = len(df) // (mult + n_folds)
@@ -37,10 +38,48 @@ def _metrics_at(df, func, params, kind, validation, fee, ppy, execution, risk):
     return sim.metrics(ppy)[0]
 
 
+def _key(fp, func, params, kind, validation, fee, ppy, execution, risk):
+    return ("m", fp, func.__name__, perf.digest(params), kind, perf.digest(validation), fee, ppy, execution, repr(risk))
+
+
+def _metrics_at(df, func, params, kind, validation, fee, ppy, execution, risk, fp=None):
+    """Kennzahlen eines Parameterpunkts (mit Zwischenspeicher: dieselbe Rechnung wird nie zweimal ausgefuehrt)."""
+    key = _key(fp or perf.fingerprint(df), func, params, kind, validation, fee, ppy, execution, risk)
+    m = perf.metrics_cache.get(key)
+    if m is None:
+        m = _metrics_uncached(df, func, params, kind, validation, fee, ppy, execution, risk)
+        perf.metrics_cache.set(key, m)
+    return m
+
+
+def _metrics_chunk(df, func, kind, validation, fee, ppy, execution, risk, plist):
+    return [_metrics_uncached(df, func, p, kind, validation, fee, ppy, execution, risk) for p in plist]
+
+
+def metrics_many(df, func, plist, kind, validation, fee, ppy, execution, risk) -> list:
+    """Kennzahlen fuer viele Parameterpunkte: Treffer aus dem Zwischenspeicher, der Rest (bei Stops) parallel."""
+    fp = perf.fingerprint(df)
+    keys = [_key(fp, func, p, kind, validation, fee, ppy, execution, risk) for p in plist]
+    out = [perf.metrics_cache.get(k) for k in keys]
+    todo = [i for i, m in enumerate(out) if m is None]
+    if todo:
+        miss = [plist[i] for i in todo]
+        res = None
+        if risk is not None and risk.active:
+            res = perf.parallel_map(_metrics_chunk, (df, func, kind, validation, fee, ppy, execution, risk), miss)
+        if res is None:
+            res = _metrics_chunk(df, func, kind, validation, fee, ppy, execution, risk, miss)
+        for i, m in zip(todo, res):
+            out[i] = m
+            perf.metrics_cache.set(keys[i], m)
+    return out
+
+
 def analyze(df, func, params, kind, validation, fee, ppy, execution, risk, main_metrics) -> dict:
     rows = []
+    fp = perf.fingerprint(df)
     for mult in MULTS:
-        m = _metrics_at(df, func, params, kind, validation, fee * mult, ppy, execution, risk)
+        m = _metrics_at(df, func, params, kind, validation, fee * mult, ppy, execution, risk, fp)
         rows.append(_row(m, mult, fee))
     base = next(r for r in rows if r["mult"] == 1)
     replay_diff = abs(base["total_return_pct"] - main_metrics["total_return_pct"])

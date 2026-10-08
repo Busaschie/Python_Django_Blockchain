@@ -158,6 +158,7 @@ class EndToEndNoFalseAlarms(SimpleTestCase):
 
         from . import jobs
         from .strategies import default_inputs
+        from . import perf
 
         class Run:       # minimaler Ersatz fuer das Modell (compute schreibt nur Attribute)
             chain, days, created_at = "btc", 900, __import__("datetime").datetime(2026, 1, 1)
@@ -170,6 +171,7 @@ class EndToEndNoFalseAlarms(SimpleTestCase):
             run = Run()
             run.job = dict(chain="btc", timeframe="1d", execution="open", fee=0.001, slippage=0.0005, source="demo", mode=mode,
                            strategy=strat, days=900, train_frac=70, wf_folds=5, wf_train_mult=3, **default_inputs(strat), **extra)
+            perf.clear_all()
             with mock.patch.object(jobs, "fetch_ohlcv", return_value=(df, {"symbol": "BTC/USDT", "note": ""})):
                 jobs.compute(run)
             engine = [c for c in run.curves["plaus"]["checks"] if c["group"] == "Engine"]

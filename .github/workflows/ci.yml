@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      REQUIRE_BROWSER_TESTS: "1"      # fehlt der Browser, schlägt der Lauf fehl, statt die Tests zu überspringen
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
+
+      - name: Abhängigkeiten installieren
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Chromium für die Browser-Tests installieren
+        run: python -m playwright install --with-deps chromium
+
+      - name: Django-Konfiguration prüfen
+        run: |
+          python manage.py check
+          python manage.py makemigrations --check --dry-run   # Modelländerung ohne Migration fällt hier auf
+
+      - name: Tests (inkl. Browser-Tests)
+        run: python manage.py test --parallel 1 -v 1
