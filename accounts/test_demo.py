@@ -333,10 +333,74 @@ class AdminLinkTests(TestCase):
     def test_command_prints_valid_link(self):
         out = io.StringIO()
         call_command("demo_link", "--host", "https://beispiel.onrender.com/", stdout=out)
-        first = out.getvalue().splitlines()[0]
+        lines = out.getvalue().splitlines()
+        self.assertEqual(lines[0], "Fester Link (läuft nie ab): https://beispiel.onrender.com/demo/")
+        first = lines[1].split(": ", 1)[1]
         self.assertTrue(first.startswith("https://beispiel.onrender.com/demo/"))
         self.assertTrue(demo.valid_token(first.rstrip("/").split("/")[-1]))
         self.assertIn("48 Stunden", out.getvalue())
+
+
+class FixedLinkTests(TestCase):
+    """Fester Link /demo/: Landingpage, Start per Klick, Platzvergabe nach Aktivität."""
+
+    def test_get_creates_nothing_and_post_starts_demo(self):
+        c = Client()
+        r = c.get(reverse("demo_start"), REMOTE_ADDR="9.9.0.1")
+        self.assertEqual(r.status_code, 200)
+        self.assertContains(r, "Demo starten")
+        self.assertIn("noindex", r["X-Robots-Tag"])
+        self.assertEqual(User.objects.count(), 0)
+        r = c.post(reverse("demo_start"), REMOTE_ADDR="9.9.0.1")
+        self.assertEqual(r.status_code, 302)
+        self.assertEqual(User.objects.count(), 1)
+        self.assertTrue(demo.is_demo(demo_user()))
+
+    def test_idle_accounts_free_their_slot(self):
+        for i in range(demo.MAX_ACCOUNTS):
+            Client().post(reverse("demo_start"), REMOTE_ADDR=f"9.9.1.{i}")
+        r = Client().post(reverse("demo_start"), REMOTE_ADDR="9.9.1.99")
+        self.assertEqual(r.status_code, 503)
+        User.objects.filter(username__endswith="@" + demo.DOMAIN).update(
+            last_login=timezone.now() - timedelta(minutes=demo.IDLE_MINUTES + 1))
+        r = Client().post(reverse("demo_start"), REMOTE_ADDR="9.9.1.98")
+        self.assertEqual(r.status_code, 302)
+
+    def test_total_cap(self):
+        old = timezone.now() - timedelta(minutes=demo.IDLE_MINUTES + 1)
+        for i in range(demo.MAX_TOTAL):
+            u = demo.create_user()
+            User.objects.filter(pk=u.pk).update(last_login=old)
+        r = Client().post(reverse("demo_start"), REMOTE_ADDR="9.9.2.1")
+        self.assertEqual(r.status_code, 503)
+
+    def test_accounts_older_than_48h_are_deleted_on_start(self):
+        u = demo.create_user()
+        computed_run("single", "sma_cross", owner=u)
+        User.objects.filter(pk=u.pk).update(date_joined=timezone.now() - timedelta(hours=demo.ACCOUNT_HOURS + 1))
+        Client().post(reverse("demo_start"), REMOTE_ADDR="9.9.3.1")
+        self.assertFalse(User.objects.filter(pk=u.pk).exists())
+        self.assertFalse(BacktestRun.objects.filter(owner_id=u.pk).exists())
+
+    def test_touch_writes_at_most_every_few_minutes(self):
+        u = demo.create_user()
+        demo.touch(u)
+        first = User.objects.get(pk=u.pk).last_login
+        demo.touch(u)
+        self.assertEqual(User.objects.get(pk=u.pk).last_login, first)
+
+    def test_kill_switch(self):
+        with mock.patch.dict(os.environ, {"DEMO_ENABLED": "0"}):
+            r = Client().post(reverse("demo_start"), REMOTE_ADDR="9.9.4.1")
+        self.assertEqual(r.status_code, 503)
+        self.assertEqual(User.objects.count(), 0)
+
+    def test_real_user_is_not_replaced(self):
+        User.objects.create_user("me@x.de", "me@x.de", PW)
+        c = Client()
+        c.login(username="me@x.de", password=PW)
+        c.post(reverse("demo_start"))
+        self.assertEqual(User.objects.count(), 1)
 
 
 class DemoEnglishTests(TestCase):
@@ -345,7 +409,7 @@ class DemoEnglishTests(TestCase):
     def test_pages_in_english(self):
         c = Client()
         c.cookies["tb_lang"] = "en"
-        pages = {"invalid": c.get(link("quatsch")), "disabled": None}
+        pages = {"invalid": c.get(link("quatsch")), "disabled": None, "landing": c.get(reverse("demo_start"))}
         with mock.patch.dict(os.environ, {"DEMO_ENABLED": "0"}):
             pages["disabled"] = c.get(link())
         c.get(link())

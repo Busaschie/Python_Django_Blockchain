@@ -1,7 +1,11 @@
 {% extends "accounts/base.html" %}
 {% block auth %}<h2>Demo-Link</h2>
 {% if not enabled %}<div class="msg">Die Demo ist abgeschaltet (DEMO_ENABLED=0). Der Link würde nicht funktionieren.</div>{% endif %}
+<h3>Fester Link für Bewerbungsseiten</h3>
+<input type="text" readonly value="{{ fixed }}" aria-label="Fester Demo-Link" onfocus="this.select()" style="width:100%">
+<p class="small muted">Läuft nie ab. Die Seite erklärt die Demo, erst ein Klick auf „Demo starten“ legt ein Konto an.</p>
+<h3>Einladungslink</h3>
 <p class="small">Jeder, der diesen Link öffnet, bekommt ein eigenes Demo-Konto. Der Link ist {{ hours }} Stunden gültig.</p>
 <input type="text" readonly value="{{ link }}" aria-label="Demo-Link" onfocus="this.select()" style="width:100%">
-<p class="small muted">Demo-Konto: {{ account_hours }} Stunden gültig, höchstens {{ max_accounts }} gleichzeitig, {{ max_runs }} Läufe, {{ ai_limit }} KI-Aufrufe. Zurzeit aktiv: {{ active }} von {{ max_accounts }}.</p>
+<p class="small muted">Demo-Konto: {{ account_hours }} Stunden gültig, höchstens {{ max_accounts }} gleichzeitig, {{ max_runs }} Läufe, {{ ai_limit }} KI-Aufrufe. Zurzeit aktiv: {{ active }} von {{ max_accounts }} (ein Konto zählt nur, solange es in den letzten {{ idle }} Minuten benutzt wurde); vorhanden: {{ total }} von {{ max_total }}.</p>
 <p class="alt"><a href="{% url 'index' %}">← Zur App</a></p>{% endblock %}

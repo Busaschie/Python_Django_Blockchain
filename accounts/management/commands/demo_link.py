@@ -16,6 +16,7 @@ class Command(BaseCommand):
         if not base:
             h = os.environ.get("RENDER_EXTERNAL_HOSTNAME", "")
             base = f"https://{h}" if h else "http://localhost:8000"
-        self.stdout.write(f"{base}/demo/{demo.make_token()}/")
+        self.stdout.write(f"Fester Link (läuft nie ab): {base}/demo/")
+        self.stdout.write(f"Einladungslink: {base}/demo/{demo.make_token()}/")
         self.stdout.write(f"Gültig {demo.TOKEN_MAX_AGE // 3600} Stunden; je Besuch ein eigenes Konto "
                           f"({demo.ACCOUNT_HOURS} Stunden, höchstens {demo.MAX_ACCOUNTS} gleichzeitig).")

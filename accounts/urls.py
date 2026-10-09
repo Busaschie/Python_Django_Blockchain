@@ -25,6 +25,7 @@ urlpatterns = [
         template_name="accounts/reset_done.html")), name="reset_done"),
     path("impressum/", views.legal, {"page": "impressum"}, name="impressum"),
     path("datenschutz/", views.legal, {"page": "datenschutz"}, name="datenschutz"),
+    path("demo/", views.demo_start, name="demo_start"),
     path("demo/<str:token>/", views.demo_login, name="demo_login"),
     path("demo-link/", views.demo_link, name="demo_link"),
     path("konto/", views.account, name="account"),

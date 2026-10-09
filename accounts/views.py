@@ -280,13 +280,10 @@ def _demo_page(request, kind):
     return resp
 
 
-@login_not_required
-def demo_login(request, token):
-    """Demo-Link: legt ein eigenes, begrenztes Demo-Konto an und meldet es an."""
+def _start_demo(request):
+    """Gemeinsamer Teil von Einladungs- und festem Link: neues Demo-Konto anlegen und anmelden (oder Fehlerseite)."""
     if not demo.enabled():
         return _demo_page(request, "disabled")
-    if not demo.valid_token(token):
-        return _demo_page(request, "invalid")
     if request.user.is_authenticated:
         if not demo.is_demo(request.user):
             messages.info(request, "Du bist mit deinem eigenen Konto angemeldet. Für die Demo bitte abmelden oder ein privates Fenster nutzen.")
@@ -294,13 +291,36 @@ def demo_login(request, token):
     if throttle.blocked(request, "demo", ""):
         return _demo_page(request, "throttled")
     demo.cleanup()
-    if demo.active_count() >= demo.MAX_ACCOUNTS:
+    if not demo.has_room():
         return _demo_page(request, "full")
     user = demo.create_user()
     throttle.record(request, "demo", "")
     login(request, user, backend="django.contrib.auth.backends.ModelBackend")
     request.session.set_expiry(demo.ACCOUNT_HOURS * 3600)
     return redirect("index")
+
+
+@login_not_required
+def demo_login(request, token):
+    """Einladungslink (2 Tage gültig): legt sofort ein eigenes Demo-Konto an und meldet es an."""
+    if demo.enabled() and not demo.valid_token(token):
+        return _demo_page(request, "invalid")
+    return _start_demo(request)
+
+
+@login_not_required
+def demo_start(request):
+    """Fester Demo-Link für Bewerbungsseiten: GET erklärt nur, erst der Knopf (POST) legt das Konto an."""
+    if request.method == "POST":
+        return _start_demo(request)
+    if request.user.is_authenticated:
+        return _start_demo(request)          # leitet weiter bzw. weist auf das eigene Konto hin
+    if not demo.enabled():
+        return _demo_page(request, "disabled")
+    resp = render(request, "accounts/demo_start.html", {
+        "hours": demo.ACCOUNT_HOURS, "runs": demo.MAX_RUNS, "ai": demo.AI_LIMIT})
+    resp["X-Robots-Tag"] = "noindex, nofollow"
+    return resp
 
 
 def demo_link(request):
@@ -310,5 +330,6 @@ def demo_link(request):
         raise Http404
     link = request.build_absolute_uri(reverse("demo_login", args=[demo.make_token()]))
     return render(request, "accounts/demo_link.html", {
-        "link": link, "hours": demo.TOKEN_MAX_AGE // 3600, "account_hours": demo.ACCOUNT_HOURS, "max_accounts": demo.MAX_ACCOUNTS,
-        "max_runs": demo.MAX_RUNS, "ai_limit": demo.AI_LIMIT, "active": demo.active_count(), "enabled": demo.enabled()})
+        "link": link, "fixed": request.build_absolute_uri(reverse("demo_start")), "hours": demo.TOKEN_MAX_AGE // 3600, "account_hours": demo.ACCOUNT_HOURS, "max_accounts": demo.MAX_ACCOUNTS,
+        "max_runs": demo.MAX_RUNS, "ai_limit": demo.AI_LIMIT, "active": demo.active_count(), "total": demo.total_count(), "max_total": demo.MAX_TOTAL,
+        "idle": demo.IDLE_MINUTES, "enabled": demo.enabled()})

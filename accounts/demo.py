@@ -1,8 +1,12 @@
 """Demo-Zugang: ein geheimer, 2 Tage gültiger Link legt je Besuch ein eigenes, begrenztes Demo-Konto an.
 
-- Link: signierter Token (Django `signing`, Ablauf nach TOKEN_MAX_AGE). Erzeugt per `manage.py demo_link` oder auf /demo-link/ (nur Admin).
+- Fester Link: /demo/ (läuft nie ab, für Bewerbungsseiten). Die GET-Seite erklärt nur; erst ein Klick (POST) legt das Konto an, damit
+  Suchmaschinen und Link-Vorschauen keine Plätze belegen.
+- Einladungslink: signierter Token (Django `signing`, Ablauf nach TOKEN_MAX_AGE) unter /demo/<token>/, erzeugt per `manage.py demo_link`
+  oder auf /demo-link/ (nur Admin). Er legt das Konto sofort an.
 - Konto: Benutzername `demo-<zufall>@demo.invalid`, kein Passwort, keine E-Mail. Es läuft nach ACCOUNT_HOURS ab und wird dann samt Daten gelöscht.
-- Grenzen: höchstens MAX_ACCOUNTS Demo-Konten gleichzeitig, MAX_RUNS Läufe je Konto, AI_LIMIT KI-Aufrufe je Konto (insgesamt, nicht je Tag).
+- Grenzen: höchstens MAX_ACCOUNTS gleichzeitig AKTIVE Demo-Konten (ein Konto zählt nur, solange es innerhalb der letzten IDLE_MINUTES benutzt
+  wurde), insgesamt höchstens MAX_TOTAL Demo-Konten, MAX_RUNS Läufe je Konto, AI_LIMIT KI-Aufrufe je Konto (insgesamt, nicht je Tag).
 - Gesperrt: Passwort/E-Mail ändern, Konto löschen, Teilen, Signal-Mail, Paper-Trading starten (die Seiten sind sichtbar, mit Erklärung).
 - Kill-Schalter: Umgebungsvariable DEMO_ENABLED=0 schaltet alle Demo-Links ab.
 """
@@ -19,8 +23,11 @@ from django.utils import timezone
 
 SALT = "tradebot-demo-link"
 TOKEN_MAX_AGE = 2 * 24 * 3600     # Link gilt 2 Tage
-ACCOUNT_HOURS = 24                # Lebensdauer eines Demo-Kontos
+ACCOUNT_HOURS = 48                # Lebensdauer eines Demo-Kontos: danach sind Eingaben und Läufe gelöscht
 MAX_ACCOUNTS = 5                  # gleichzeitig aktive Demo-Konten
+IDLE_MINUTES = 60                 # ein Konto ohne Aktivität in dieser Zeit gibt seinen Platz frei (seine Daten bleiben bis zum Ablauf)
+MAX_TOTAL = 20                    # vorhandene (nicht abgelaufene) Demo-Konten insgesamt: schützt die Datenbank
+TOUCH_MINUTES = 5                 # so selten wird die Aktivität gespeichert
 MAX_RUNS = 20                     # Läufe je Demo-Konto
 AI_LIMIT = 5                      # KI-Aufrufe je Demo-Konto (insgesamt)
 DOMAIN = "demo.invalid"           # reservierte Domain: kann nie echte Mails empfangen
@@ -68,8 +75,29 @@ def _demo_users():
     return User.objects.filter(username__endswith="@" + DOMAIN, is_staff=False, password__startswith="!")
 
 
+def _alive():
+    return _demo_users().filter(date_joined__gte=timezone.now() - timedelta(hours=ACCOUNT_HOURS))
+
+
 def active_count() -> int:
-    return _demo_users().filter(date_joined__gte=timezone.now() - timedelta(hours=ACCOUNT_HOURS)).count()
+    """Demo-Konten, die gerade benutzt werden (Aktivität innerhalb IDLE_MINUTES)."""
+    return _alive().filter(last_login__gte=timezone.now() - timedelta(minutes=IDLE_MINUTES)).count()
+
+
+def total_count() -> int:
+    return _alive().count()
+
+
+def has_room() -> bool:
+    return active_count() < MAX_ACCOUNTS and total_count() < MAX_TOTAL
+
+
+def touch(user) -> None:
+    """Aktivität festhalten (höchstens alle TOUCH_MINUTES ein Schreibzugriff)."""
+    now = timezone.now()
+    if user.last_login is None or now - user.last_login > timedelta(minutes=TOUCH_MINUTES):
+        User.objects.filter(pk=user.pk).update(last_login=now)
+        user.last_login = now
 
 
 def cleanup() -> int:

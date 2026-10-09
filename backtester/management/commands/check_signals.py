@@ -11,6 +11,8 @@ class Command(BaseCommand):
         parser.add_argument("--base-url", default="", help="z. B. https://meine-app.onrender.com (für den Link in der Mail)")
 
     def handle(self, *a, **o):
+        from accounts import demo
+        self.stdout.write(f"Demo: {demo.cleanup()} abgelaufene Konten gelöscht.")      # aufräumen, auch wenn Signale aus sind
         if not signals.enabled():
             self.stdout.write("SIGNALS_ENABLED ist aus - nichts zu tun.")
             return

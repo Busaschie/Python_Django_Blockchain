@@ -11,6 +11,9 @@ class DemoExpiryMiddleware:
 
     def __call__(self, request):
         u = request.user
-        if demo.is_demo(u) and not demo.is_active(u):
-            logout(request)
+        if demo.is_demo(u):
+            if demo.is_active(u):
+                demo.touch(u)
+            else:
+                logout(request)
         return self.get_response(request)
