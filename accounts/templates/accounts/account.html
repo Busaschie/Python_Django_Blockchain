@@ -18,6 +18,13 @@
 <div class="acc">
  <h2 style="margin:0 0 .2rem">Konto</h2><p class="muted" style="margin:0 0 1rem">{{ user.username }}</p>
  {% for m in messages %}<div class="msg">{{ m }}</div>{% endfor %}
+ {% if is_demo_page %}
+ <div class="box" id="demoinfo"><h3>Demo-Konto</h3>
+  <p>Das ist ein Demo-Konto: Es läuft in {{ demo.hours }} Stunden ab und wird dann samt allen Auswertungen gelöscht. Beim Abmelden wird es sofort gelöscht.</p>
+  <p class="small">Gesperrt sind: Passwort und E-Mail ändern, Konto löschen, Auswertungen teilen, Signal-Mail und das Starten von Paper-Trading. Die Seiten dazu sind sichtbar und erklären, was mit einem eigenen Konto möglich ist.</p>
+  <p class="small">Grenzen: {{ demo.runs_max }} Läufe und {{ demo.ai_max }} KI-Aufrufe je Demo-Konto.</p>
+  <p><a class="btn" href="{% url 'register' %}">Eigenes Konto anlegen</a></p></div>
+ {% else %}
  <div class="grid">
   <div class="box"><h3>Passwort ändern</h3>
    <form method="post" action="{% url 'account' %}">{% csrf_token %}{% for f in form %}<div class="field"><label for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}{{ f.errors }}</div>{% endfor %}{{ form.non_field_errors }}<button>Passwort ändern</button></form></div>
@@ -26,6 +33,8 @@
   <div class="box danger"><h3>Konto löschen</h3>
    <form method="post" action="{% url 'account_delete' %}">{% csrf_token %}{% for f in delete_form %}<div class="field"><label for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}{{ f.errors }}</div>{% endfor %}{{ delete_form.non_field_errors }}<button style="background:#7a1f1f">Konto endgültig löschen</button></form></div>
  </div>
+ {% endif %}
+ {% if user.is_staff %}<p class="small"><a href="{% url 'demo_link' %}">Demo-Link erzeugen</a></p>{% endif %}
  <form method="post" action="{% url 'account_export' %}" style="margin-top:1rem">{% csrf_token %}
   <button class="secondary" type="submit" style="margin-left:0">Meine Daten herunterladen (JSON)</button>
   <span class="small muted">Alle Daten, die zu deinem Konto gespeichert sind (Art. 15/20 DSGVO).</span></form>

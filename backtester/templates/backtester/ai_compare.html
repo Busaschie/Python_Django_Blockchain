@@ -22,7 +22,7 @@
   <form method="post" action="{% url 'ai_compare' %}">{% csrf_token %}
    <input type="hidden" name="run" value="{{ a.pk }}"><input type="hidden" name="run" value="{{ b.pk }}">
    <button type="submit">Unterschiede erklären</button>
-   <span class="small muted">Heute noch {{ ai_left }} von {{ ai_limit }} KI-Antworten; ohne KI gibt es den regelbasierten Text.</span>
+   <span class="small muted">{% if demo %}Demo: noch {{ ai_left }} von {{ ai_limit }} KI-Aufrufen im Demo-Konto (insgesamt, nicht je Tag); ohne KI gibt es den regelbasierten Text.{% else %}Heute noch {{ ai_left }} von {{ ai_limit }} KI-Antworten; ohne KI gibt es den regelbasierten Text.{% endif %}</span>
   </form>
  {% endif %}
 </div>

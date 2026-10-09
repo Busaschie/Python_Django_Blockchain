@@ -4,7 +4,28 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d8010543-1eed-4775-a043-da519baf32cf" name="Changes" comment="LitteWebMan" />
+    <list default="true" id="d8010543-1eed-4775-a043-da519baf32cf" name="Changes" comment="LitteWebMan 2">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/accounts/apps.py" beforeDir="false" afterPath="$PROJECT_DIR$/accounts/apps.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/accounts/templates/accounts/account.html" beforeDir="false" afterPath="$PROJECT_DIR$/accounts/templates/accounts/account.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/accounts/templates/accounts/datenschutz.html" beforeDir="false" afterPath="$PROJECT_DIR$/accounts/templates/accounts/datenschutz.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/accounts/templates/accounts/datenschutz_en.html" beforeDir="false" afterPath="$PROJECT_DIR$/accounts/templates/accounts/datenschutz_en.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/accounts/throttle.py" beforeDir="false" afterPath="$PROJECT_DIR$/accounts/throttle.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/accounts/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/accounts/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/accounts/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/accounts/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtester/ai.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/ai.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtester/ai_extra.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/ai_extra.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtester/signals.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/signals.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtester/templates/backtester/ai_compare.html" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/templates/backtester/ai_compare.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtester/templates/backtester/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/templates/backtester/base.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtester/templates/backtester/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/templates/backtester/dashboard.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtester/templates/backtester/paper_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/templates/backtester/paper_list.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtester/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtester/views_ai.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/views_ai.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backtester/views_paper.py" beforeDir="false" afterPath="$PROJECT_DIR$/backtester/views_paper.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/config/settings.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -33,58 +54,58 @@
       <entry key="MS100" value="1.0" />
       <entry key="MS500" value="1.0" />
       <entry key="S2" value="1.0" />
-      <entry key="S5" value="1.0000000000000069" />
-      <entry key="S10" value="1.0000001179444125" />
-      <entry key="S30" value="1.0077842179964827" />
-      <entry key="S60" value="1.124777558079679" />
-      <entry key="M2" value="1.5075930078985835" />
-      <entry key="M5" value="2.913390421519794" />
-      <entry key="M10" value="6.342281033823561" />
-      <entry key="M15" value="9.35640895931297" />
-      <entry key="M30" value="15.025741729424013" />
-      <entry key="H1" value="21.74888452341854" />
-      <entry key="H2" value="33.526475946592434" />
-      <entry key="H4" value="52.25376990964469" />
-      <entry key="D1" value="96.97018329374477" />
-      <entry key="W1" value="111.29678727708131" />
+      <entry key="S5" value="1.0" />
+      <entry key="S10" value="1.0" />
+      <entry key="S30" value="1.0000046425646638" />
+      <entry key="S60" value="1.0024141366363708" />
+      <entry key="M2" value="1.0698444202324238" />
+      <entry key="M5" value="1.8525850810816995" />
+      <entry key="M10" value="4.43095484750962" />
+      <entry key="M15" value="7.2118678741104105" />
+      <entry key="M30" value="13.24312902869486" />
+      <entry key="H1" value="20.632031434803956" />
+      <entry key="H2" value="32.85312403457756" />
+      <entry key="H4" value="51.93305097835796" />
+      <entry key="D1" value="97.55732531256912" />
+      <entry key="W1" value="112.22896991829491" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
       <entry key="MS500" value="0.0" />
-      <entry key="S2" value="5.863890011970208E-148" />
-      <entry key="S5" value="1.2801896929526147E-59" />
-      <entry key="S10" value="3.577975558025141E-30" />
-      <entry key="S30" value="1.5482940460904366E-10" />
-      <entry key="S60" value="1.4304898304147753E-5" />
-      <entry key="M2" value="0.005484834819106844" />
-      <entry key="M5" value="0.22971707227806665" />
-      <entry key="M10" value="0.8237655629374696" />
-      <entry key="M15" value="1.2652695747340759" />
-      <entry key="M30" value="1.94667995019181" />
-      <entry key="H1" value="2.416126309811791" />
-      <entry key="H2" value="2.6921454776649973" />
-      <entry key="H4" value="2.841871445924832" />
-      <entry key="D1" value="2.9730418787060113" />
-      <entry key="W1" value="2.9961337976122113" />
+      <entry key="S2" value="5.2365100785257013E-228" />
+      <entry key="S5" value="1.2235360715871303E-91" />
+      <entry key="S10" value="3.4979097103628283E-46" />
+      <entry key="S30" value="7.132534027853782E-16" />
+      <entry key="S60" value="3.0702941063796495E-8" />
+      <entry key="M2" value="2.5410379724771125E-4" />
+      <entry key="M5" value="0.06722523258378725" />
+      <entry key="M10" value="0.4456286998792789" />
+      <entry key="M15" value="0.8400324801489945" />
+      <entry key="M30" value="1.5861748615777138" />
+      <entry key="H1" value="2.1809609414040088" />
+      <entry key="H2" value="2.5577768434652914" />
+      <entry key="H4" value="2.7700428788107994" />
+      <entry key="D1" value="2.960383925237211" />
+      <entry key="W1" value="2.994308139516449" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.6506709277209668" />
-      <entry key="MS500" value="0.9176398823113651" />
-      <entry key="S2" value="0.9787416503974358" />
-      <entry key="S5" value="0.9914418065903108" />
-      <entry key="S10" value="0.9957118263239312" />
-      <entry key="S30" value="1.0063484395666655" />
-      <entry key="S60" value="1.1240406754007475" />
-      <entry key="M2" value="1.5124647565203115" />
-      <entry key="M5" value="3.138824000773181" />
-      <entry key="M10" value="7.157965510992004" />
-      <entry key="M15" value="10.61320924187399" />
-      <entry key="M30" value="16.96573823229659" />
-      <entry key="H1" value="24.160736011685856" />
-      <entry key="H2" value="36.21598649631991" />
-      <entry key="H4" value="55.093943154548334" />
-      <entry key="D1" value="99.94277297997371" />
-      <entry key="W1" value="114.29284827935739" />
+      <entry key="MS100" value="0.8122523963562355" />
+      <entry key="MS500" value="0.9592641193252643" />
+      <entry key="S2" value="0.989656656415207" />
+      <entry key="S5" value="0.9958497530944581" />
+      <entry key="S10" value="0.9979227189990506" />
+      <entry key="S30" value="0.9993117289409086" />
+      <entry key="S60" value="1.0020660415070837" />
+      <entry key="M2" value="1.0698968489255822" />
+      <entry key="M5" value="1.9184874645010317" />
+      <entry key="M10" value="4.872177302514968" />
+      <entry key="M15" value="8.04625435260981" />
+      <entry key="M30" value="14.823846596214478" />
+      <entry key="H1" value="22.80912785354846" />
+      <entry key="H2" value="35.40839457482537" />
+      <entry key="H4" value="54.70143713428194" />
+      <entry key="D1" value="100.51725872989729" />
+      <entry key="W1" value="115.22320527244987" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -96,31 +117,31 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.OpenDjangoStructureViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "codeWithMe.voiceChat.enabledByDefault": "false",
-    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "django.template.preview.state": "SHOW_EDITOR_AND_PREVIEW",
-    "git-widget-placeholder": "main",
-    "junie.onboarding.icon.badge.shown": "true",
-    "last_opened_file_path": "C:/Users/Nobody-42/Documents/Work/Python Blockchain/Projekt_Live",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.jshint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.jshint": "",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "python.packages.toolwindow.project.migrated.to.right.top.v2": "true",
-    "settings.editor.selected.configurable": "preferences.pluginManager",
-    "to.speed.mode.migration.done": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.OpenDjangoStructureViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
+    &quot;django.template.preview.state&quot;: &quot;SHOW_EDITOR_AND_PREVIEW&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/Nobody-42/Documents/Work/Python Blockchain/Projekt_Live&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.jshint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.jshint&quot;: &quot;&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;python.packages.toolwindow.project.migrated.to.right.top.v2&quot;: &quot;true&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\Nobody-42\Documents\Work\Python Blockchain\Projekt_Live\zip" />
@@ -174,7 +195,10 @@
       <workItem from="1791272686745" duration="8564000" />
       <workItem from="1791352737110" duration="2085000" />
       <workItem from="1791427922834" duration="4718000" />
-      <workItem from="1791440637382" duration="10449000" />
+      <workItem from="1791440637382" duration="11503000" />
+      <workItem from="1791470597653" duration="1194000" />
+      <workItem from="1791483929529" duration="16000" />
+      <workItem from="1791525803036" duration="3380000" />
     </task>
     <task id="LOCAL-00001" summary="Backtest Manuell">
       <option name="closed" value="true" />
@@ -432,7 +456,15 @@
       <option name="project" value="LOCAL" />
       <updated>1791461804878</updated>
     </task>
-    <option name="localTasksCounter" value="33" />
+    <task id="LOCAL-00033" summary="LitteWebMan 2">
+      <option name="closed" value="true" />
+      <created>1791462298624</created>
+      <option name="number" value="00033" />
+      <option name="presentableId" value="LOCAL-00033" />
+      <option name="project" value="LOCAL" />
+      <updated>1791462298624</updated>
+    </task>
+    <option name="localTasksCounter" value="34" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -450,7 +482,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Email Api" />
     <MESSAGE value="Admin" />
     <MESSAGE value="Admin 2" />
     <MESSAGE value="Admin 3" />
@@ -475,6 +506,7 @@
     <MESSAGE value="Design 2 - Live Reiter" />
     <MESSAGE value="Design 3 - Rechte Spalte" />
     <MESSAGE value="LitteWebMan" />
-    <option name="LAST_COMMIT_MESSAGE" value="LitteWebMan" />
+    <MESSAGE value="LitteWebMan 2" />
+    <option name="LAST_COMMIT_MESSAGE" value="LitteWebMan 2" />
   </component>
 </project>

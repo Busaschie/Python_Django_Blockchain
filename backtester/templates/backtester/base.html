@@ -28,6 +28,8 @@
 
  .disclaimer{display:flex;gap:.6rem;align-items:baseline;flex-wrap:wrap;border:1px solid var(--warnline);background:var(--warnbg);color:var(--warnink);border-radius:8px;padding:.45rem .8rem;margin:-.4rem 0 1rem;font-size:.84rem;line-height:1.4}
  .disclaimer strong{white-space:nowrap}
+ .demobar{display:flex;gap:.2rem .7rem;align-items:baseline;flex-wrap:wrap;border:1px solid var(--accent);background:var(--sel);color:var(--ink);border-radius:8px;padding:.45rem .8rem;margin:-.4rem 0 1rem;font-size:.84rem;line-height:1.4}
+ .demobar strong{white-space:nowrap}
 
  /* Auswahl der Chain (ganz oben) */
  .chains{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1rem}
@@ -116,8 +118,7 @@
  .legend h3{margin-top:1rem;break-after:avoid} .legend h3:first-child{margin-top:0}
  .term{break-inside:avoid;margin-bottom:.55rem} .term dt{font-weight:600} .term dd{margin:0 0 0 .1rem;color:var(--ink2)}
  dl{margin:0}
-</style></head>
-<body>
+</style></head><body>
 <div class="wrap">
 <div class="topbar">
 <h1><a href="{% url 'index' %}">Trading Backtester <span style="font-size: x-small">by LittleWebMan</span></a></h1>
@@ -129,6 +130,10 @@
 {% if user.is_authenticated %}<form method="post" action="{% url 'logout' %}" style="margin:0;font-size:.88rem;display:flex;flex-wrap:wrap;align-items:center;gap:.25rem .5rem">{% csrf_token %}
 <a class="btn" href="{% url 'account' %}" title="Konto und Daten: angemeldet als {{ user.username }}">Konto</a>
 <button>Abmelden</button></form>{% endif %}</div></div>
+{% if demo %}<div class="demobar" role="note" id="demobar"><strong>Demo-Konto</strong>
+<span>läuft in {{ demo.hours }} Std. ab</span><span>Läufe: {{ demo.runs }} von {{ demo.runs_max }}</span><span>KI-Aufrufe übrig: {{ demo.ai_left }} von {{ demo.ai_max }}</span>
+<span class="muted">Gesperrt: Passwort und E-Mail ändern, Konto löschen, Teilen, Signal-Mail, Paper-Trading starten.</span>
+<a href="{% url 'register' %}">Eigenes Konto anlegen</a></div>{% endif %}
 <div class="disclaimer" role="note" id="disclaimer"><strong>Keine Anlageberatung.</strong>
 <span>Backtests rechnen mit vergangenen Kursen, Paper-Trading mit Spielgeld. Ergebnisse der Vergangenheit sind keine Garantie für die Zukunft; beim Handel mit Kryptowährungen sind Verluste bis zum Totalverlust möglich. Nichts hier ist eine Empfehlung zum Kauf oder Verkauf. KI-Texte entstehen automatisch und können Fehler enthalten.</span></div>
 {% block content %}{% endblock %}

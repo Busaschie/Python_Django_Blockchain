@@ -250,8 +250,26 @@ def used_today(user=None) -> int:
     return (qs.filter(user=user) if user is not None else qs).count()
 
 
+def user_limit(user) -> int:
+    """KI-Aufrufe je Benutzer: Tageslimit, für Demo-Konten ein kleines Gesamtlimit."""
+    from accounts import demo
+    return demo.AI_LIMIT if demo.is_demo(user) else limits()[0]
+
+
+def limit_text(user, kind: str) -> str:
+    """Hinweistext bei erreichtem Limit; kind = 'Kommentare' oder 'Antworten'."""
+    from accounts import demo
+    end = "regelbasierter Kommentar." if kind == "Kommentare" else "regelbasierte Antwort."
+    if demo.is_demo(user):
+        return f"Demo-Limit für KI-{kind} erreicht ({demo.AI_LIMIT} je Demo-Konto), {end}"
+    return f"Tageslimit für KI-{kind} erreicht ({limits()[0]} je Benutzer), {end}"
+
+
 def remaining_today(user) -> int:
+    from accounts import demo
     per_user, global_ = limits()
+    if demo.is_demo(user):                      # Demo: insgesamt, nicht je Tag
+        return max(0, min(demo.ai_left(user), global_ - used_today()))
     return max(0, min(per_user - used_today(user), global_ - used_today()))
 
 
@@ -263,7 +281,7 @@ def generate(run, user) -> None:
     if not os.environ.get("GROQ_API_KEY"):
         note = "KI nicht eingerichtet (GROQ_API_KEY fehlt), regelbasierter Kommentar."
     elif remaining_today(user) <= 0:
-        note = f"Tageslimit für KI-Kommentare erreicht ({limits()[0]} je Benutzer), regelbasierter Kommentar."
+        note = limit_text(user, "Kommentare")
     else:
         call = AiCall.objects.create(user=user)
         try:

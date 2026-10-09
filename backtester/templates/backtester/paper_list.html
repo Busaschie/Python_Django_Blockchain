@@ -15,7 +15,8 @@
    <td><a href="{% url 'paper_detail' a.pk %}">Journal</a></td></tr>
   {% endfor %}
  </table>
- {% else %}<p class="muted">Noch kein Paper-Konto. Öffne eine fertige Auswertung mit echten Kursen und starte das Konto im Kasten „Aktuelles Signal“.</p>{% endif %}
+ {% else %}<p class="muted">Noch kein Paper-Konto. Öffne eine fertige Auswertung mit echten Kursen und starte das Konto im Reiter „Live“ im Kasten „Paper-Trading“.</p>{% endif %}
+ {% if demo %}<p class="small muted">Demo: Im Demo-Konto lässt sich Paper-Trading nicht starten. Mit einem eigenen Konto folgt hier ein virtuelles Konto dem Signal einer Auswertung; die Liste zeigt dann Stand, Position, Rendite und das Journal.</p>{% endif %}
  <p class="small muted">Höchstens {{ max_accounts }} aktive Konten. Spielgeld, keine echten Orders, keine Anlageberatung.</p>
 </div>
 {% include "backtester/_tips.html" %}

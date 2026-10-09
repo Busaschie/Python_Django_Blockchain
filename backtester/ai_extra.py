@@ -40,7 +40,7 @@ def llm_rewrite(user, system: str, facts: dict, parse, text_of):
     if not os.environ.get("GROQ_API_KEY"):
         return None, "KI nicht eingerichtet, regelbasierte Antwort."
     if ai.remaining_today(user) <= 0:
-        return None, f"Tageslimit für KI-Antworten erreicht ({ai.limits()[0]} je Benutzer), regelbasierte Antwort."
+        return None, ai.limit_text(user, "Antworten")
     text = ai.facts_text(facts)
     call = AiCall.objects.create(user=user)
     models = [os.environ.get("GROQ_MODEL", "openai/gpt-oss-120b"), os.environ.get("GROQ_FALLBACK_MODEL", "openai/gpt-oss-20b")]

@@ -1,0 +1,4 @@
+{% extends "accounts/base.html" %}
+{% block auth %}<h2>Demo</h2>
+<div class="msg">{{ text }}</div>
+<p class="alt"><a href="{% url 'login' %}">Zur Anmeldung</a> · <a href="{% url 'register' %}">Eigenes Konto anlegen</a></p>{% endblock %}

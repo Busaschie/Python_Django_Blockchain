@@ -13,6 +13,8 @@ from django.views.decorators.http import require_POST
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
+from accounts import demo
+
 from . import ai, ai_extra, export, jobs, nl_strategy, paper, signals, views_ai
 from .chains import CHAINS
 from .forms import PARAM_TIPS, SIZE_TIPS, UI_TIPS, BacktestForm
@@ -197,6 +199,9 @@ def dashboard(request, pk=None, batch=None):
                 variants = [(d["chain"], d["strategy"], dict(d))]
             bid = uuid.uuid4().hex[:10] if compare else ""
             created = []
+            if demo.is_demo(request.user) and len(variants) > demo.runs_free(request.user):
+                messages.error(request, f"Demo-Konto: höchstens {demo.MAX_RUNS} Läufe. Lösche zuerst ältere Läufe oder lege ein eigenes Konto an.")
+                variants = []
             for ch, strategy, job in variants:
                 new = BacktestRun.objects.create(
                     owner=request.user, chain=ch, symbol=CHAINS[ch]["symbol"], timeframe=d["timeframe"],
@@ -208,7 +213,8 @@ def dashboard(request, pk=None, batch=None):
                                     "end_date": d["end_date"].isoformat()})
                 created.append(new)
                 jobs.submit(new.pk)
-            return redirect("compare", batch=bid) if compare else redirect("detail", pk=created[0].pk)
+            if created:
+                return redirect("compare", batch=bid) if compare else redirect("detail", pk=created[0].pk)
     else:
         first = run or (batch_runs[0] if batch_runs else None)
         if first:
@@ -241,8 +247,8 @@ def dashboard(request, pk=None, batch=None):
         "tip_data": {"params": PARAM_TIPS, "size": SIZE_TIPS}, "ui_tips": UI_TIPS,
         "pending_ids": ",".join(str(r.pk) for r in shown if r.is_pending),
         "chains": [{"key": k, **m} for k, m in CHAINS.items()],
-        "ai_left": ai.remaining_today(request.user), "ai_limit": ai.limits()[0],
-        "signals_enabled": signals.enabled(), "signal_max": settings.SIGNAL_MAX_PER_USER,
+        "ai_left": ai.remaining_today(request.user), "ai_limit": ai.user_limit(request.user),
+        "signals_enabled": signals.enabled(request.user), "signal_max": settings.SIGNAL_MAX_PER_USER,
         "nl_max": nl_strategy.MAX_LEN, "nl_examples": nl_strategy.EXAMPLES,
         **views_ai.ai_context(run, request.user),
     })
@@ -302,14 +308,14 @@ def export_pdf(request, pk):
     return _download(export.summary_pdf(run), "application/pdf", "auswertung_" + _fname(run, "pdf"))
 
 
-def _need_signals():
-    if not signals.enabled():
+def _need_signals(request):
+    if not signals.enabled(request.user):
         raise Http404
 
 
 @require_POST
 def signal_refresh(request, pk):
-    _need_signals()
+    _need_signals(request)
     run = _done_run(request, pk)
     try:
         st = signals.refresh(run)
@@ -322,8 +328,11 @@ def signal_refresh(request, pk):
 
 @require_POST
 def signal_toggle(request, pk):
-    _need_signals()
+    _need_signals(request)
     run = _done_run(request, pk)
+    if demo.is_demo(request.user):
+        messages.error(request, "Im Demo-Konto werden keine Signal-Mails versendet. Mit einem eigenen Konto bekommst du bei jedem Signal-Wechsel eine Mail.", extra_tags="signal")
+        return redirect("detail", pk=run.pk)
     if run.signal_alert:
         run.signal_alert = False
         messages.success(request, "Signal-Mail ausgeschaltet.", extra_tags="signal")
@@ -375,6 +384,9 @@ def _back(request, pk=None):
 @require_POST
 def share_toggle(request, pk):
     run = _done_run(request, pk)
+    if demo.is_demo(request.user):
+        messages.error(request, "Im Demo-Konto lassen sich Auswertungen nicht teilen. Mit einem eigenen Konto erzeugst du einen schreibgeschützten Link.")
+        return redirect("detail", pk=run.pk)
     action = request.POST.get("action")
     if action == "off":
         run.share_token = ""

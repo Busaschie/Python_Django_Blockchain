@@ -58,7 +58,7 @@ def ai_compare(request):
     return render(request, "backtester/ai_compare.html", {
         "a": a, "b": b, "res": AiResult.objects.filter(owner=request.user, kind="compare", run=a, run2=b).first(),
         "facts": ai_extra.compare_facts(a, b), "ui_tips": UI_TIPS, "ai_left": ai.remaining_today(request.user),
-        "ai_limit": ai.limits()[0]})
+        "ai_limit": ai.user_limit(request.user)})
 
 
 @require_POST

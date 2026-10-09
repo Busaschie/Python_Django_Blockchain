@@ -84,7 +84,8 @@
     <button type="submit" name="action" value="renew" class="secondary" title="Der alte Link funktioniert danach nicht mehr">Neuen Link erzeugen</button></form>
    {% else %}
    <p class="small muted">Nicht geteilt. Mit einem Link kann jemand die Auswertung nur ansehen (Kennzahlen, Diagramme, Trades, PDF). Dein Name und deine E-Mail sind nicht sichtbar, die Freigabe lässt sich jederzeit beenden.</p>
-   <form method="post" action="{% url 'share_toggle' run.pk %}">{% csrf_token %}<button type="submit" name="action" value="on">Öffentlichen Link erzeugen</button></form>
+   <form method="post" action="{% url 'share_toggle' run.pk %}">{% csrf_token %}<button type="submit" name="action" value="on"{% if demo %} disabled{% endif %}>Öffentlichen Link erzeugen</button></form>
+   {% if demo %}<p class="small muted">Demo: Teilen ist im Demo-Konto gesperrt. Mit einem eigenen Konto erzeugst du hier einen schreibgeschützten Link, den jeder ohne Anmeldung ansehen kann.</p>{% endif %}
    {% endif %}
   </div>
   {% endif %}
@@ -354,8 +355,9 @@
    <div class="actions">
     <form method="post" action="{% url 'signal_refresh' run.pk %}">{% csrf_token %}<button class="secondary" type="submit">Jetzt prüfen</button></form>
     <form method="post" action="{% url 'signal_toggle' run.pk %}">{% csrf_token %}
-     <button class="secondary" type="submit">{% if run.signal_alert %}Signal-Mail ausschalten{% else %}Mail bei Signal-Wechsel einschalten{% endif %}</button></form>
+     <button class="secondary" type="submit"{% if demo %} disabled{% endif %}>{% if run.signal_alert %}Signal-Mail ausschalten{% else %}Mail bei Signal-Wechsel einschalten{% endif %}</button></form>
    </div>
+   {% if demo %}<p class="small muted">Demo: Im Demo-Konto werden keine Mails versendet. Mit einem eigenen Konto bekommst du bei jedem Wechsel zwischen LONG und FLAT eine Mail; „Jetzt prüfen“ funktioniert auch hier.</p>{% endif %}
    <p class="small muted">{% if run.signal_alert %}Mail an: {{ user.email }}. Du bekommst sie, sobald die Strategie zwischen LONG und FLAT wechselt (nur wenn der Betreiber die automatische Prüfung eingerichtet hat).{% else %}Mail aus: Du bekommst eine Nachricht, sobald die Strategie zwischen LONG und FLAT wechselt. Höchstens {{ signal_max }} Läufe gleichzeitig.{% endif %}</p>
    {% endif %}
    {% endwith %}
@@ -367,9 +369,10 @@
    <p class="small muted">Ein virtuelles Konto folgt diesem Signal, ohne echtes Geld. So siehst du, wie die Strategie läuft, nachdem du sie ausgewählt hast.</p>
    {% for pa in run.paper_accounts.all %}{% if pa.owner_id == user.pk %}<p class="small">Paper-Konto: <a href="{% url 'paper_detail' pa.pk %}">{{ pa.name }}</a> ({{ pa.return_pct }} %)</p>{% endif %}{% endfor %}
    <form method="post" action="{% url 'paper_start' run.pk %}" id="paperstart" class="actions">{% csrf_token %}
-    <input type="number" name="capital" value="10000" min="100" max="1000000" step="100" aria-label="Startkapital">
-    <button class="secondary" type="submit">Paper-Trading starten</button>
+    <input type="number" name="capital" value="10000" min="100" max="1000000" step="100" aria-label="Startkapital"{% if demo %} disabled{% endif %}>
+    <button class="secondary" type="submit"{% if demo %} disabled{% endif %}>Paper-Trading starten</button>
    </form>
+   {% if demo %}<p class="small muted">Demo: Paper-Trading lässt sich im Demo-Konto nicht starten. Mit einem eigenen Konto folgt ein virtuelles Konto dem Signal dieser Auswertung und führt ein Journal; ein Abgleich vergleicht es mit dem Backtest.</p>{% endif %}
    <p class="small"><a href="{% url 'paper_list' %}?von={{ run.pk }}">Alle Paper-Konten</a></p>
   </div>
   {% endif %}
@@ -389,7 +392,7 @@
    {% if not shared and not run.ai_comment.zusammenfassung or not shared and run.ai_source == "regeln" %}
    <form method="post" action="{% url 'ai_comment' run.pk %}">{% csrf_token %}
     <button type="submit" {% if ai_left <= 0 and run.ai_source == "regeln" %}disabled{% endif %}>{% if run.ai_source == "regeln" %}Mit KI neu erstellen{% else %}Auswertung kommentieren{% endif %}</button>
-    <span class="small muted">Heute noch {{ ai_left }} von {{ ai_limit }} KI-Kommentaren.</span>
+    <span class="small muted">{% if demo %}Demo: noch {{ ai_left }} von {{ ai_limit }} KI-Aufrufen im Demo-Konto (insgesamt, nicht je Tag).{% else %}Heute noch {{ ai_left }} von {{ ai_limit }} KI-Kommentaren.{% endif %}</span>
    </form>
    {% endif %}
   </div>

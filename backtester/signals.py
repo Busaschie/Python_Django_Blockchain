@@ -22,8 +22,12 @@ LOOKBACK_DAYS = {"15m": 10, "1h": 45, "4h": 150, "1d": 600}
 COOLDOWN = timedelta(seconds=60)
 
 
-def enabled() -> bool:
-    return bool(getattr(settings, "SIGNALS_ENABLED", False))
+def enabled(user=None) -> bool:
+    """Schalter SIGNALS_ENABLED; Demo-Konten sehen die Seiten immer (ihre Aktionen sind gesperrt), damit die Funktion erklärt werden kann."""
+    if getattr(settings, "SIGNALS_ENABLED", False):
+        return True
+    from accounts import demo
+    return demo.is_demo(user)
 
 
 def current(run, cache=None) -> dict:

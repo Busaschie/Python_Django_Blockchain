@@ -58,6 +58,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "accounts.middleware.DemoExpiryMiddleware",                 # abgelaufene Demo-Konten abmelden
     "django.contrib.auth.middleware.LoginRequiredMiddleware",   # alle Seiten nur angemeldet
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",   # X-Frame-Options: DENY (Seite nicht in fremde Frames einbettbar)
@@ -70,6 +71,7 @@ TEMPLATES = [{
         "django.template.context_processors.request",
         "django.contrib.auth.context_processors.auth",
         "django.contrib.messages.context_processors.messages",
+        "accounts.context.demo_context",
     ]},
 }]
 WSGI_APPLICATION = "config.wsgi.application"

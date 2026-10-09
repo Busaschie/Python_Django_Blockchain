@@ -16,7 +16,7 @@ from django.views.decorators.http import require_POST
 
 from config.i18n import mail_text
 
-from . import throttle
+from . import demo, throttle
 from .forms import DeleteAccountForm, EmailChangeForm, EmailForm, PasswordSetForm
 
 User = get_user_model()
@@ -97,6 +97,8 @@ def _account_page(request, pw=None, em=None, de=None):
 
 
 def account(request):
+    if demo.is_demo(request.user):       # Demo: nur Erklärung statt der Formulare
+        return render(request, "accounts/account.html", {"is_demo_page": True})
     form = PasswordChangeForm(request.user, request.POST or None)
     if request.method == "POST" and form.is_valid():
         user = form.save()
@@ -107,6 +109,7 @@ def account(request):
 
 
 @require_POST
+@demo.forbid
 def email_change(request):
     """E-Mail ändern: neue Adresse wird erst nach Klick auf den Link übernommen."""
     form = EmailChangeForm(request.user, request.POST)
@@ -142,6 +145,7 @@ def email_change_confirm(request, token):
 
 
 @require_POST
+@demo.forbid
 def account_delete(request):
     """Konto samt aller Auswertungen endgültig löschen (Passwort + Bestätigung nötig)."""
     form = DeleteAccountForm(request.user, request.POST)
@@ -258,3 +262,53 @@ def account_export(request):
     resp = HttpResponse(json.dumps(data, ensure_ascii=False, indent=1, default=str), content_type="application/json; charset=utf-8")
     resp["Content-Disposition"] = 'attachment; filename="meine-daten.json"'
     return resp
+
+
+_DEMO_PAGES = {
+    "disabled": (503, "Die Demo ist zurzeit abgeschaltet."),
+    "invalid": (403, "Dieser Demo-Link ist ungültig oder abgelaufen. Demo-Links sind 48 Stunden gültig."),
+    "full": (503, "Zurzeit sind alle Demo-Plätze belegt. Bitte in einigen Minuten erneut versuchen."),
+    "throttled": (429, "Zu viele Demo-Zugänge von dieser Adresse. Bitte in einer Stunde erneut versuchen."),
+}
+
+
+def _demo_page(request, kind):
+    status, text = _DEMO_PAGES[kind]
+    resp = render(request, "accounts/demo_info.html", {"text": text, "kind": kind}, status=status)
+    if status in (429, 503):
+        resp["Retry-After"] = "3600" if status == 429 else "600"
+    return resp
+
+
+@login_not_required
+def demo_login(request, token):
+    """Demo-Link: legt ein eigenes, begrenztes Demo-Konto an und meldet es an."""
+    if not demo.enabled():
+        return _demo_page(request, "disabled")
+    if not demo.valid_token(token):
+        return _demo_page(request, "invalid")
+    if request.user.is_authenticated:
+        if not demo.is_demo(request.user):
+            messages.info(request, "Du bist mit deinem eigenen Konto angemeldet. Für die Demo bitte abmelden oder ein privates Fenster nutzen.")
+        return redirect("index")             # ein vorhandenes Demo-Konto wird weiterverwendet
+    if throttle.blocked(request, "demo", ""):
+        return _demo_page(request, "throttled")
+    demo.cleanup()
+    if demo.active_count() >= demo.MAX_ACCOUNTS:
+        return _demo_page(request, "full")
+    user = demo.create_user()
+    throttle.record(request, "demo", "")
+    login(request, user, backend="django.contrib.auth.backends.ModelBackend")
+    request.session.set_expiry(demo.ACCOUNT_HOURS * 3600)
+    return redirect("index")
+
+
+def demo_link(request):
+    """Nur für Admins: erzeugt einen frischen Demo-Link (2 Tage gültig) zum Kopieren."""
+    from django.http import Http404
+    if not request.user.is_staff:
+        raise Http404
+    link = request.build_absolute_uri(reverse("demo_login", args=[demo.make_token()]))
+    return render(request, "accounts/demo_link.html", {
+        "link": link, "hours": demo.TOKEN_MAX_AGE // 3600, "account_hours": demo.ACCOUNT_HOURS, "max_accounts": demo.MAX_ACCOUNTS,
+        "max_runs": demo.MAX_RUNS, "ai_limit": demo.AI_LIMIT, "active": demo.active_count(), "enabled": demo.enabled()})

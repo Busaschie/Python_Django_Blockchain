@@ -38,6 +38,8 @@
 <h3>Retention</h3>
 <p>Account and evaluations are kept until the account is deleted. You can delete your account permanently at any time yourself under <a href="{% url 'account' %}">Account</a>; all evaluations are removed as well. Emails may remain briefly in the email provider's logs.</p>
 
+<p><b>Demo access:</b> A demo link creates a temporary account without an email address and without a password. It is deleted together with all evaluations after 24 hours, at the latest when you log out. For the abuse limiter the IP address is stored for at most one day.</p>
+
 <h3>Your rights</h3>
 <p>You have the right of access, rectification (you can change your email address yourself in the account), erasure, restriction of processing, data portability and objection. You handle access and data portability yourself under <a href="{% url 'account' %}">Account</a> with "Download my data" (JSON); for anything else, contact the address given above. You can also lodge a complaint with a data protection supervisory authority.</p>
 <!--i18n:on-->{% endblock %}

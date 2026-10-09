@@ -4,13 +4,15 @@ from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
+from accounts import demo
+
 from . import paper, signals
 from .forms import UI_TIPS
 from .models import BacktestRun, PaperAccount
 
 
-def _need():
-    if not signals.enabled():      # braucht aktuelle Kurse: gleicher Schalter wie das aktuelle Signal
+def _need(request):
+    if not signals.enabled(request.user):      # braucht aktuelle Kurse: gleicher Schalter wie das aktuelle Signal
         raise Http404
 
 
@@ -22,7 +24,7 @@ def _num(text, default):
 
 
 def paper_list(request):
-    _need()
+    _need(request)
     back = None
     von = request.GET.get("von", "")
     if von.isdigit():                                     # Rücksprung zur Auswertung, von der der Nutzer kam
@@ -33,7 +35,7 @@ def paper_list(request):
 
 
 def paper_detail(request, pk):
-    _need()
+    _need(request)
     acc = get_object_or_404(PaperAccount, pk=pk, owner=request.user)
     rec = {"ok": False, "reason": "noch keine Prüfung"}
     try:
@@ -48,8 +50,11 @@ def paper_detail(request, pk):
 
 @require_POST
 def paper_start(request, pk):
-    _need()
+    _need(request)
     run = get_object_or_404(BacktestRun, pk=pk, owner=request.user, status="done")
+    if demo.is_demo(request.user):
+        messages.error(request, "Im Demo-Konto lässt sich Paper-Trading nicht starten. Mit einem eigenen Konto folgt ein virtuelles Konto dem Signal dieser Auswertung.", extra_tags="signal")
+        return redirect("detail", pk=run.pk)
     try:
         acc = paper.start(run, request.user, _num(request.POST.get("capital"), 10_000.0))
     except paper.PaperError as exc:
@@ -64,7 +69,7 @@ def paper_start(request, pk):
 
 @require_POST
 def paper_check(request, pk):
-    _need()
+    _need(request)
     acc = get_object_or_404(PaperAccount, pk=pk, owner=request.user)
     try:
         res = paper.refresh(acc)
@@ -79,7 +84,7 @@ def paper_check(request, pk):
 
 @require_POST
 def paper_toggle(request, pk):
-    _need()
+    _need(request)
     acc = get_object_or_404(PaperAccount, pk=pk, owner=request.user)
     if not acc.active and PaperAccount.objects.filter(owner=request.user, active=True).count() >= paper.max_accounts():
         messages.error(request, f"Höchstens {paper.max_accounts()} aktive Paper-Konten.")
@@ -92,7 +97,7 @@ def paper_toggle(request, pk):
 
 @require_POST
 def paper_delete(request, pk):
-    _need()
+    _need(request)
     get_object_or_404(PaperAccount, pk=pk, owner=request.user).delete()
     messages.success(request, "Paper-Konto gelöscht.")
     return redirect("paper_list")

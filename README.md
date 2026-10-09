@@ -157,7 +157,7 @@ Knopf „Auswertung kommentieren“ (nur auf Knopfdruck, einmal je Lauf gespeich
 
 ## Paper-Trading
 
-Ein virtuelles Konto führt das Signal eines Laufs mit Spielgeld aus (nur mit echten Kursen und `SIGNALS_ENABLED=1`; Start im Kasten „Aktuelles Signal“). Bei jeder Prüfung wird zum letzten bekannten Schlusskurs gekauft bzw. verkauft (ganzes Konto, Gebühr + Slippage wie im Lauf), jede Order steht im Journal. Der Abgleich rechnet dieselbe Strategie ab Start als Backtest und zeigt die Abweichung (≤ 1 Prozentpunkt = passend, ≤ 3 = leicht, sonst deutlich) samt Ursachen. Geprüft wird per Knopf und vom bestehenden Zeitplan (`/signale/pruefen/` bzw. `manage.py check_signals` prüft jetzt auch die Paper-Konten). `PAPER_MAX_PER_USER` (Standard 3) begrenzt aktive Konten. Modul `paper.py`, Seiten `views_paper.py`, Tests `test_paper.py`.
+Ein virtuelles Konto führt das Signal eines Laufs mit Spielgeld aus (nur mit echten Kursen und `SIGNALS_ENABLED=1`; Start im Reiter „Live“, Kasten „Paper-Trading“). Bei jeder Prüfung wird zum letzten bekannten Schlusskurs gekauft bzw. verkauft (ganzes Konto, Gebühr + Slippage wie im Lauf), jede Order steht im Journal. Der Abgleich rechnet dieselbe Strategie ab Start als Backtest und zeigt die Abweichung (≤ 1 Prozentpunkt = passend, ≤ 3 = leicht, sonst deutlich) samt Ursachen. Geprüft wird per Knopf und vom bestehenden Zeitplan (`/signale/pruefen/` bzw. `manage.py check_signals` prüft jetzt auch die Paper-Konten). `PAPER_MAX_PER_USER` (Standard 3) begrenzt aktive Konten. Modul `paper.py`, Seiten `views_paper.py`, Tests `test_paper.py`.
 
 ## KI-Erweiterungen (ohne Chat)
 
@@ -174,3 +174,11 @@ Ein virtuelles Konto führt das Signal eines Laufs mit Spielgeld aus (nur mit ec
 - **Hell/Dunkel:** Knopf oben rechts, Wahl im Browser (`localStorage tb_theme`); Farben über CSS-Variablen, Diagramme folgen (`_plot_theme.html`).
 - **Tabs im Ergebnis:** Die mittlere Spalte ist in Reiter gegliedert (Übersicht, Kennzahlen mit Train/Test bzw. Walk-Forward, Robustheit, Live, KI & Fragen; Tastatur- und Hash-tauglich). Die linke Spalte (schmaler) enthält oben „Strategie in Worten“ und „Vorlagen“, darunter die Einstellungen. Die Legende unten ist ein- und ausklappbar (standardmäßig zu).
 - **Rechtliches:** dauerhafter Hinweis „keine Anlageberatung“, Cookie-/Datenschutzübersicht in der Datenschutzerklärung (nur technisch nötige Cookies, kein Banner nötig), Konto-Export und -Löschung, Admin-Login-Drosselung.
+
+## Demo-Zugang
+Ein geheimer Link meldet Besucher ohne Passwort in einem eigenen, begrenzten Demo-Konto an (`accounts/demo.py`, Tests `accounts/test_demo.py`).
+- **Link erzeugen:** als Admin auf `/demo-link/` (auch über die Konto-Seite) oder mit `python manage.py demo_link --host https://<deine-seite>` (muss mit demselben `SECRET_KEY` laufen). Der Link ist **2 Tage** gültig (signierter Token, kein Eintrag in der Datenbank).
+- **Konto je Besuch:** `demo-<zufall>@demo.invalid`, ohne Passwort und ohne E-Mail. Es lebt 24 Stunden (Sitzung ebenso), beim Abmelden wird es sofort samt Läufen gelöscht, abgelaufene Konten räumt jeder neue Demo-Login auf (oder `manage.py demo_cleanup`). Ein erneuter Aufruf des Links mit bestehender Demo-Sitzung legt kein zweites Konto an.
+- **Grenzen:** höchstens **5** Demo-Konten gleichzeitig (sonst „Alle Plätze belegt“, HTTP 503), **20 Läufe** je Konto (ein Vergleich, der darüber ginge, legt gar keinen an), **5 KI-Aufrufe** je Konto insgesamt (danach der regelbasierte Text mit Hinweis), höchstens 10 neue Demo-Konten je IP und Stunde.
+- **Gesperrt, aber sichtbar mit Erklärung:** Passwort/E-Mail ändern, Konto löschen (die Konto-Seite erklärt das Demo-Konto), Teilen, Signal-Mail, Paper-Trading starten. Die Live-Boxen und die Paper-Seite erscheinen für Demo-Konten auch bei `SIGNALS_ENABLED=0`; „Jetzt prüfen“ funktioniert. Ein Banner zeigt Restzeit, Läufe und KI-Aufrufe.
+- **Abschalten:** `DEMO_ENABLED=0` (alle Links liefern dann „abgeschaltet“). Ein einzelner Link lässt sich nicht widerrufen, er läuft nach 2 Tagen ab; ein neuer `SECRET_KEY` entwertet alle (und meldet alle Nutzer ab).

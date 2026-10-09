@@ -11,12 +11,14 @@ RULES = {
     "admin":    [("user", 5, 900), ("ip", 10, 900)],     # Admin-Login: strenger, es gibt nur wenige Admins
     "register": [("email", 3, 3600), ("ip", 10, 3600)],
     "forgot":   [("email", 3, 3600), ("ip", 10, 3600)],
+    "demo":     [("ip", 10, 3600)],                      # neue Demo-Konten je IP und Stunde
 }
 MESSAGE = {
     "login": "Zu viele Fehlversuche. Bitte in 15 Minuten erneut versuchen.",
     "admin": "Zu viele Fehlversuche beim Admin-Login. Bitte in 15 Minuten erneut versuchen.",
     "register": "Zu viele Anfragen. Bitte in einer Stunde erneut versuchen.",
     "forgot": "Zu viele Anfragen. Bitte in einer Stunde erneut versuchen.",
+    "demo": "Zu viele Demo-Zugänge von dieser Adresse. Bitte in einer Stunde erneut versuchen.",
 }
 
 
