@@ -113,6 +113,29 @@ def create_user():
     return User.objects.create_user(f"demo-{secrets.token_hex(4)}@{DOMAIN}", email="", password=None)
 
 
+def example_source():
+    """Beispiel-Lauf, den jedes neue Demo-Konto als Startansicht bekommt: `DEMO_EXAMPLE_RUN=<id>`, sonst der neueste fertige Lauf
+    eines Admins mit dem Tag „demo“."""
+    from backtester.models import BacktestRun
+    done = BacktestRun.objects.filter(status="done").exclude(metrics={})
+    rid = os.environ.get("DEMO_EXAMPLE_RUN", "").strip()
+    if rid.isdigit():
+        return done.filter(pk=int(rid)).first()
+    return done.filter(owner__is_staff=True, tags__contains="|demo|").order_by("-created_at").first()
+
+
+def seed_example(user):
+    """Kopie des Beispiel-Laufs für das Demo-Konto anlegen (ohne Teilen, Signal-Mail und Favorit). Gibt den Lauf oder None zurück."""
+    src = example_source()
+    if src is None:
+        return None
+    src.pk = None
+    src.owner, src.share_token, src.signal_alert, src.favorite = user, "", False, False
+    src.batch = ""
+    src.save()
+    return src
+
+
 def runs_used(user) -> int:
     from backtester.models import BacktestRun
     return BacktestRun.objects.filter(owner=user).count()

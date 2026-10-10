@@ -297,7 +297,8 @@ def _start_demo(request):
     throttle.record(request, "demo", "")
     login(request, user, backend="django.contrib.auth.backends.ModelBackend")
     request.session.set_expiry(demo.ACCOUNT_HOURS * 3600)
-    return redirect("index")
+    example = demo.seed_example(user)         # Startansicht: ein fertiger Beispiel-Lauf
+    return redirect("detail", pk=example.pk) if example else redirect("index")
 
 
 @login_not_required

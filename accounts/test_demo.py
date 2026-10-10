@@ -64,6 +64,35 @@ class LinkTests(TestCase):
         with mock.patch("django.core.signing.time.time", return_value=__import__("time").time() + 2 * 24 * 3600 + 60):
             self.assertFalse(demo.valid_token(tok))
 
+    def test_start_shows_example_run(self):
+        admin = User.objects.create_user("a@x.de", "a@x.de", PW, is_staff=True)
+        src, _ = computed_run("single", "sma_cross", owner=admin)
+        BacktestRun.objects.filter(pk=src.pk).update(tags="|demo|", share_token="geheim", favorite=True)
+        r = Client().post(reverse("demo_start"), REMOTE_ADDR="9.9.5.1")
+        u = demo_user()
+        copy = BacktestRun.objects.get(owner=u)
+        self.assertRedirects(r, reverse("detail", args=[copy.pk]), fetch_redirect_response=False)
+        self.assertNotEqual(copy.pk, src.pk)
+        self.assertEqual((copy.share_token, copy.favorite, copy.signal_alert), ("", False, False))
+        self.assertEqual(copy.metrics, src.metrics)
+        self.assertEqual(demo.runs_used(u), 1)
+
+    def test_example_by_env_and_without_example(self):
+        r = Client().post(reverse("demo_start"), REMOTE_ADDR="9.9.6.1")      # kein Beispiel vorhanden
+        self.assertRedirects(r, reverse("index"), fetch_redirect_response=False)
+        admin = User.objects.create_user("a@x.de", "a@x.de", PW, is_staff=True)
+        src, _ = computed_run("single", "sma_cross", owner=admin)
+        with mock.patch.dict(os.environ, {"DEMO_EXAMPLE_RUN": str(src.pk)}):
+            r = Client().post(reverse("demo_start"), REMOTE_ADDR="9.9.6.2")
+        self.assertEqual(r.status_code, 302)
+        self.assertIn("/run/", r["Location"])
+
+    def test_landing_has_two_columns(self):
+        r = Client().get(reverse("demo_start"))
+        html = r.content.decode()
+        self.assertLess(html.index(">Demo starten<"), html.index("<aside"))
+        self.assertIn("demo-grid", html)
+
     def test_kill_switch(self):
         with mock.patch.dict(os.environ, {"DEMO_ENABLED": "0"}):
             self.assertEqual(self.client.get(link()).status_code, 503)
