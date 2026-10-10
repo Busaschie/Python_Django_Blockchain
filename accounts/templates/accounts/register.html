@@ -1,4 +1,6 @@
 {% extends "accounts/base.html" %}
+{% block disclaimer %}{% endblock %}
+{% block aside %}{% include "accounts/_disclaimer_box.html" %}{% endblock %}
 {% block auth %}<h2>Konto erstellen</h2>
 <p class="alt" style="text-align:left">Gib deine E-Mail-Adresse ein. Wir senden dir einen Link zur Bestätigung; danach legst du dein Passwort fest.</p>
 <form method="post">{% csrf_token %}{% for f in form %}<div class="field"><label for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}{{ f.errors }}</div>{% endfor %}{{ form.non_field_errors }}<button>Bestätigungslink senden</button></form>

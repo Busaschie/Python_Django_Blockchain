@@ -91,8 +91,8 @@ class LinkTests(TestCase):
         r = Client().get(reverse("demo_start"))
         html = r.content.decode()
         self.assertLess(html.index(">Demo starten<"), html.index("<aside"))
-        self.assertIn("demo-grid", html)
-        self.assertNotIn('id="disclaimer"', html)                       # kein Banner oben, der Hinweis steht im rechten Kasten
+        self.assertIn("authrow", html)
+        self.assertEqual(html.count('id="disclaimer"'), 1)               # kein Banner oben, der Hinweis steht im rechten Kasten
         self.assertIn("Totalverlust", html[html.index("<aside"):])
 
     def test_kill_switch(self):

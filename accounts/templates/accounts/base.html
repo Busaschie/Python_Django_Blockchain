@@ -1,9 +1,15 @@
 {% extends "backtester/base.html" %}
 {% block content %}
-<style>.auth{max-width:420px;margin:2rem auto}.auth .field input{width:100%}.auth p.alt{margin:.9rem 0 0;font-size:.9rem}
+<style>.authrow{display:flex;gap:1rem;justify-content:center;align-items:flex-start;flex-wrap:wrap;margin:2rem auto}
+.authrow .auth{margin:0;flex:1 1 420px;max-width:420px}.authrow .auth.wide{max-width:520px}
+.authrow .side{margin:0;flex:1 1 280px;max-width:360px;font-size:.85rem;line-height:1.45;color:var(--ink2)}
+.auth .field input{width:100%}.auth p.alt{margin:.9rem 0 0;font-size:.9rem}
 .msg{padding:.5rem .7rem;border-radius:6px;background:var(--okbg);color:var(--good);margin-bottom:.7rem}</style>
-<div class="box auth">
+<div class="authrow">
+<div class="box auth{% block authcls %}{% endblock %}">
  {% for m in messages %}<div class="msg">{{ m }}</div>{% endfor %}
  {% block auth %}{% endblock %}
+</div>
+{% block aside %}{% endblock %}
 </div>
 {% endblock %}

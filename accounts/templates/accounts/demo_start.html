@@ -1,23 +1,12 @@
 {% extends "accounts/base.html" %}
 {% block disclaimer %}{% endblock %}
-{% block auth %}<style>
-.auth{max-width:860px}
-.demo-grid{display:grid;grid-template-columns:3fr 2fr;gap:1.2rem;align-items:start}
-.demo-grid .note{border:1px solid var(--line,#ccc);border-radius:8px;padding:.8rem 1rem}
-@media(max-width:640px){.demo-grid{grid-template-columns:1fr}}
-</style>
-<div class="demo-grid">
-<div>
-<h2>Demo ausprobieren</h2>
+{% block authcls %} wide{% endblock %}
+{% block auth %}<h2>Demo ausprobieren</h2>
 <p>Teste den Tradebot ohne Anmeldung. Du bekommst ein eigenes Demo-Konto; alle Eingaben und Läufe werden nach {{ hours }} Stunden automatisch gelöscht.</p>
 <ul class="small">
 <li>Bis zu {{ runs }} Läufe und {{ ai }} KI-Aufrufe je Demo-Konto.</li>
 <li>Gesperrt: Passwort und E-Mail ändern, Konto löschen, Teilen, Signal-Mail und das Starten von Paper-Trading. Die Seiten dazu sind sichtbar und erklärt.</li>
 </ul>
 <form method="post" action="{% url 'demo_start' %}">{% csrf_token %}<button type="submit">Demo starten</button></form>
-<p class="alt"><a href="{% url 'login' %}">Zur Anmeldung</a> · <a href="{% url 'register' %}">Eigenes Konto anlegen</a></p>
-</div>
-<aside class="note">
-<p class="small"><strong>Keine Anlageberatung.</strong> <span>Backtests rechnen mit vergangenen Kursen, Paper-Trading mit Spielgeld. Ergebnisse der Vergangenheit sind keine Garantie für die Zukunft; beim Handel mit Kryptowährungen sind Verluste bis zum Totalverlust möglich. Nichts hier ist eine Empfehlung zum Kauf oder Verkauf. KI-Texte entstehen automatisch und können Fehler enthalten.</span></p>
-</aside>
-</div>{% endblock %}
+<p class="alt"><a href="{% url 'login' %}">Zur Anmeldung</a> · <a href="{% url 'register' %}">Eigenes Konto anlegen</a></p>{% endblock %}
+{% block aside %}{% include "accounts/_disclaimer_box.html" %}{% endblock %}
