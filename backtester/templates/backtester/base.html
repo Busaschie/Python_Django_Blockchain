@@ -134,8 +134,8 @@
 <span>läuft in {{ demo.hours }} Std. ab</span><span>Läufe: {{ demo.runs }} von {{ demo.runs_max }}</span><span>KI-Aufrufe übrig: {{ demo.ai_left }} von {{ demo.ai_max }}</span>
 <span class="muted">Gesperrt: Passwort und E-Mail ändern, Konto löschen, Teilen, Signal-Mail, Paper-Trading starten.</span>
 <a href="{% url 'register' %}">Eigenes Konto anlegen</a></div>{% endif %}
-<div class="disclaimer" role="note" id="disclaimer"><strong>Keine Anlageberatung.</strong>
-<span>Backtests rechnen mit vergangenen Kursen, Paper-Trading mit Spielgeld. Ergebnisse der Vergangenheit sind keine Garantie für die Zukunft; beim Handel mit Kryptowährungen sind Verluste bis zum Totalverlust möglich. Nichts hier ist eine Empfehlung zum Kauf oder Verkauf. KI-Texte entstehen automatisch und können Fehler enthalten.</span></div>
+{% block disclaimer %}<div class="disclaimer" role="note" id="disclaimer"><strong>Keine Anlageberatung.</strong>
+<span>Backtests rechnen mit vergangenen Kursen, Paper-Trading mit Spielgeld. Ergebnisse der Vergangenheit sind keine Garantie für die Zukunft; beim Handel mit Kryptowährungen sind Verluste bis zum Totalverlust möglich. Nichts hier ist eine Empfehlung zum Kauf oder Verkauf. KI-Texte entstehen automatisch und können Fehler enthalten.</span></div>{% endblock %}
 {% block content %}{% endblock %}
 <p class="small" style="text-align:center;margin:1.5rem 0 .5rem"><a href="{% url 'impressum' %}">Impressum</a> · <a href="{% url 'datenschutz' %}">Datenschutz</a></p>
 </div>

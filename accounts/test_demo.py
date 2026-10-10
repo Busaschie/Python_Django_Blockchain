@@ -92,6 +92,8 @@ class LinkTests(TestCase):
         html = r.content.decode()
         self.assertLess(html.index(">Demo starten<"), html.index("<aside"))
         self.assertIn("demo-grid", html)
+        self.assertNotIn('id="disclaimer"', html)                       # kein Banner oben, der Hinweis steht im rechten Kasten
+        self.assertIn("Totalverlust", html[html.index("<aside"):])
 
     def test_kill_switch(self):
         with mock.patch.dict(os.environ, {"DEMO_ENABLED": "0"}):
